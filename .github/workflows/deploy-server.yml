@@ -6,29 +6,34 @@ on:
       - production
 jobs:
   gcloud-deploy:
-    runs-on: ubuntu-latest
-
     permissions:
       contents: "read"
       id-token: "write"
 
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - id: "auth"
+      - name: Google Auth
+        id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: "projects/730713275888/locations/global/workloadIdentityPools/survival-list-service-account/providers/github"
           service_account: "survival-list-service-account@survival-list-server.iam.gserviceaccount.com"
 
-      - id: "deploy"
+      - name: Deploy to Cloud Run
+        id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v1"
         with:
           service: "survival-list-server"
-          source: "server"
+          region: "europe-north1"
+          source: "./server/"
 
       # - id: "deploy"
       #   uses: "google-github-actions/deploy-appengine@v1"
       #   with:
       #     working_directory: server
+
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
