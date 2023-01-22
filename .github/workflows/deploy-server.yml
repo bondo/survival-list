@@ -1,0 +1,21 @@
+name: deploy-server
+run-name: Deploying survival-list server
+on:
+  push:
+    branches:
+      - production
+jobs:
+  gcloud-deploy:
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: "projects/730713275888/locations/global/workloadIdentityPools/survival-list-service-account/providers/github"
+          service_account: "survival-list-service-account@survival-list-server.iam.gserviceaccount.com"
+
+      - id: "deploy"
+        uses: "google-github-actions/deploy-appengine@v1"
