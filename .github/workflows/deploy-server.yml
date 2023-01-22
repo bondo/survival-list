@@ -1,9 +1,16 @@
 name: deploy-server
 run-name: Deploying survival-list server
+
 on:
   push:
     branches:
       - production
+
+env:
+  PROJECT_ID: "survival-list-server"
+  SERVICE: "survival-list-server"
+  REGION: "europe-north1"
+
 jobs:
   gcloud-deploy:
     permissions:
@@ -19,21 +26,16 @@ jobs:
         id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: "projects/730713275888/locations/global/workloadIdentityPools/survival-list-service-account/providers/github"
-          service_account: "survival-list-service-account@survival-list-server.iam.gserviceaccount.com"
+          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}"
+          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}"
 
       - name: Deploy to Cloud Run
         id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v1"
         with:
-          service: "survival-list-server"
-          region: "europe-north1"
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
           source: "./server/"
 
-      # - id: "deploy"
-      #   uses: "google-github-actions/deploy-appengine@v1"
-      #   with:
-      #     working_directory: server
-
-      - name: Show Output
+      - name: Show Output URL
         run: echo ${{ steps.deploy.outputs.url }}
