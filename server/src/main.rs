@@ -31,7 +31,7 @@ async fn main() {
                 Ok(target) => {
                     hello.push_str(&target);
                 }
-                Err(_e) => hello.push_str("World"),
+                Err(_e) => hello.push_str("World!"),
             };
             Ok::<_, Infallible>(Response::new(Body::from(hello)))
         }))
