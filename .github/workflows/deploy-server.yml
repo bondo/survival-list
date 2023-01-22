@@ -36,6 +36,3 @@ jobs:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           source: "./server/"
-
-      - name: Show Output URL
-        run: echo ${{ steps.deploy.outputs.url }}

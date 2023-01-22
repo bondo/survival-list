@@ -6,6 +6,9 @@ use hyper::{
 use std::convert::Infallible;
 use std::env;
 
+mod db;
+use db::Database;
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -26,14 +29,9 @@ async fn main() {
 
     let make_svc = make_service_fn(|_socket: &AddrStream| async move {
         Ok::<_, Infallible>(service_fn(move |_: Request<Body>| async move {
-            let mut hello = "Hello ".to_string();
-            match env::var("TARGET") {
-                Ok(target) => {
-                    hello.push_str(&target);
-                }
-                Err(_e) => hello.push_str("World!"),
-            };
-            Ok::<_, Infallible>(Response::new(Body::from(hello)))
+            let mut database = Database::new().await;
+            let tasks = database.get_tasks().await;
+            Ok::<_, Infallible>(Response::new(Body::from(format!("{:?}", tasks))))
         }))
     });
 
