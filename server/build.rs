@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 
@@ -10,14 +11,15 @@ async fn main() -> Result<(), Error> {
         return Ok(());
     }
 
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("Environment variable DATABASE_URL missing");
+
     println!("cargo:rerun-if-changed=migrations");
 
     container::cleanup()?;
     container::setup()?;
 
-    let pool = PgPoolOptions::new()
-        .connect("postgresql://postgres:postgres@127.0.0.1:5435/postgres")
-        .await?;
+    let pool = PgPoolOptions::new().connect(database_url.as_str()).await?;
 
     sqlx::migrate!().run(&pool).await?;
 
