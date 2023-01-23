@@ -1,6 +1,8 @@
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
+use openssl::ssl::{SslConnector, SslMethod};
+use postgres_openssl::MakeTlsConnector;
 use std::{fs, str::FromStr};
-use tokio_postgres::{Config, NoTls};
+use tokio_postgres::Config;
 
 mod cornucopia;
 use self::cornucopia::queries::tasks::{get_tasks, GetTasks};
@@ -17,7 +19,9 @@ impl Database {
         let mgr_config = ManagerConfig {
             recycling_method: RecyclingMethod::Fast,
         };
-        let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
+        let tls_builder = SslConnector::builder(SslMethod::tls()).unwrap();
+        let tls_connector = MakeTlsConnector::new(tls_builder.build());
+        let mgr = Manager::from_config(pg_config, tls_connector, mgr_config);
         let pool = Pool::builder(mgr)
             .build()
             .expect("Should be able to create PG pool");
