@@ -8,10 +8,10 @@ dotenv = "0.15.0"
 hyper = { version = "0.14.23", features = ["full"] }
 pretty_env_logger = "0.4.0"
 serde = { version = "1.0.152", features = ["derive"] }
-sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls"] }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
 
 [build-dependencies]
 dotenv = "0.15.0"
-sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls"] }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
