@@ -1,4 +1,4 @@
-use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
+use deadpool_postgres::{Manager, ManagerConfig, Object, Pool, PoolError, RecyclingMethod};
 use openssl::ssl::{SslConnector, SslMethod};
 use postgres_openssl::MakeTlsConnector;
 use std::{fs, str::FromStr};
@@ -9,6 +9,10 @@ use self::cornucopia::queries::tasks::{get_tasks, GetTasks};
 
 pub struct Database {
     pool: Pool,
+}
+
+pub struct DatabaseConnection {
+    connection: Object,
 }
 
 impl Database {
@@ -28,8 +32,15 @@ impl Database {
         Database { pool }
     }
 
-    pub async fn get_tasks(&mut self) -> Vec<GetTasks> {
-        let client = self.pool.get().await.unwrap();
-        get_tasks().bind(&client).all().await.unwrap()
+    pub async fn get_connection(&self) -> Result<DatabaseConnection, PoolError> {
+        Ok(DatabaseConnection {
+            connection: self.pool.get().await?,
+        })
+    }
+}
+
+impl DatabaseConnection {
+    pub async fn get_tasks(&mut self) -> Result<Vec<GetTasks>, tokio_postgres::Error> {
+        get_tasks().bind(&self.connection).all().await
     }
 }
