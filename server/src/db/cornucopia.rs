@@ -5,13 +5,13 @@
 #[allow(unused_imports)] #[allow(dead_code)] pub mod queries
 { pub mod tasks
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug, Clone, PartialEq, )] pub struct GetTasks
-{ pub id : i32,pub title : String,pub category_id : i32,pub subcategory_id : i32,pub schedule_id : i32,pub responsible_user_id : i32,pub completed_at : time::PrimitiveDateTime,pub start_date : time::Date,pub end_date : time::Date,}pub struct GetTasksBorrowed < 'a >
-{ pub id : i32,pub title : &'a str,pub category_id : i32,pub subcategory_id : i32,pub schedule_id : i32,pub responsible_user_id : i32,pub completed_at : time::PrimitiveDateTime,pub start_date : time::Date,pub end_date : time::Date,} impl < 'a > From < GetTasksBorrowed <
+{ pub id : i32,pub title : Option<String>,pub start_date : Option<time::Date>,pub end_date : Option<time::Date>,}pub struct GetTasksBorrowed < 'a >
+{ pub id : i32,pub title : Option<&'a str>,pub start_date : Option<time::Date>,pub end_date : Option<time::Date>,} impl < 'a > From < GetTasksBorrowed <
 'a >> for GetTasks
 {
     fn
-    from(GetTasksBorrowed { id,title,category_id,subcategory_id,schedule_id,responsible_user_id,completed_at,start_date,end_date,} : GetTasksBorrowed < 'a >)
-    -> Self { Self { id,title: title.into(),category_id,subcategory_id,schedule_id,responsible_user_id,completed_at,start_date,end_date,} }
+    from(GetTasksBorrowed { id,title,start_date,end_date,} : GetTasksBorrowed < 'a >)
+    -> Self { Self { id,title: title.map(|v| v.into()),start_date,end_date,} }
 }pub struct GetTasksQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -53,7 +53,10 @@ where C : GenericClient
     }
 }pub fn get_tasks() -> GetTasksStmt
 { GetTasksStmt(cornucopia_async :: private :: Stmt :: new("SELECT
-    *
+    id,
+    title,
+    start_date,
+    end_date
 FROM
     tasks")) } pub
 struct GetTasksStmt(cornucopia_async :: private :: Stmt) ; impl
@@ -65,6 +68,6 @@ GetTasks, 0 >
     GetTasksQuery
     {
         client, params : [], stmt : & mut self.0, extractor :
-        | row | { GetTasksBorrowed { id : row.get(0),title : row.get(1),category_id : row.get(2),subcategory_id : row.get(3),schedule_id : row.get(4),responsible_user_id : row.get(5),completed_at : row.get(6),start_date : row.get(7),end_date : row.get(8),} }, mapper : | it | { <GetTasks>::from(it) },
+        | row | { GetTasksBorrowed { id : row.get(0),title : row.get(1),start_date : row.get(2),end_date : row.get(3),} }, mapper : | it | { <GetTasks>::from(it) },
     }
 } }}}
