@@ -3,21 +3,13 @@ name = "server"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-cornucopia_async = "0.4.0"
-deadpool-postgres = "0.10.4"
-futures = "0.3.25"
 hyper = { version = "0.14.23", features = ["full"] }
-openssl = "0.10.45"
-postgres-openssl = "0.5.0"
-postgres-types = { version = "0.2.4", features = ["derive"] }
 pretty_env_logger = "0.4.0"
 serde = { version = "1.0.152", features = ["derive"] }
-time = "0.3.17"
-tokio = { version = "1.24.2", features = ["macros", "rt-multi-thread"] }
-tokio-postgres = { version = "0.7.7", features = ["with-time-0_3"] }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls"] }
+tokio = { version = "1.24.2", features = ["full"] }
 
 [build-dependencies]
-cornucopia = "0.9.0"
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls"] }
+tokio = { version = "1.24.2", features = ["full"] }

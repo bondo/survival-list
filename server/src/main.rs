@@ -3,7 +3,7 @@ use hyper::{
     service::{make_service_fn, service_fn},
     Body, Request, Response, Server,
 };
-use std::convert::Infallible;
+use sqlx::Error;
 use std::env;
 
 mod db;
@@ -27,12 +27,21 @@ async fn main() {
     };
     let addr = ([0, 0, 0, 0], port).into();
 
-    let database: &Database = Box::leak(Box::new(Database::new().await));
+    let database: &Database = Box::leak(Box::new(
+        Database::new()
+            .await
+            .expect("should be able to connect to database"),
+    ));
+
+    database
+        .migrate()
+        .await
+        .expect("should be able to migrate database");
+
     let make_svc = make_service_fn(|_socket: &AddrStream| async move {
-        Ok::<_, Infallible>(service_fn(move |_: Request<Body>| async move {
-            let mut conn = database.get_connection().await.unwrap();
-            let tasks = conn.get_tasks().await;
-            Ok::<_, Infallible>(Response::new(Body::from(format!("{:?}", tasks))))
+        Ok::<_, Error>(service_fn(move |_: Request<Body>| async move {
+            let tasks = database.get_tasks().await?;
+            Ok::<_, Error>(Response::new(Body::from(format!("{:?}", tasks))))
         }))
     });
 
