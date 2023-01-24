@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - production
+    paths:
+      - "server/**"
 
 env:
   PROJECT_ID: "survival-list-server"
