@@ -1,10 +1,11 @@
-use std::{convert::Infallible, env, str};
+use std::{env, str};
 
-use hyper::{
-    body::{self, HttpBody},
-    server::conn::AddrStream,
-    service::{make_service_fn, service_fn},
-    Body, Method, Request, Response, Server,
+use axum::{
+    extract,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Json, Router,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -13,14 +14,10 @@ mod db;
 use db::Database;
 
 mod error;
-use error::{ClientError, Error};
+use error::Error;
 
-async fn shutdown_signal() {
-    // Wait for the CTRL+C signal
-    tokio::signal::ctrl_c()
-        .await
-        .expect("failed to install CTRL+C signal handler");
-}
+mod state;
+use state::State;
 
 #[tokio::main]
 async fn main() {
@@ -32,77 +29,98 @@ async fn main() {
         .unwrap_or(8080);
     let addr = ([0, 0, 0, 0], port).into();
 
-    let database: &Database = Box::leak(Box::new(
-        Database::new()
-            .await
-            .expect("should be able to connect to database"),
-    ));
+    let database: Database = Database::new()
+        .await
+        .expect("should be able to connect to database");
 
     database
         .migrate()
         .await
         .expect("should be able to migrate database");
 
-    let make_svc = make_service_fn(|_socket: &AddrStream| async move {
-        Ok::<_, Infallible>(service_fn(move |req: Request<Body>| async move {
-            match dispatch(database, req).await {
-                Ok(value) => Response::builder().body(json!({ "result": value }).to_string()),
-                Err(e) => {
-                    let error = format!("{e}");
-                    Response::builder()
-                        .status(e.status())
-                        .body(json!({ "error": error }).to_string())
-                }
-            }
-        }))
-    });
+    let state = State::new(database);
 
-    let server = Server::bind(&addr).serve(make_svc);
+    let app = Router::new()
+        .route("/task", post(create_task))
+        .route("/tasks", get(get_tasks))
+        .with_state(state);
 
-    let graceful = server.with_graceful_shutdown(shutdown_signal());
+    let make_service = app.into_make_service();
+
+    let server = axum::Server::bind(&addr)
+        .serve(make_service)
+        .with_graceful_shutdown(shutdown_signal());
 
     println!("Listening on http://{}", addr);
-    if let Err(e) = graceful.await {
+    if let Err(e) = server.await {
         eprintln!("server error: {}", e);
     }
 }
 
-async fn dispatch(db: &Database, req: Request<Body>) -> Result<Value, Error> {
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/tasks") => {
-            let tasks = db.get_tasks().await?;
-            Ok(json!(tasks))
+async fn shutdown_signal() {
+    // Wait for the CTRL+C signal
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to install CTRL+C signal handler");
+}
+
+#[derive(Deserialize)]
+struct CreateTaskPayload {
+    title: String,
+}
+
+async fn create_task(
+    extract::State(state): extract::State<State>,
+    Json(payload): Json<CreateTaskPayload>,
+) -> impl IntoResponse {
+    match state.db.create_task(&payload.title).await {
+        Ok(value) => SuccessResponse {
+            status: StatusCode::CREATED,
+            value: json!(value),
         }
-
-        (&Method::POST, "/task") => {
-            #[derive(Deserialize)]
-            struct ParsedBody {
-                title: String,
-            }
-
-            let body: ParsedBody = parse_body(req).await?;
-            let result = db.create_task(&body.title).await?;
-            Ok(json!(result))
+        .into_response(),
+        Err(error) => ErrorResponse {
+            error: error.into(),
         }
-
-        _ => Err(ClientError::NotFoundError.into()),
+        .into_response(),
     }
 }
 
-async fn parse_body<'a, T>(req: Request<Body>) -> Result<T, ClientError>
-where
-    T: Deserialize<'a>,
-{
-    let upper = req.body().size_hint().upper().unwrap_or(u64::MAX);
-    if upper > 1024 * 64 {
-        return Err(ClientError::PayloadTooLarge);
+struct SuccessResponse {
+    status: StatusCode,
+    value: Value,
+}
+
+impl IntoResponse for SuccessResponse {
+    fn into_response(self) -> Response {
+        (self.status, Json(json!({"result":self.value}))).into_response()
     }
+}
 
-    let body = req.into_body();
-    let bytes = body::to_bytes(body).await?;
-    // let str = String::from_utf8(bytes.into_iter().collect())?;
-    // serde_json::from_str(Box::leak(Box::new(str))).map_err(|e| e.into())
+struct ErrorResponse {
+    error: Error,
+}
 
-    let str = str::from_utf8(&bytes[..])?;
-    serde_json::from_str(str).map_err(|e| e.into())
+impl IntoResponse for ErrorResponse {
+    fn into_response(self) -> Response {
+        (
+            self.error.status(),
+            Json(json!({ "result": format!("{}", self.error) })),
+        )
+            .into_response()
+    }
+}
+
+async fn get_tasks(extract::State(state): extract::State<State>) -> impl IntoResponse {
+    match state.db.get_tasks().await {
+        Ok(value) => SuccessResponse {
+            status: StatusCode::OK,
+            value: json!(value),
+        }
+        .into_response(),
+        Err(error) => ErrorResponse {
+            error: error.into(),
+        }
+        .into_response(),
+    }
 }

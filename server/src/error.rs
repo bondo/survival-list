@@ -1,20 +1,16 @@
-use std::{error, fmt, str};
+use std::{fmt, str};
 
-use hyper::StatusCode;
+use axum::http::StatusCode;
 
 #[derive(Debug)]
 pub enum ClientError {
     BadRequest(String),
-    NotFoundError,
-    PayloadTooLarge,
 }
 
 impl ClientError {
     fn status(&self) -> StatusCode {
         match self {
             Self::BadRequest(_) => StatusCode::BAD_REQUEST,
-            Self::NotFoundError => StatusCode::NOT_FOUND,
-            Self::PayloadTooLarge => StatusCode::PAYLOAD_TOO_LARGE,
         }
     }
 }
@@ -39,20 +35,23 @@ impl From<str::Utf8Error> for ClientError {
 
 impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "client error: ")?;
         match self {
             Self::BadRequest(e) => write!(f, "bad request: {e}"),
-            Self::NotFoundError => write!(f, "not found"),
-            Self::PayloadTooLarge => write!(f, "payload too large"),
         }
     }
 }
-
-impl error::Error for ClientError {}
 
 #[derive(Debug)]
 pub enum ServerError {
     HyperHttpError(hyper::http::Error),
     SqlxError(sqlx::Error),
+}
+
+impl ServerError {
+    fn status(&self) -> StatusCode {
+        StatusCode::INTERNAL_SERVER_ERROR
+    }
 }
 
 impl From<hyper::http::Error> for ServerError {
@@ -69,14 +68,16 @@ impl From<sqlx::Error> for ServerError {
 
 impl fmt::Display for ServerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::HyperHttpError(e) => write!(f, "hyper http error: {}", e),
-            Self::SqlxError(e) => write!(f, "sqlx error: {}", e),
+        write!(f, "server error")?;
+        if cfg!(debug_assertions) {
+            match self {
+                Self::HyperHttpError(e) => write!(f, ": hyper http error: {e}"),
+                Self::SqlxError(e) => write!(f, ": sqlx error: {e}"),
+            }?
         }
+        Ok(())
     }
 }
-
-impl error::Error for ServerError {}
 
 #[derive(Debug)]
 pub enum Error {
@@ -88,7 +89,7 @@ impl Error {
     pub fn status(&self) -> StatusCode {
         match self {
             Self::ClientError(e) => e.status(),
-            Self::ServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::ServerError(e) => e.status(),
         }
     }
 }
@@ -108,16 +109,8 @@ impl From<ServerError> for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ClientError(e) => write!(f, "client error: {e}"),
-            Self::ServerError(e) => {
-                if cfg!(debug_assertions) {
-                    write!(f, "server error: {e}")
-                } else {
-                    write!(f, "server error")
-                }
-            }
+            Self::ClientError(e) => e.fmt(f),
+            Self::ServerError(e) => e.fmt(f),
         }
     }
 }
-
-impl error::Error for Error {}

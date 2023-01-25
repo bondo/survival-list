@@ -6,6 +6,7 @@ use sqlx::{migrate::MigrateError, postgres::PgPoolOptions, PgPool};
 
 use crate::error::ServerError;
 
+#[derive(Clone)]
 pub struct Database {
     pool: PgPool,
 }
