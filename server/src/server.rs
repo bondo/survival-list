@@ -2,6 +2,7 @@ use std::net::SocketAddr;
 
 use anyhow::{Context, Result};
 use axum::Server;
+use tower_http::compression::CompressionLayer;
 
 use crate::{db::Database, router, state::State};
 
@@ -19,7 +20,7 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
 
     let app = router::build(state);
 
-    let make_service = app.into_make_service();
+    let make_service = app.layer(CompressionLayer::new()).into_make_service();
 
     Server::bind(&addr)
         .serve(make_service)
