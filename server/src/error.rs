@@ -7,6 +7,8 @@ pub enum ClientError {
     BadRequest(String),
 }
 
+impl std::error::Error for ClientError {}
+
 impl ClientError {
     fn status(&self) -> StatusCode {
         match self {
@@ -48,6 +50,8 @@ pub enum ServerError {
     SqlxError(sqlx::Error),
 }
 
+impl std::error::Error for ServerError {}
+
 impl ServerError {
     fn status(&self) -> StatusCode {
         StatusCode::INTERNAL_SERVER_ERROR
@@ -84,6 +88,8 @@ pub enum Error {
     ClientError(ClientError),
     ServerError(ServerError),
 }
+
+impl std::error::Error for Error {}
 
 impl Error {
     pub fn status(&self) -> StatusCode {

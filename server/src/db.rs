@@ -1,5 +1,6 @@
 use std::{env, fs};
 
+use anyhow::Result;
 use dotenvy::dotenv;
 use serde::Serialize;
 use sqlx::{migrate::MigrateError, postgres::PgPoolOptions, PgPool};
