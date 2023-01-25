@@ -1,30 +1,35 @@
+use std::{convert::Infallible, env};
+
 use hyper::{
+    body::{self, HttpBody},
     server::conn::AddrStream,
     service::{make_service_fn, service_fn},
-    Body, Request, Response, Server,
+    Body, Method, Request, Response, Server,
 };
-use sqlx::Error;
-use std::env;
+use serde::{de::DeserializeOwned, Deserialize};
+use serde_json::{json, Value};
 
 mod db;
 use db::Database;
+
+mod error;
+use error::{ClientError, Error};
+
+async fn shutdown_signal() {
+    // Wait for the CTRL+C signal
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to install CTRL+C signal handler");
+}
 
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
 
-    let mut port: u16 = 8080;
-    match env::var("PORT") {
-        Ok(p) => {
-            match p.parse::<u16>() {
-                Ok(n) => {
-                    port = n;
-                }
-                Err(_e) => {}
-            };
-        }
-        Err(_e) => {}
-    };
+    let port = env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
     let addr = ([0, 0, 0, 0], port).into();
 
     let database: &Database = Box::leak(Box::new(
@@ -39,16 +44,67 @@ async fn main() {
         .expect("should be able to migrate database");
 
     let make_svc = make_service_fn(|_socket: &AddrStream| async move {
-        Ok::<_, Error>(service_fn(move |_: Request<Body>| async move {
-            let tasks = database.get_tasks().await?;
-            Ok::<_, Error>(Response::new(Body::from(format!("{:?}", tasks))))
+        Ok::<_, Infallible>(service_fn(move |req: Request<Body>| async move {
+            match dispatch(database, req).await {
+                Ok(result) => Response::builder().body(json!({ "result": result }).to_string()),
+                Err(e) => {
+                    let error = format!("{e}");
+                    Response::builder()
+                        .status(e.status())
+                        .body(json!({ "error": error }).to_string())
+                }
+            }
         }))
     });
 
     let server = Server::bind(&addr).serve(make_svc);
 
+    let graceful = server.with_graceful_shutdown(shutdown_signal());
+
     println!("Listening on http://{}", addr);
-    if let Err(e) = server.await {
+    if let Err(e) = graceful.await {
         eprintln!("server error: {}", e);
     }
+}
+
+async fn dispatch(db: &Database, req: Request<Body>) -> Result<Value, Error> {
+    match (req.method(), req.uri().path()) {
+        (&Method::GET, "/tasks") => {
+            let tasks = db.get_tasks().await?;
+            Ok(json!({ "result": tasks }))
+        }
+
+        (&Method::POST, "/task") => {
+            #[derive(Deserialize)]
+            struct ParsedBody {
+                title: String,
+            }
+
+            let body: ParsedBody = parse_body(req).await?;
+            let result = db.create_task(&body.title).await?;
+            Ok(json!({ "result": result }))
+        }
+
+        _ => Err(ClientError::NotFoundError.into()),
+    }
+}
+
+async fn parse_body<'a, T>(req: Request<Body>) -> Result<T, ClientError>
+where
+    T: DeserializeOwned,
+{
+    let upper = req.body().size_hint().upper().unwrap_or(u64::MAX);
+    if upper > 1024 * 64 {
+        return Err(ClientError::PayloadTooLarge);
+    }
+
+    let body = req.into_body();
+    let bytes = body::to_bytes(body).await?;
+    let str = String::from_utf8(bytes.into_iter().collect())?;
+
+    // This?
+    // - https://docs.rs/serde/1.0.152/serde/de/trait.Visitor.html#method.visit_string
+    // - https://docs.rs/serde/1.0.152/serde/de/trait.DeserializeOwned.html
+    let json = serde_json::from_reader(str)?;
+    json.map_err(|e| e.into())?
 }
