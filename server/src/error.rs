@@ -1,4 +1,4 @@
-use std::{error, fmt, string};
+use std::{error, fmt, str};
 
 use hyper::StatusCode;
 
@@ -31,8 +31,8 @@ impl From<serde_json::Error> for ClientError {
     }
 }
 
-impl From<string::FromUtf8Error> for ClientError {
-    fn from(error: string::FromUtf8Error) -> Self {
+impl From<str::Utf8Error> for ClientError {
+    fn from(error: str::Utf8Error) -> Self {
         Self::BadRequest(format!("{error}"))
     }
 }

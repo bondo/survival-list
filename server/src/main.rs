@@ -1,4 +1,4 @@
-use std::{convert::Infallible, env};
+use std::{convert::Infallible, env, str};
 
 use hyper::{
     body::{self, HttpBody},
@@ -6,7 +6,7 @@ use hyper::{
     service::{make_service_fn, service_fn},
     Body, Method, Request, Response, Server,
 };
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::Deserialize;
 use serde_json::{json, Value};
 
 mod db;
@@ -46,7 +46,7 @@ async fn main() {
     let make_svc = make_service_fn(|_socket: &AddrStream| async move {
         Ok::<_, Infallible>(service_fn(move |req: Request<Body>| async move {
             match dispatch(database, req).await {
-                Ok(result) => Response::builder().body(json!({ "result": result }).to_string()),
+                Ok(value) => Response::builder().body(json!({ "result": value }).to_string()),
                 Err(e) => {
                     let error = format!("{e}");
                     Response::builder()
@@ -71,7 +71,7 @@ async fn dispatch(db: &Database, req: Request<Body>) -> Result<Value, Error> {
     match (req.method(), req.uri().path()) {
         (&Method::GET, "/tasks") => {
             let tasks = db.get_tasks().await?;
-            Ok(json!({ "result": tasks }))
+            Ok(json!(tasks))
         }
 
         (&Method::POST, "/task") => {
@@ -82,7 +82,7 @@ async fn dispatch(db: &Database, req: Request<Body>) -> Result<Value, Error> {
 
             let body: ParsedBody = parse_body(req).await?;
             let result = db.create_task(&body.title).await?;
-            Ok(json!({ "result": result }))
+            Ok(json!(result))
         }
 
         _ => Err(ClientError::NotFoundError.into()),
@@ -91,7 +91,7 @@ async fn dispatch(db: &Database, req: Request<Body>) -> Result<Value, Error> {
 
 async fn parse_body<'a, T>(req: Request<Body>) -> Result<T, ClientError>
 where
-    T: DeserializeOwned,
+    T: Deserialize<'a>,
 {
     let upper = req.body().size_hint().upper().unwrap_or(u64::MAX);
     if upper > 1024 * 64 {
@@ -100,11 +100,9 @@ where
 
     let body = req.into_body();
     let bytes = body::to_bytes(body).await?;
-    let str = String::from_utf8(bytes.into_iter().collect())?;
+    // let str = String::from_utf8(bytes.into_iter().collect())?;
+    // serde_json::from_str(Box::leak(Box::new(str))).map_err(|e| e.into())
 
-    // This?
-    // - https://docs.rs/serde/1.0.152/serde/de/trait.Visitor.html#method.visit_string
-    // - https://docs.rs/serde/1.0.152/serde/de/trait.DeserializeOwned.html
-    let json = serde_json::from_reader(str)?;
-    json.map_err(|e| e.into())?
+    let str = str::from_utf8(&bytes[..])?;
+    serde_json::from_str(str).map_err(|e| e.into())
 }
