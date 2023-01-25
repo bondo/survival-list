@@ -1,6 +1,26 @@
 {
   "db": "PostgreSQL",
-  "73ce908198a2879f9dec3f100fea5af1dac3ceb4bfefb6f8e932091ca25c048d": {
+  "0855d827d2fcf74d9f498da7c0ff936a0b649d69563a101cf7ccead724c3bbd7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO tasks (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id\n            "
+  },
+  "db1d8615bd4597e0a108deedbcf4a956c0d49196ade2c732af2daf8f0036d4a6": {
     "describe": {
       "columns": [
         {
@@ -12,28 +32,16 @@
           "name": "title",
           "ordinal": 1,
           "type_info": "Text"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 2,
-          "type_info": "Date"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 3,
-          "type_info": "Date"
         }
       ],
       "nullable": [
         false,
-        true,
-        true,
         true
       ],
       "parameters": {
         "Left": []
       }
     },
-    "query": "\n                SELECT\n                    id,\n                    title,\n                    start_date,\n                    end_date\n                FROM\n                    tasks\n            "
+    "query": "\n                SELECT\n                    id,\n                    title\n                FROM\n                    tasks\n            "
   }
 }
