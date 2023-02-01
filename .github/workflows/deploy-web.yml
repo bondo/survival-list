@@ -27,3 +27,4 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SURVIVAL_LIST_WEB_CLIENT }}"
           channelId: live
           projectId: survival-list-web-client
+          entryPoint: ./client
