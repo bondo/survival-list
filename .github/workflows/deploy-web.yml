@@ -8,10 +8,22 @@ on:
     paths:
       - "client/**"
 
-steps:
-  - uses: actions/checkout@v3
-  - uses: subosito/flutter-action@v2
-    with:
-      channel: "stable"
-  - run: flutter pub get
-  - run: flutter build web
+jobs:
+  web-client-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+      - run: flutter pub get
+      - run: flutter build web
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SURVIVAL_LIST_WEB_CLIENT }}"
+          channelId: live
+          projectId: survival-list-web-client

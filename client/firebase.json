@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+  },
+  "rewrites": [
+    {
+      "source": "/api",
+      "run": {
+        "serviceId": "survival-list-server",
+        "region": "europe-north1"
+      }
+    }
+  ]
+}
