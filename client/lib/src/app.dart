@@ -69,7 +69,8 @@ class SurvivalListApp extends StatelessWidget {
                     return SurvivalItemListView(items: [
                       SurvivalItem(1, true),
                       SurvivalItem(2, false),
-                      SurvivalItem(3, false)
+                      SurvivalItem(3, false),
+                      SurvivalItem(4, false),
                     ]);
                 }
               },
