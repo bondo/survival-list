@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'survival/survival_item.dart';
+import 'survival/survival_item_create_view.dart';
 import 'survival/survival_item_details_view.dart';
 import 'survival/survival_item_list_view.dart';
 import 'settings/settings_controller.dart';
@@ -18,8 +19,6 @@ class SurvivalListApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Glue the SettingsController to the MaterialApp.
-    //
     // The AnimatedBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
     return AnimatedBuilder(
@@ -64,6 +63,8 @@ class SurvivalListApp extends StatelessWidget {
                     return SettingsView(controller: settingsController);
                   case SurvivalItemDetailsView.routeName:
                     return const SurvivalItemDetailsView();
+                  case SurvivalItemCreateView.routeName:
+                    return const SurvivalItemCreateView();
                   case SurvivalItemListView.routeName:
                   default:
                     return SurvivalItemListView(items: [

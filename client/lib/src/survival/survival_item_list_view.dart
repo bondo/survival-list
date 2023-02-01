@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../settings/settings_view.dart';
 import 'survival_item.dart';
+import 'survival_item_create_view.dart';
 import 'survival_item_list_tile.dart';
 
 /// Displays a list of SurvivalItems.
@@ -31,6 +32,13 @@ class SurvivalItemListView extends StatelessWidget {
           ),
         ],
       ),
+
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.restorablePushNamed(
+                context, SurvivalItemCreateView.routeName);
+          },
+          child: const Icon(Icons.add)),
 
       // To work with lists that may contain a large number of items, it’s best
       // to use the ListView.builder constructor.

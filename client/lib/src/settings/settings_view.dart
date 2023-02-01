@@ -23,7 +23,7 @@ class SettingsView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           DropdownButton<ThemeMode>(
             // Read the selected themeMode from the controller
             value: controller.themeMode,

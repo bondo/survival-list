@@ -19,5 +19,6 @@
     "placeholders": {
       "i": {}
     }
-  }
+  },
+  "pageItemCreateTitle": "Create new todo"
 }
