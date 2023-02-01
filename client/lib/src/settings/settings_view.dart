@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'settings_controller.dart';
 
@@ -15,36 +16,52 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.pageSettingsTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        // Glue the SettingsController to the theme selection DropdownButton.
-        //
-        // When a user selects a theme from the dropdown list, the
-        // SettingsController is updated, which rebuilds the MaterialApp.
-        child: DropdownButton<ThemeMode>(
-          // Read the selected themeMode from the controller
-          value: controller.themeMode,
-          // Call the updateThemeMode method any time the user selects a theme.
-          onChanged: controller.updateThemeMode,
-          items: const [
-            DropdownMenuItem(
-              value: ThemeMode.system,
-              child: Text('System Theme'),
-            ),
-            DropdownMenuItem(
-              value: ThemeMode.light,
-              child: Text('Light Theme'),
-            ),
-            DropdownMenuItem(
-              value: ThemeMode.dark,
-              child: Text('Dark Theme'),
-            )
-          ],
-        ),
+        child: Column(children: [
+          DropdownButton<ThemeMode>(
+            // Read the selected themeMode from the controller
+            value: controller.themeMode,
+            // Call the updateThemeMode method any time the user selects a theme.
+            onChanged: controller.updateThemeMode,
+            items: [
+              DropdownMenuItem(
+                value: ThemeMode.system,
+                child: Text(l10n.pageSettingsThemeSystem),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.light,
+                child: Text(l10n.pageSettingsThemeLight),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.dark,
+                child: Text(l10n.pageSettingsThemeDark),
+              )
+            ],
+          ),
+          DropdownButton<Locale?>(
+              value: controller.locale,
+              onChanged: controller.updateLocale,
+              items: [
+                DropdownMenuItem<Locale?>(
+                  value: null,
+                  child: Text(l10n.pageSettingsLanguageDefault),
+                ),
+                for (Locale locale in AppLocalizations.supportedLocales)
+                  DropdownMenuItem(
+                      value: locale,
+                      child: Text(locale.languageCode == 'da'
+                          ? l10n.pageSettingsLanguageDanish
+                          : (locale.languageCode == 'en'
+                              ? l10n.pageSettingsLanguageEnglish
+                              : locale.toLanguageTag())))
+              ]),
+        ]),
       ),
     );
   }

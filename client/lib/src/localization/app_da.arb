@@ -1,0 +1,23 @@
+{
+  "appTitle": "Overlevelsesliste",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "bottomNavigationIconLabelSurvival": "Overlevelse",
+  "bottomNavigationIconLabelTodo": "Todo",
+  "bottomNavigationIconLabelSchedule": "Plan",
+  "pageSettingsTitle": "Indstillinger",
+  "pageSettingsThemeSystem": "Systemtema",
+  "pageSettingsThemeLight": "Lyst tema",
+  "pageSettingsThemeDark": "Mørkt tema",
+  "pageSettingsLanguageDefault": "Standardsprog",
+  "pageSettingsLanguageEnglish": "Engelsk",
+  "pageSettingsLanguageDanish": "Dansk",
+  "pageSurvivalTitle": "Overlevelse",
+  "pageSurvivalItemTitle": "Ting nr {i}",
+  "@pageSurvivalItemTitle": {
+    "placeholders": {
+      "i": {}
+    }
+  }
+}
