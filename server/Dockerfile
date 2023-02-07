@@ -1,6 +1,8 @@
 # Use the official Rust image.
 # https://hub.docker.com/_/rust
-FROM rust:1.66.1 as build
+FROM rust:1.67.0-alpine3.17 as build
+
+RUN apk add --no-cache musl-dev
 
 # Copy local code to the container image.
 WORKDIR /usr/src/app
@@ -9,7 +11,7 @@ COPY . .
 # Install production dependencies and build a release artifact.
 RUN cargo build --release
 
-FROM rust:1.66.1
+FROM alpine:3.17
 
 WORKDIR /usr/local/bin
 COPY --from=build /usr/src/app/target/release/server .
