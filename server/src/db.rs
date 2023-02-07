@@ -2,29 +2,25 @@ use std::{env, fs};
 
 use anyhow::Result;
 use dotenvy::dotenv;
-use serde::Serialize;
-use sqlx::{migrate::MigrateError, postgres::PgPoolOptions, PgPool};
-
-use crate::error::ServerError;
+use sqlx::{self, migrate::MigrateError, postgres::PgPoolOptions, PgPool};
+use tonic::Status;
 
 #[derive(Clone)]
 pub struct Database {
     pool: PgPool,
 }
 
-#[derive(Serialize)]
 pub struct GetTasksResult {
     pub id: i32,
     pub title: Option<String>,
 }
 
-#[derive(Serialize)]
 pub struct CreateTaskResult {
     pub id: i32,
 }
 
 impl Database {
-    pub async fn new() -> Result<Self, ServerError> {
+    pub async fn new() -> Result<Self, sqlx::Error> {
         let url = fs::read_to_string("/secrets/POSTGRES_CONNECTION").unwrap_or_else(|_| {
             dotenv().ok();
             env::var("DATABASE_URL").expect(
@@ -39,7 +35,7 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
-    pub async fn get_tasks(&self) -> Result<Vec<GetTasksResult>, ServerError> {
+    pub async fn get_tasks(&self) -> Result<Vec<GetTasksResult>, Status> {
         sqlx::query_as!(
             GetTasksResult,
             "
@@ -52,10 +48,10 @@ impl Database {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| e.into())
+        .map_err(|_| Status::internal("Failed to fetch tasks"))
     }
 
-    pub async fn create_task(&self, title: &str) -> Result<CreateTaskResult, ServerError> {
+    pub async fn create_task(&self, title: &str) -> Result<CreateTaskResult, Status> {
         sqlx::query_as!(
             CreateTaskResult,
             r#"
@@ -72,6 +68,6 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| e.into())
+        .map_err(|_| Status::internal("Failed to create task"))
     }
 }

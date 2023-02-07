@@ -8,3 +8,7 @@
 ## Update client localization
 
 - Run `flutter gen-l10n`
+
+## Play with API
+
+- Run `grpcui -plaintext localhost:8080` after `cargo serve`

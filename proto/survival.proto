@@ -1,0 +1,22 @@
+syntax = "proto3";
+package survival;
+
+service Survival {
+    rpc CreateTask (CreateTaskRequest) returns (CreateTaskReply);
+    rpc GetTasks (GetTasksRequest) returns (GetTasksReply);
+}
+
+message CreateTaskRequest {
+    string title = 1;
+}
+
+message CreateTaskReply {
+    int32 id = 1;
+}
+
+message GetTasksRequest {
+}
+
+message GetTasksReply {
+    repeated int32 id = 1;
+}

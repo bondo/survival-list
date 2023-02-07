@@ -1,10 +1,14 @@
 use std::net::SocketAddr;
 
 use anyhow::{Context, Result};
-use axum::Server;
-use tower_http::compression::CompressionLayer;
+use tokio::signal;
+use tonic::transport::Server;
 
-use crate::{db::Database, router, state::State};
+use crate::{
+    db::Database,
+    service::{SurvivalServer, SurvivalService, FILE_DESCRIPTOR_SET},
+    state::State,
+};
 
 pub async fn start(addr: SocketAddr) -> Result<()> {
     let database = Database::new()
@@ -18,21 +22,23 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
 
     let state = State::new(database);
 
-    let app = router::build(state);
+    let greeter = SurvivalService::new(state);
+    let reflection = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
+        .build()
+        .context("reflection service build failed")?;
 
-    let make_service = app.layer(CompressionLayer::new()).into_make_service();
-
-    Server::bind(&addr)
-        .serve(make_service)
-        .with_graceful_shutdown(shutdown_signal())
+    Server::builder()
+        .add_service(reflection)
+        .add_service(SurvivalServer::new(greeter))
+        .serve_with_shutdown(addr, create_signal())
         .await?;
 
     Ok(())
 }
 
-async fn shutdown_signal() {
-    // Wait for the CTRL+C signal
-    tokio::signal::ctrl_c()
+async fn create_signal() {
+    signal::ctrl_c()
         .await
-        .expect("failed to install CTRL+C signal handler");
+        .expect("failed to create shutdown signal")
 }

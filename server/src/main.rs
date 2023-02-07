@@ -3,10 +3,8 @@ use std;
 use anyhow::{Context, Result};
 
 mod db;
-mod error;
-mod response;
-mod router;
 mod server;
+mod service;
 mod state;
 
 #[tokio::main]

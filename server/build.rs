@@ -14,6 +14,12 @@ async fn main() -> Result<(), Error> {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Environment variable DATABASE_URL missing");
 
+    tonic_build::configure()
+        .build_client(false)
+        .out_dir("src/service/gen")
+        .file_descriptor_set_path("src/service/gen/descriptor")
+        .compile(&["../proto/survival.proto"], &["../proto/"])?;
+
     println!("cargo:rerun-if-changed=migrations");
 
     container::cleanup()?;

@@ -8,17 +8,16 @@ opt-level = 3
 
 [dependencies]
 anyhow = "1.0.68"
-axum = "0.6.4"
 dotenvy = "0.15.6"
-hyper = { version = "0.14.23", features = ["full"] }
 pretty_env_logger = "0.4.0"
-serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.91"
+prost = "0.11.6"
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
-tower-http = { version = "0.3.5", features = ["compression-br", "compression-deflate", "compression-gzip"] }
+tonic = "0.8.3"
+tonic-reflection = "0.6.0"
 
 [build-dependencies]
 dotenvy = "0.15.6"
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
+tonic-build = "0.8.4"
