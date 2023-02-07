@@ -5,7 +5,6 @@ use anyhow::{Context, Result};
 mod db;
 mod server;
 mod service;
-mod state;
 
 #[tokio::main]
 async fn main() -> Result<()> {

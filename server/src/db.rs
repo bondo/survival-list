@@ -1,3 +1,5 @@
+use futures_core::stream::Stream;
+use futures_util::stream::StreamExt;
 use std::{env, fs};
 
 use anyhow::Result;
@@ -35,7 +37,7 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
-    pub async fn get_tasks(&self) -> Result<Vec<GetTasksResult>, Status> {
+    pub fn get_tasks<'a>(&'a self) -> impl Stream<Item = Result<GetTasksResult, Status>> + 'a {
         sqlx::query_as!(
             GetTasksResult,
             "
@@ -46,9 +48,8 @@ impl Database {
                     tasks
             "
         )
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to fetch tasks"))
+        .fetch(&self.pool)
+        .map(|i| i.or(Err(Status::internal("unexpected error loading tasks"))))
     }
 
     pub async fn create_task(&self, title: &str) -> Result<CreateTaskResult, Status> {

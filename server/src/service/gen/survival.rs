@@ -16,8 +16,10 @@ pub struct GetTasksRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTasksReply {
-    #[prost(int32, repeated, tag = "1")]
-    pub id: ::prost::alloc::vec::Vec<i32>,
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
 }
 /// Generated server implementations.
 pub mod survival_server {
@@ -30,10 +32,16 @@ pub mod survival_server {
             &self,
             request: tonic::Request<super::CreateTaskRequest>,
         ) -> Result<tonic::Response<super::CreateTaskReply>, tonic::Status>;
+        /// Server streaming response type for the GetTasks method.
+        type GetTasksStream: futures_core::Stream<
+                Item = Result<super::GetTasksReply, tonic::Status>,
+            >
+            + Send
+            + 'static;
         async fn get_tasks(
             &self,
             request: tonic::Request<super::GetTasksRequest>,
-        ) -> Result<tonic::Response<super::GetTasksReply>, tonic::Status>;
+        ) -> Result<tonic::Response<Self::GetTasksStream>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct SurvivalServer<T: Survival> {
@@ -135,11 +143,14 @@ pub mod survival_server {
                 "/survival.Survival/GetTasks" => {
                     #[allow(non_camel_case_types)]
                     struct GetTasksSvc<T: Survival>(pub Arc<T>);
-                    impl<T: Survival> tonic::server::UnaryService<super::GetTasksRequest>
+                    impl<
+                        T: Survival,
+                    > tonic::server::ServerStreamingService<super::GetTasksRequest>
                     for GetTasksSvc<T> {
                         type Response = super::GetTasksReply;
+                        type ResponseStream = T::GetTasksStream;
                         type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
+                            tonic::Response<Self::ResponseStream>,
                             tonic::Status,
                         >;
                         fn call(
@@ -163,7 +174,7 @@ pub mod survival_server {
                                 accept_compression_encodings,
                                 send_compression_encodings,
                             );
-                        let res = grpc.unary(method, req).await;
+                        let res = grpc.server_streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)

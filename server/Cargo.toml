@@ -9,11 +9,14 @@ opt-level = 3
 [dependencies]
 anyhow = "1.0.68"
 dotenvy = "0.15.6"
+futures-core = "0.3.26"
+futures-util = "0.3.26"
 pretty_env_logger = "0.4.0"
 prost = "0.11.6"
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
-tonic = "0.8.3"
+tokio-stream = "0.1.11"
+tonic = { version = "0.8.3", features = ["gzip"] }
 tonic-reflection = "0.6.0"
 
 [build-dependencies]
