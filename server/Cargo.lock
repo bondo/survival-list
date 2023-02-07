@@ -1186,6 +1186,7 @@ dependencies = [
  "dotenvy",
  "futures-core",
  "futures-util",
+ "log",
  "pretty_env_logger",
  "prost",
  "sqlx",

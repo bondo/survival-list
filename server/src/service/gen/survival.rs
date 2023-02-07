@@ -6,16 +6,10 @@ pub struct CreateTaskRequest {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateTaskReply {
-    #[prost(int32, tag = "1")]
-    pub id: i32,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTasksRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetTasksReply {
+pub struct TaskResponse {
     #[prost(int32, tag = "1")]
     pub id: i32,
     #[prost(string, tag = "2")]
@@ -31,10 +25,10 @@ pub mod survival_server {
         async fn create_task(
             &self,
             request: tonic::Request<super::CreateTaskRequest>,
-        ) -> Result<tonic::Response<super::CreateTaskReply>, tonic::Status>;
+        ) -> Result<tonic::Response<super::TaskResponse>, tonic::Status>;
         /// Server streaming response type for the GetTasks method.
         type GetTasksStream: futures_core::Stream<
-                Item = Result<super::GetTasksReply, tonic::Status>,
+                Item = Result<super::TaskResponse, tonic::Status>,
             >
             + Send
             + 'static;
@@ -109,7 +103,7 @@ pub mod survival_server {
                         T: Survival,
                     > tonic::server::UnaryService<super::CreateTaskRequest>
                     for CreateTaskSvc<T> {
-                        type Response = super::CreateTaskReply;
+                        type Response = super::TaskResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -147,7 +141,7 @@ pub mod survival_server {
                         T: Survival,
                     > tonic::server::ServerStreamingService<super::GetTasksRequest>
                     for GetTasksSvc<T> {
-                        type Response = super::GetTasksReply;
+                        type Response = super::TaskResponse;
                         type ResponseStream = T::GetTasksStream;
                         type Future = BoxFuture<
                             tonic::Response<Self::ResponseStream>,

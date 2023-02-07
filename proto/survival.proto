@@ -2,22 +2,18 @@ syntax = "proto3";
 package survival;
 
 service Survival {
-    rpc CreateTask (CreateTaskRequest) returns (CreateTaskReply);
-    rpc GetTasks (GetTasksRequest) returns (stream GetTasksReply);
+    rpc CreateTask (CreateTaskRequest) returns (TaskResponse);
+    rpc GetTasks (GetTasksRequest) returns (stream TaskResponse);
 }
 
 message CreateTaskRequest {
     string title = 1;
 }
 
-message CreateTaskReply {
-    int32 id = 1;
-}
-
 message GetTasksRequest {
 }
 
-message GetTasksReply {
+message TaskResponse {
     int32 id = 1;
     string title = 2;
 }

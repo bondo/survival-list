@@ -1,16 +1,22 @@
 {
   "db": "PostgreSQL",
-  "0855d827d2fcf74d9f498da7c0ff936a0b649d69563a101cf7ccead724c3bbd7": {
+  "6f98c667a1defe09ef607052f2547bd8ed102c3698f34e6a1d83ad79af436b44": {
     "describe": {
       "columns": [
         {
           "name": "id",
           "ordinal": 0,
           "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
         }
       ],
       "nullable": [
-        false
+        false,
+        true
       ],
       "parameters": {
         "Left": [
@@ -18,7 +24,7 @@
         ]
       }
     },
-    "query": "\n                INSERT INTO tasks (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id\n            "
+    "query": "\n                INSERT INTO tasks (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id,\n                    title\n            "
   },
   "db1d8615bd4597e0a108deedbcf4a956c0d49196ade2c732af2daf8f0036d4a6": {
     "describe": {

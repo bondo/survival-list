@@ -12,13 +12,10 @@ pub struct Database {
     pool: PgPool,
 }
 
-pub struct GetTasksResult {
+#[derive(Debug)]
+pub struct TaskResult {
     pub id: i32,
     pub title: Option<String>,
-}
-
-pub struct CreateTaskResult {
-    pub id: i32,
 }
 
 impl Database {
@@ -37,24 +34,24 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
-    pub fn get_tasks<'a>(&'a self) -> impl Stream<Item = Result<GetTasksResult, Status>> + 'a {
+    pub fn get_tasks<'a>(&'a self) -> impl Stream<Item = Result<TaskResult, Status>> + 'a {
         sqlx::query_as!(
-            GetTasksResult,
-            "
+            TaskResult,
+            r#"
                 SELECT
                     id,
                     title
                 FROM
                     tasks
-            "
+            "#
         )
         .fetch(&self.pool)
         .map(|i| i.or(Err(Status::internal("unexpected error loading tasks"))))
     }
 
-    pub async fn create_task(&self, title: &str) -> Result<CreateTaskResult, Status> {
+    pub async fn create_task(&self, title: &str) -> Result<TaskResult, Status> {
         sqlx::query_as!(
-            CreateTaskResult,
+            TaskResult,
             r#"
                 INSERT INTO tasks (
                     title
@@ -63,7 +60,8 @@ impl Database {
                     $1
                 )
                 RETURNING
-                    id
+                    id,
+                    title
             "#,
             title
         )
