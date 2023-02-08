@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:survival_list/src/api/client.dart';
 
 class SurvivalItemCreateForm extends StatefulWidget {
   const SurvivalItemCreateForm({super.key});
@@ -10,11 +11,13 @@ class SurvivalItemCreateForm extends StatefulWidget {
 
 class _SurvivalItemCreateFormState extends State<SurvivalItemCreateForm> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController titleInput = TextEditingController();
   TextEditingController dateInput = TextEditingController();
 
   @override
   void initState() {
-    dateInput.text = ""; //set the initial value of text field
+    titleInput.text = "";
+    dateInput.text = "";
     super.initState();
   }
 
@@ -30,6 +33,7 @@ class _SurvivalItemCreateFormState extends State<SurvivalItemCreateForm> {
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: TextFormField(
+                    controller: titleInput,
                     decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
                       icon: Icon(Icons.text_fields),
@@ -85,6 +89,13 @@ class _SurvivalItemCreateFormState extends State<SurvivalItemCreateForm> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Processing Data')),
                         );
+                        Client.createTask(titleInput.text).then((value) {
+                          Navigator.pop(context);
+                        }, onError: (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Error')),
+                          );
+                        });
                       }
                     },
                     child: const Text('Submit'),

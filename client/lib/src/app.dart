@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import 'survival/survival_item.dart';
 import 'survival/survival_item_create_view.dart';
 import 'survival/survival_item_details_view.dart';
 import 'survival/survival_item_list_view.dart';
@@ -67,12 +65,7 @@ class SurvivalListApp extends StatelessWidget {
                     return const SurvivalItemCreateView();
                   case SurvivalItemListView.routeName:
                   default:
-                    return SurvivalItemListView(items: [
-                      SurvivalItem(1, true),
-                      SurvivalItem(2, false),
-                      SurvivalItem(3, false),
-                      SurvivalItem(4, false),
-                    ]);
+                    return const SurvivalItemListView();
                 }
               },
             );
