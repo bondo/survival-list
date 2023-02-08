@@ -12,6 +12,8 @@ pub struct GetTasksRequest {}
 pub struct CreateTaskResponse {
     #[prost(int32, tag = "1")]
     pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
