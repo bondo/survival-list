@@ -9,8 +9,30 @@ on:
       - "client/**"
 
 jobs:
+  validate-protos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: production
+      - uses: actions/checkout@v3
+        with:
+          ref: web-client-production
+          path: web-client-production
+      - uses: bufbuild/buf-setup-action@v1
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: "production/proto"
+      - uses: bufbuild/buf-breaking-action@v1
+        with:
+          input: "production/proto"
+          against: "web-client-production/proto"
+
+  # TODO: Check that we're not ahead of the server-production tag
+
   web-client-deploy:
     runs-on: ubuntu-latest
+    needs: validate-protos
     defaults:
       run:
         working-directory: ./client
@@ -28,3 +50,9 @@ jobs:
           channelId: live
           projectId: survival-list-web-client
           entryPoint: ./client
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: web-client-production
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
