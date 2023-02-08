@@ -31,6 +31,9 @@ jobs:
   # TODO: Check that we're not ahead of the server-production tag
 
   web-client-deploy:
+    permissions:
+      contents: write
+
     runs-on: ubuntu-latest
     needs: validate-protos
     defaults:
