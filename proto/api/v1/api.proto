@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.v1;
+
+service API {
+    rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
+    rpc GetTasks (GetTasksRequest) returns (stream GetTasksResponse);
+}
+
+message CreateTaskRequest {
+    string title = 1;
+}
+
+message GetTasksRequest {
+}
+
+message CreateTaskResponse {
+    int32 id = 1;
+    string title = 2;
+}
+
+message GetTasksResponse {
+    int32 id = 1;
+    string title = 2;
+}

@@ -1,0 +1,11 @@
+{
+  "name": "survival-list",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:bondo/survival-list.git",
+  "author": "Bjarke Bondo Andersen <bba@orbit.online>",
+  "license": "MIT",
+  "devDependencies": {
+    "@bufbuild/buf": "^1.13.1-4"
+  }
+}

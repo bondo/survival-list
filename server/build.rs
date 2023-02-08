@@ -18,7 +18,7 @@ async fn main() -> Result<(), Error> {
         .build_client(false)
         .out_dir("src/service/proto")
         .file_descriptor_set_path("src/service/proto/descriptor")
-        .compile(&["../proto/v1.proto"], &["../proto/"])?;
+        .compile(&["../proto/api/v1/api.proto"], &["../proto/"])?;
 
     println!("cargo:rerun-if-changed=migrations");
 

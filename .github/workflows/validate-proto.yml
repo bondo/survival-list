@@ -1,0 +1,28 @@
+name: validate-proto
+run-name: Lint proto files and check for breaking changes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "proto/**"
+
+jobs:
+  validate-protos:
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: main
+      - uses: actions/checkout@v3
+        with:
+          ref: production
+          path: production
+      - uses: bufbuild/buf-setup-action@v1
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: "main/proto"
+      - uses: bufbuild/buf-breaking-action@v1
+        with:
+          input: "main/proto"
+          against: "production/proto"

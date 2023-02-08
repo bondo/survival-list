@@ -1,0 +1,3 @@
+version: v1
+lint:
+  service_suffix: API

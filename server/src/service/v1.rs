@@ -5,46 +5,38 @@ use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
-use crate::db::{Database, TaskResult};
+use crate::db::Database;
 
-use super::proto::v1::{
-    survival_server::Survival, CreateTaskRequest, GetTasksRequest, TaskResponse,
-};
+include!("proto/api.v1.rs");
 
-pub struct SurvivalService {
+pub struct Service {
     db: Database,
 }
 
-impl SurvivalService {
+impl Service {
     pub fn new(db: Database) -> Self {
         Self { db }
     }
 }
 
-impl From<TaskResult> for TaskResponse {
-    fn from(task: TaskResult) -> Self {
-        TaskResponse {
-            id: task.id,
-            title: task.title.unwrap_or_else(|| {
-                error!("Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
-        }
-    }
-}
-
 #[tonic::async_trait]
-impl Survival for SurvivalService {
+impl api_server::Api for Service {
     async fn create_task(
         &self,
         request: Request<CreateTaskRequest>,
-    ) -> Result<Response<TaskResponse>, Status> {
+    ) -> Result<Response<CreateTaskResponse>, Status> {
         let request = request.into_inner();
-        let value = self.db.create_task(&request.title).await?;
-        Ok(Response::new(value.into()))
+        let task = self.db.create_task(&request.title).await?;
+        Ok(Response::new(CreateTaskResponse {
+            id: task.id,
+            title: task.title.unwrap_or_else(|| {
+                error!("v1:create_task: Got task without title (id {})", task.id);
+                "N/A".to_string()
+            }),
+        }))
     }
 
-    type GetTasksStream = ReceiverStream<Result<TaskResponse, Status>>;
+    type GetTasksStream = ReceiverStream<Result<GetTasksResponse, Status>>;
     async fn get_tasks(
         &self,
         _request: Request<GetTasksRequest>,
@@ -57,7 +49,15 @@ impl Survival for SurvivalService {
             pin_mut!(tasks);
 
             while let Some(res) = tasks.next().await {
-                tx.send(res.map(Into::into)).await.unwrap();
+                tx.send(res.map(|task| GetTasksResponse {
+                    id: task.id,
+                    title: task.title.unwrap_or_else(|| {
+                        error!("v1:get_tasks: Got task without title (id {})", task.id);
+                        "N/A".to_string()
+                    }),
+                }))
+                .await
+                .unwrap();
             }
         });
 

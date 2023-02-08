@@ -9,26 +9,34 @@ pub struct CreateTaskRequest {
 pub struct GetTasksRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TaskResponse {
+pub struct CreateTaskResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetTasksResponse {
     #[prost(int32, tag = "1")]
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
 }
 /// Generated server implementations.
-pub mod survival_server {
+pub mod api_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with SurvivalServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with ApiServer.
     #[async_trait]
-    pub trait Survival: Send + Sync + 'static {
+    pub trait Api: Send + Sync + 'static {
         async fn create_task(
             &self,
             request: tonic::Request<super::CreateTaskRequest>,
-        ) -> Result<tonic::Response<super::TaskResponse>, tonic::Status>;
+        ) -> Result<tonic::Response<super::CreateTaskResponse>, tonic::Status>;
         /// Server streaming response type for the GetTasks method.
         type GetTasksStream: futures_core::Stream<
-                Item = Result<super::TaskResponse, tonic::Status>,
+                Item = Result<super::GetTasksResponse, tonic::Status>,
             >
             + Send
             + 'static;
@@ -38,13 +46,13 @@ pub mod survival_server {
         ) -> Result<tonic::Response<Self::GetTasksStream>, tonic::Status>;
     }
     #[derive(Debug)]
-    pub struct SurvivalServer<T: Survival> {
+    pub struct ApiServer<T: Api> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: Survival> SurvivalServer<T> {
+    impl<T: Api> ApiServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -78,9 +86,9 @@ pub mod survival_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for SurvivalServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for ApiServer<T>
     where
-        T: Survival,
+        T: Api,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -96,14 +104,12 @@ pub mod survival_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/v1.Survival/CreateTask" => {
+                "/api.v1.API/CreateTask" => {
                     #[allow(non_camel_case_types)]
-                    struct CreateTaskSvc<T: Survival>(pub Arc<T>);
-                    impl<
-                        T: Survival,
-                    > tonic::server::UnaryService<super::CreateTaskRequest>
+                    struct CreateTaskSvc<T: Api>(pub Arc<T>);
+                    impl<T: Api> tonic::server::UnaryService<super::CreateTaskRequest>
                     for CreateTaskSvc<T> {
-                        type Response = super::TaskResponse;
+                        type Response = super::CreateTaskResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -134,14 +140,14 @@ pub mod survival_server {
                     };
                     Box::pin(fut)
                 }
-                "/v1.Survival/GetTasks" => {
+                "/api.v1.API/GetTasks" => {
                     #[allow(non_camel_case_types)]
-                    struct GetTasksSvc<T: Survival>(pub Arc<T>);
+                    struct GetTasksSvc<T: Api>(pub Arc<T>);
                     impl<
-                        T: Survival,
+                        T: Api,
                     > tonic::server::ServerStreamingService<super::GetTasksRequest>
                     for GetTasksSvc<T> {
-                        type Response = super::TaskResponse;
+                        type Response = super::GetTasksResponse;
                         type ResponseStream = T::GetTasksStream;
                         type Future = BoxFuture<
                             tonic::Response<Self::ResponseStream>,
@@ -188,7 +194,7 @@ pub mod survival_server {
             }
         }
     }
-    impl<T: Survival> Clone for SurvivalServer<T> {
+    impl<T: Api> Clone for ApiServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -198,7 +204,7 @@ pub mod survival_server {
             }
         }
     }
-    impl<T: Survival> Clone for _Inner<T> {
+    impl<T: Api> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(self.0.clone())
         }
@@ -208,7 +214,7 @@ pub mod survival_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: Survival> tonic::server::NamedService for SurvivalServer<T> {
-        const NAME: &'static str = "v1.Survival";
+    impl<T: Api> tonic::server::NamedService for ApiServer<T> {
+        const NAME: &'static str = "api.v1.API";
     }
 }
