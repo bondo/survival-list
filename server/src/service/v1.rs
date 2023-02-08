@@ -27,13 +27,7 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let request = request.into_inner();
         let task = self.db.create_task(&request.title).await?;
-        Ok(Response::new(CreateTaskResponse {
-            id: task.id,
-            title: task.title.unwrap_or_else(|| {
-                error!("v1:create_task: Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
-        }))
+        Ok(Response::new(CreateTaskResponse { id: task.id }))
     }
 
     type GetTasksStream = ReceiverStream<Result<GetTasksResponse, Status>>;
