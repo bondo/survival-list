@@ -21,5 +21,5 @@ message CreateTaskResponse {
 
 message GetTasksResponse {
     int32 id = 1;
-    // string title = 2;
+    string title = 2;
 }
