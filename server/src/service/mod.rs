@@ -1,69 +1,24 @@
-use futures_util::pin_mut;
-use futures_util::stream::StreamExt;
-use log::error;
-use tokio::sync::mpsc;
-use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status};
+mod proto;
+mod v1;
 
-mod gen;
+use anyhow::Result;
+use tonic::codegen::CompressionEncoding;
+use tonic_reflection::server::{ServerReflection, ServerReflectionServer};
 
-use self::gen::survival::TaskResponse;
-use self::gen::survival::{survival_server::Survival, CreateTaskRequest, GetTasksRequest};
-use crate::db::{Database, TaskResult};
+use self::proto::v1::survival_server::SurvivalServer as SurvivalServerV1;
+use self::proto::FILE_DESCRIPTOR_SET;
+use self::v1::SurvivalService as SurvivalServiceV1;
+use crate::db::Database;
 
-pub use self::gen::survival::survival_server::SurvivalServer;
-pub use self::gen::FILE_DESCRIPTOR_SET;
-
-pub struct SurvivalService {
-    db: Database,
+pub fn build_reflection_service() -> Result<ServerReflectionServer<impl ServerReflection>> {
+    let service = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
+        .build()?;
+    Ok(service)
 }
 
-impl SurvivalService {
-    pub fn new(db: Database) -> Self {
-        Self { db }
-    }
-}
-
-impl From<TaskResult> for TaskResponse {
-    fn from(task: TaskResult) -> Self {
-        TaskResponse {
-            id: task.id,
-            title: task.title.unwrap_or_else(|| {
-                error!("Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
-        }
-    }
-}
-
-#[tonic::async_trait]
-impl Survival for SurvivalService {
-    async fn create_task(
-        &self,
-        request: Request<CreateTaskRequest>,
-    ) -> Result<Response<TaskResponse>, Status> {
-        let request = request.into_inner();
-        let value = self.db.create_task(&request.title).await?;
-        Ok(Response::new(value.into()))
-    }
-
-    type GetTasksStream = ReceiverStream<Result<TaskResponse, Status>>;
-    async fn get_tasks(
-        &self,
-        _request: Request<GetTasksRequest>,
-    ) -> Result<Response<Self::GetTasksStream>, Status> {
-        let (tx, rx) = mpsc::channel(10);
-
-        let db = self.db.clone();
-        tokio::spawn(async move {
-            let tasks = db.get_tasks();
-            pin_mut!(tasks);
-
-            while let Some(res) = tasks.next().await {
-                tx.send(res.map(Into::into)).await.unwrap();
-            }
-        });
-
-        Ok(Response::new(ReceiverStream::new(rx)))
-    }
+pub fn build_v1_service(database: &Database) -> SurvivalServerV1<SurvivalServiceV1> {
+    SurvivalServerV1::new(SurvivalServiceV1::new(database.to_owned()))
+        .accept_compressed(CompressionEncoding::Gzip)
+        .send_compressed(CompressionEncoding::Gzip)
 }

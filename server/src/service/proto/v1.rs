@@ -96,7 +96,7 @@ pub mod survival_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/survival.Survival/CreateTask" => {
+                "/v1.Survival/CreateTask" => {
                     #[allow(non_camel_case_types)]
                     struct CreateTaskSvc<T: Survival>(pub Arc<T>);
                     impl<
@@ -134,7 +134,7 @@ pub mod survival_server {
                     };
                     Box::pin(fut)
                 }
-                "/survival.Survival/GetTasks" => {
+                "/v1.Survival/GetTasks" => {
                     #[allow(non_camel_case_types)]
                     struct GetTasksSvc<T: Survival>(pub Arc<T>);
                     impl<
@@ -209,6 +209,6 @@ pub mod survival_server {
         }
     }
     impl<T: Survival> tonic::server::NamedService for SurvivalServer<T> {
-        const NAME: &'static str = "survival.Survival";
+        const NAME: &'static str = "v1.Survival";
     }
 }

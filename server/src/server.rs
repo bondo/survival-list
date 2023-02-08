@@ -2,11 +2,11 @@ use std::net::SocketAddr;
 
 use anyhow::{Context, Result};
 use tokio::signal;
-use tonic::{codegen::CompressionEncoding, transport::Server};
+use tonic::transport::Server;
 
 use crate::{
     db::Database,
-    service::{SurvivalServer, SurvivalService, FILE_DESCRIPTOR_SET},
+    service::{build_reflection_service, build_v1_service},
 };
 
 pub async fn start(addr: SocketAddr) -> Result<()> {
@@ -19,19 +19,14 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
         .await
         .context("should be able to migrate database")?;
 
-    let reflection = tonic_reflection::server::Builder::configure()
-        .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
-        .build()
-        .context("reflection service build failed")?;
+    let reflection_service =
+        build_reflection_service().context("reflection service build failed")?;
 
-    let service = SurvivalService::new(database);
-    let server = SurvivalServer::new(service)
-        .accept_compressed(CompressionEncoding::Gzip)
-        .send_compressed(CompressionEncoding::Gzip);
+    let v1_service = build_v1_service(&database);
 
     Server::builder()
-        .add_service(reflection)
-        .add_service(server)
+        .add_service(reflection_service)
+        .add_service(v1_service)
         .serve_with_shutdown(addr, create_signal())
         .await?;
 
