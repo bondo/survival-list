@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'settings_service.dart';
 
@@ -17,7 +16,6 @@ class SettingsController with ChangeNotifier {
   Future<void> loadSettings() async {
     _themeMode = await _settingsService.themeMode();
     _locale = await _settingsService.locale();
-    Intl.systemLocale = _locale.toString();
     notifyListeners();
   }
 
@@ -32,7 +30,6 @@ class SettingsController with ChangeNotifier {
   Future<void> updateLocale(Locale? newLocale) async {
     if (newLocale == _locale) return;
     _locale = newLocale;
-    Intl.systemLocale = newLocale.toString();
     notifyListeners();
     await _settingsService.updateLocale(newLocale);
   }
