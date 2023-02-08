@@ -9,9 +9,34 @@ pub fn setup() -> Result<(), Error> {
 }
 
 pub fn cleanup() -> Result<(), Error> {
-    stop_container()?;
-    remove_container()?;
+    if container_running() {
+        stop_container()?;
+    }
+    if container_exists() {
+        remove_container()?;
+    }
     Ok(())
+}
+
+fn container_running() -> bool {
+    container_status().map_or_else(|_| false, |r| r.contains("running"))
+}
+
+fn container_exists() -> bool {
+    container_status().is_ok()
+}
+
+fn container_status() -> Result<String, Error> {
+    cmd(
+        &[
+            "container",
+            "inspect",
+            "survival_list_postgres",
+            "--format",
+            "'{{ .State.Status }}'",
+        ],
+        "inspect container",
+    )
 }
 
 fn spawn_container() -> Result<(), Error> {
@@ -29,6 +54,7 @@ fn spawn_container() -> Result<(), Error> {
         ],
         "spawn container",
     )
+    .map(|_| ())
 }
 
 fn is_postgres_healthy() -> Result<bool, Error> {
@@ -62,22 +88,22 @@ fn healthcheck(max_retries: u64, ms_per_retry: u64) -> Result<(), Error> {
 }
 
 fn stop_container() -> Result<(), Error> {
-    cmd(&["stop", "survival_list_postgres"], "stop container")
+    cmd(&["stop", "survival_list_postgres"], "stop container").map(|_| ())
 }
 
 fn remove_container() -> Result<(), Error> {
-    cmd(&["rm", "-v", "survival_list_postgres"], "remove container")
+    cmd(&["rm", "-v", "survival_list_postgres"], "remove container").map(|_| ())
 }
 
-fn cmd(args: &[&'static str], action: &'static str) -> Result<(), Error> {
+fn cmd(args: &[&'static str], action: &'static str) -> Result<String, Error> {
     let output = Command::new("docker")
         .args(args)
         .stderr(Stdio::piped())
-        .stdout(Stdio::null())
+        .stdout(Stdio::piped())
         .output()?;
 
     if output.status.success() {
-        Ok(())
+        Ok(String::from_utf8(output.stdout).unwrap_or_default())
     } else {
         let err = String::from_utf8_lossy(&output.stderr);
         Err(Error::new(format!("`docker` couldn't {action}: {err}")))
