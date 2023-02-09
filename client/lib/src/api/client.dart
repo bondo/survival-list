@@ -8,7 +8,7 @@ class Client {
   static APIClient get _client {
     if (_clientInstance == null) {
       final channel = ClientChannel('survival-list-server.bjarkebjarke.dk',
-          port: 8080,
+          port: 443,
           options:
               const ChannelOptions(credentials: ChannelCredentials.secure()));
       _clientInstance = APIClient(channel,
