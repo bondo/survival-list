@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:survival_list/src/api/client.dart';
+import 'package:provider/provider.dart';
 import 'package:survival_list/src/settings/settings_view.dart';
 import 'survival_item.dart';
 import 'survival_item_create_view.dart';
 import 'survival_item_list_tile.dart';
 
-class SurvivalItemListView extends StatefulWidget {
+class SurvivalItemListView extends StatelessWidget {
   const SurvivalItemListView({super.key});
 
   static const routeName = '/';
 
   @override
-  State<SurvivalItemListView> createState() => _SurvivalItemListViewState();
-}
-
-class _SurvivalItemListViewState extends State<SurvivalItemListView> {
-  late Future<List<SurvivalItem>> futureItems;
-
-  @override
-  void initState() {
-    super.initState();
-    futureItems = Client.getTasks();
-  }
-
-  @override
   Widget build(BuildContext context) {
     AppLocalizations l10n = AppLocalizations.of(context)!;
+    var itemsContainer = Provider.of<SurvivalItemListRefetchContainer>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.pageSurvivalTitle),
@@ -57,7 +45,7 @@ class _SurvivalItemListViewState extends State<SurvivalItemListView> {
       // building all Widgets up front, the ListView.builder constructor lazily
       // builds Widgets as they’re scrolled into view.
       body: FutureBuilder<List<SurvivalItem>>(
-          future: futureItems,
+          future: itemsContainer.future,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('${snapshot.error}'));
@@ -67,17 +55,20 @@ class _SurvivalItemListViewState extends State<SurvivalItemListView> {
             }
             var items = snapshot.data!;
 
-            return ListView.builder(
-              // Providing a restorationId allows the ListView to restore the
-              // scroll position when a user leaves and returns to the app after it
-              // has been killed while running in the background.
-              restorationId: 'survivalItemListView',
-              itemCount: items.length,
-              itemBuilder: (BuildContext context, int index) {
-                return SurvivalItemListTile(
-                  item: items[index],
-                );
-              },
+            return RefreshIndicator(
+              onRefresh: itemsContainer.refetch,
+              child: ListView.builder(
+                // Providing a restorationId allows the ListView to restore the
+                // scroll position when a user leaves and returns to the app after it
+                // has been killed while running in the background.
+                restorationId: 'survivalItemListView',
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return SurvivalItemListTile(
+                    item: items[index],
+                  );
+                },
+              ),
             );
           }),
 

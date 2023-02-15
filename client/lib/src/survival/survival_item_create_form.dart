@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:survival_list/src/api/client.dart';
+import 'package:survival_list/src/survival/survival_item.dart';
 
 class SurvivalItemCreateForm extends StatefulWidget {
   const SurvivalItemCreateForm({super.key});
@@ -83,23 +85,30 @@ class _SurvivalItemCreateFormState extends State<SurvivalItemCreateForm> {
                   )),
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing Data')),
-                        );
-                        Client.createTask(titleInput.text).then((value) {
-                          Navigator.pop(context);
-                        }, onError: (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Error')),
+                  child: Consumer<SurvivalItemListRefetchContainer>(
+                      builder: (context, itemsContainer, child) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          var snackBarController =
+                              ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Processing Data')),
                           );
-                        });
-                      }
-                    },
-                    child: const Text('Submit'),
-                  ))
+                          Client.createTask(titleInput.text)
+                              .then((value) => itemsContainer.refetch())
+                              .then((value) {
+                            snackBarController.close();
+                            Navigator.pop(context);
+                          }, onError: (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Error')),
+                            );
+                          });
+                        }
+                      },
+                      child: const Text('Submit'),
+                    );
+                  }))
             ],
           )),
     );
