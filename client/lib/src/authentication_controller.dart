@@ -22,6 +22,8 @@ class AuthenticationController with ChangeNotifier {
   }
 
   signIn() {
-    _auth.signInWithProvider(GoogleAuthProvider());
+    var provider = GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+    _auth.signInWithProvider(provider);
   }
 }
