@@ -1,4 +1,4 @@
-package com.example.survival_list
+package dk.bjarkebjarke.survival_list
 
 import io.flutter.embedding.android.FlutterActivity
 
