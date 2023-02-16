@@ -1,22 +1,30 @@
 import 'package:grpc/grpc.dart';
+import 'package:survival_list/src/authentication_controller.dart';
 import 'package:survival_list/src/generated/api/v1/api.pbgrpc.dart';
 import 'package:survival_list/src/survival/survival_item.dart';
 
 class Client {
-  static APIClient? _clientInstance;
+  static late APIClient _client;
+  static late AuthenticationController _authenticationController;
 
-  static APIClient get _client {
-    if (_clientInstance == null) {
-      final channel = ClientChannel('survival-list-server.bjarkebjarke.dk',
-          port: 443,
-          options:
-              const ChannelOptions(credentials: ChannelCredentials.secure()));
-      _clientInstance = APIClient(channel,
-          options: CallOptions(
-              timeout: const Duration(seconds: 30),
-              providers: [/* add authentication here */]));
+  static initialize(AuthenticationController authenticationController) {
+    _authenticationController = authenticationController;
+
+    final channel = ClientChannel('survival-list-server.bjarkebjarke.dk',
+        port: 443,
+        options:
+            const ChannelOptions(credentials: ChannelCredentials.secure()));
+    _client = APIClient(channel,
+        options: CallOptions(
+            timeout: const Duration(seconds: 30), providers: [_authProvider]));
+  }
+
+  static Future<void> _authProvider(
+      Map<String, String> metadata, String uri) async {
+    if (_authenticationController.isAuthenticated()) {
+      var token = await _authenticationController.user!.getIdToken();
+      metadata.addEntries({'Authorization': 'Bearer $token'}.entries);
     }
-    return _clientInstance!;
   }
 
   static Future<List<SurvivalItem>> getTasks() {

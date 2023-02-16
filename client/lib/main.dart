@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:survival_list/src/authentication_controller.dart';
 
 import 'firebase_options.dart';
+import 'src/api/client.dart';
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
@@ -18,6 +19,8 @@ void main() async {
 
   final authenticationController =
       AuthenticationController(FirebaseAuth.instance);
+
+  Client.initialize(authenticationController);
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
