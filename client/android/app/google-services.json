@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "730713275888",
+    "project_id": "survival-list-server",
+    "storage_bucket": "survival-list-server.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730713275888:android:1aa8983987c568a2bbf135",
+        "android_client_info": {
+          "package_name": "dk.bjarkebjarke.survival_list"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730713275888-bu1ffhc1s0ii6doi71gtbkl1vvjd156m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD69KOuyVLKbUnh2-wYzACey1CjLBC_AoE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730713275888-4n4ipi6a3flagj15v76td4265k7uvpr8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "730713275888-k6mt8jv73bq4e139hsqeoja41rs3m3pm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.survivalList"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

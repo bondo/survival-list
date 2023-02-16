@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'authentication_controller.dart';
 import 'survival/survival_item.dart';
 import 'survival/survival_item_create_view.dart';
 import 'survival/survival_item_details_view.dart';
@@ -12,9 +13,11 @@ import 'settings/settings_view.dart';
 class SurvivalListApp extends StatelessWidget {
   const SurvivalListApp({
     super.key,
+    required this.authenticationController,
     required this.settingsController,
   });
 
+  final AuthenticationController authenticationController;
   final SettingsController settingsController;
 
   @override
@@ -24,8 +27,13 @@ class SurvivalListApp extends StatelessWidget {
     return ChangeNotifierProvider(
         create: (context) => SurvivalItemListRefetchContainer(),
         child: AnimatedBuilder(
-          animation: settingsController,
+          animation:
+              Listenable.merge([authenticationController, settingsController]),
           builder: (BuildContext context, Widget? child) {
+            if (!authenticationController.isAuthenticated()) {
+              authenticationController.signIn();
+              return const Center(child: CircularProgressIndicator());
+            }
             return MaterialApp(
               debugShowCheckedModeBanner: false,
 
