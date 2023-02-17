@@ -11,9 +11,12 @@ anyhow = "1.0.68"
 dotenvy = "0.15.6"
 futures-core = "0.3.26"
 futures-util = "0.3.26"
+jsonwebtoken = "8.2.0"
 log = "0.4.17"
 pretty_env_logger = "0.4.0"
 prost = "0.11.6"
+reqwest = { version = "0.11.14", features = ["rustls", "json"] }
+serde = { version = "1.0.152", features = ["derive"] }
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
 tokio-stream = "0.1.11"

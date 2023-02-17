@@ -5,6 +5,7 @@ use tokio::signal;
 use tonic::transport::Server;
 
 use crate::{
+    auth::Auth,
     db::Database,
     service::{build_reflection_service, build_v1_service},
 };
@@ -19,10 +20,12 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
         .await
         .context("should be able to migrate database")?;
 
+    let auth = Auth::new().await;
+
     let reflection_service =
         build_reflection_service().context("reflection service build failed")?;
 
-    let v1_service = build_v1_service(&database);
+    let v1_service = build_v1_service(&auth, &database);
 
     Server::builder()
         .add_service(reflection_service)

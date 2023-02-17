@@ -2,6 +2,7 @@ use std;
 
 use anyhow::{Context, Result};
 
+mod auth;
 mod db;
 mod server;
 mod service;
