@@ -17,8 +17,8 @@ jobs:
           path: main
       - uses: actions/checkout@v3
         with:
-          ref: web-client-production
-          path: web-client-production
+          ref: server-production
+          path: server-production
       - uses: bufbuild/buf-setup-action@v1
       - uses: bufbuild/buf-lint-action@v1
         with:
@@ -26,4 +26,4 @@ jobs:
       - uses: bufbuild/buf-breaking-action@v1
         with:
           input: "main/proto"
-          against: "web-client-production/proto"
+          against: "server-production/proto"
