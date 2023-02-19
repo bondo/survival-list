@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use log::info;
 use tonic::{service::Interceptor, Request, Status};
 
 use self::jwk_auth::JwkAuth;
@@ -15,8 +16,8 @@ pub struct Auth {
     jwk: Arc<JwkAuth>,
 }
 
+#[derive(Debug)]
 struct User {
-    #[warn(dead_code)]
     uid: String,
 }
 
@@ -40,6 +41,7 @@ impl Auth {
 
     fn verify_token(&mut self, token: &String) -> Option<User> {
         let verified_token = self.jwk.verify(&token);
+        info!("Verified token data: ${verified_token:?}");
         verified_token.map(|token| User {
             uid: token.claims.sub,
         })
@@ -48,9 +50,11 @@ impl Auth {
 
 impl Interceptor for Auth {
     fn call(&mut self, request: Request<()>) -> Result<Request<()>, Status> {
-        if let Some(_user) = self.get_authenticated_user(&request) {
+        if let Some(user) = self.get_authenticated_user(&request) {
+            info!("Authenticated user ${user:?}");
             Ok(request)
         } else {
+            info!("Token auth failed");
             Err(Status::unauthenticated("No valid auth token"))
         }
     }
