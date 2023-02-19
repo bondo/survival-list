@@ -20,7 +20,7 @@ serde = { version = "1.0.152", features = ["derive"] }
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "time", "migrate", "tls", "offline"] }
 tokio = { version = "1.24.2", features = ["full"] }
 tokio-stream = "0.1.11"
-tonic = { version = "0.8.3", features = ["gzip"] }
+tonic = { version = "0.8.3", features = ["gzip", "tokio-rustls"] }
 tonic-reflection = "0.6.0"
 
 [build-dependencies]
