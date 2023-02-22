@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::Deserialize;
 
 use super::{
@@ -33,13 +33,20 @@ const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys> {
     println!("fetch_keys_for_config: start");
 
-    let http_response = reqwest::get(&config.jwk_url).await?;
+    let http_response = reqwest::get(&config.jwk_url)
+        .await
+        .context("failed to fetch keys")?;
     println!("fetch_keys_for_config: got response");
 
     let max_age = get_max_age(&http_response).unwrap_or(FALLBACK_TIMEOUT);
     println!("fetch_keys_for_config: got max age");
 
-    let result = Result::Ok(http_response.json::<KeyResponse>().await?);
+    let result = Result::Ok(
+        http_response
+            .json::<KeyResponse>()
+            .await
+            .context("failed to decode response")?,
+    );
     println!("fetch_keys_for_config: got result");
 
     return result.map(|res| JwkKeys {
