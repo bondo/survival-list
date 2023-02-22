@@ -34,6 +34,7 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
+    #[allow(clippy::needless_lifetimes)]
     pub fn get_tasks<'a>(&'a self) -> impl Stream<Item = Result<TaskResult, Status>> + 'a {
         sqlx::query_as!(
             TaskResult,

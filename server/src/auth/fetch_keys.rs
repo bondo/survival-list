@@ -49,10 +49,10 @@ pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys>
     );
     println!("fetch_keys_for_config: got result");
 
-    return result.map(|res| JwkKeys {
+    result.map(|res| JwkKeys {
         keys: res.keys,
         validity: max_age,
-    });
+    })
 }
 
 pub async fn fetch_keys() -> Result<JwkKeys> {

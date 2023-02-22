@@ -47,7 +47,7 @@ impl JwkAuth {
         let verifier = Arc::new(RwLock::new(JwkVerifier::new(jwk_keys.keys)));
 
         let mut instance = JwkAuth {
-            verifier: verifier,
+            verifier,
             cleanup: Mutex::new(None),
         };
 
@@ -55,7 +55,7 @@ impl JwkAuth {
         instance
     }
 
-    pub fn verify(&self, token: &String) -> Option<TokenData<Claims>> {
+    pub fn verify(&self, token: &str) -> Option<TokenData<Claims>> {
         let verifier = await_sync(self.verifier.read());
         verifier.verify(token)
     }

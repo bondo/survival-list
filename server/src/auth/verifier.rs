@@ -50,7 +50,7 @@ impl JwkVerifier {
         }
     }
 
-    pub fn verify(&self, token: &String) -> Option<TokenData<Claims>> {
+    pub fn verify(&self, token: &str) -> Option<TokenData<Claims>> {
         let token_kid = match decode_header(token).map(|header| header.kid) {
             Ok(Some(header)) => header,
             _ => return None,
@@ -78,7 +78,7 @@ impl JwkVerifier {
     fn decode_token_with_key(
         &self,
         key: &JwkKey,
-        token: &String,
+        token: &str,
     ) -> Result<TokenData<Claims>, VerificationError> {
         let algorithm = match Algorithm::from_str(&key.alg) {
             Ok(alg) => alg,
@@ -94,7 +94,6 @@ impl JwkVerifier {
             Err(_) => return Err(VerificationError::KeyDecodeError),
         };
 
-        return decode::<Claims>(token, &key, &validation)
-            .map_err(|_| VerificationError::InvalidSignature);
+        decode::<Claims>(token, &key, &validation).map_err(|_| VerificationError::InvalidSignature)
     }
 }

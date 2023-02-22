@@ -2,15 +2,18 @@
   "cSpell.words": [
     "bjarkebjarke",
     "bufbuild",
+    "Clippy",
     "cloudrun",
     "DOCKERHUB",
     "dotenvy",
+    "Dwarnings",
     "jsonwebtoken",
     "oneshot",
     "proto",
     "protobuf",
     "protos",
     "reqwest",
-    "richardsimko"
+    "richardsimko",
+    "RUSTFLAGS"
   ]
 }

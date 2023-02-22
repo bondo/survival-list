@@ -39,10 +39,26 @@ jobs:
           input: "production/proto"
           against: "server-production/proto"
 
+  run-clippy:
+    runs-on: ubuntu-latest
+
+    env:
+      RUSTFLAGS: "-Dwarnings"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: production
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features
+
   build-image:
     runs-on: ubuntu-latest
 
-    needs: validate-protos
+    needs:
+      - validate-protos
+      - run-clippy
 
     outputs:
       image-digest: ${{ steps.build-and-deploy.outputs.digest }}

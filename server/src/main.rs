@@ -1,5 +1,3 @@
-use std;
-
 use anyhow::{Context, Result};
 
 mod auth;

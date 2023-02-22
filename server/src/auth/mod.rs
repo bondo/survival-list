@@ -39,8 +39,8 @@ impl Auth {
         self.verify_token(&token)
     }
 
-    fn verify_token(&mut self, token: &String) -> Option<User> {
-        let verified_token = self.jwk.verify(&token);
+    fn verify_token(&mut self, token: &str) -> Option<User> {
+        let verified_token = self.jwk.verify(token);
         info!("Verified token data: ${verified_token:?}");
         verified_token.map(|token| User {
             uid: token.claims.sub,
@@ -51,7 +51,7 @@ impl Auth {
 impl Interceptor for Auth {
     fn call(&mut self, request: Request<()>) -> Result<Request<()>, Status> {
         if let Some(user) = self.get_authenticated_user(&request) {
-            info!("Authenticated user ${user:?}");
+            info!("Authenticated user {user:?}, uid({})", user.uid);
             Ok(request)
         } else {
             info!("Token auth failed");
