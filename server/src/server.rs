@@ -4,11 +4,7 @@ use anyhow::{Context, Result};
 use tokio::signal;
 use tonic::transport::Server;
 
-use crate::{
-    auth::Auth,
-    db::Database,
-    service::{build_reflection_service, build_v1_service},
-};
+use crate::{auth::Auth, db::Database, service::build_v1_service};
 
 pub async fn start(addr: SocketAddr) -> Result<()> {
     println!("Creating database connection");
@@ -28,11 +24,6 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
 
     let auth = Auth::new().await;
 
-    println!("Creating reflection service");
-
-    let reflection_service =
-        build_reflection_service().context("reflection service build failed")?;
-
     println!("Creating v1 service");
 
     let v1_service = build_v1_service(&auth, &database);
@@ -40,7 +31,6 @@ pub async fn start(addr: SocketAddr) -> Result<()> {
     println!("Building server");
 
     Server::builder()
-        .add_service(reflection_service)
         .add_service(v1_service)
         .serve_with_shutdown(addr, create_signal())
         .await?;

@@ -14,7 +14,7 @@ use tokio::{
 };
 
 use super::{
-    fetch_keys::{fetch_keys, JwkKeys},
+    fetch_keys::fetch_keys,
     verifier::{Claims, JwkVerifier},
 };
 

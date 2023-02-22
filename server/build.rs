@@ -17,7 +17,6 @@ async fn main() -> Result<(), Error> {
     tonic_build::configure()
         .build_client(false)
         .out_dir("src/service/proto")
-        .file_descriptor_set_path("src/service/proto/descriptor")
         .compile(&["../proto/api/v1/api.proto"], &["../proto/"])?;
 
     println!("cargo:rerun-if-changed=migrations");

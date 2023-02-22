@@ -21,7 +21,6 @@ sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "tim
 tokio = { version = "1.24.2", features = ["full"] }
 tokio-stream = "0.1.11"
 tonic = { version = "0.8.3", features = ["gzip", "tokio-rustls"] }
-tonic-reflection = "0.6.0"
 
 [build-dependencies]
 dotenvy = "0.15.6"
