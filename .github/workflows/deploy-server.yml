@@ -16,36 +16,67 @@ env:
 jobs:
   validate-protos:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
         with:
           path: production
+
       - uses: actions/checkout@v3
         with:
           ref: server-production
           path: server-production
+
       - uses: bufbuild/buf-setup-action@v1
+
       - uses: bufbuild/buf-lint-action@v1
         with:
           input: "production/proto"
+
       - uses: bufbuild/buf-breaking-action@v1
         with:
           input: "production/proto"
           against: "server-production/proto"
 
-  gcloud-deploy:
-    permissions:
-      contents: write
-      id-token: write
-
+  build-image:
     runs-on: ubuntu-latest
+
     needs: validate-protos
+
+    outputs:
+      image-digest: ${{ steps.build-and-deploy.outputs.digest }}
+
+    defaults:
+      run:
+        working-directory: ./server
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           ref: production
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build-and-deploy
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: bjarkebjarke/survival-list-server:latest
+
+  cloudrun-deploy:
+    runs-on: ubuntu-latest
+
+    needs:
+      - validate-protos
+      - build-image
+
+    steps:
       - name: Google Auth
         id: "auth"
         uses: "google-github-actions/auth@v1"
@@ -59,8 +90,18 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          source: "./server/"
+          image: "docker.io/bjarkebjarke/survival-list-server@${{ needs.build-image.outputs.image-digest }}"
 
+  update-server-production-tag:
+    runs-on: ubuntu-latest
+
+    needs: cloudrun-deploy
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
       - name: Tag Repo
         uses: richardsimko/update-tag@v1
         with:
