@@ -11,21 +11,33 @@ use crate::{
 };
 
 pub async fn start(addr: SocketAddr) -> Result<()> {
+    println!("Creating database connection");
+
     let database = Database::new()
         .await
         .context("should be able to connect to database")?;
+
+    println!("Migrating database");
 
     database
         .migrate()
         .await
         .context("should be able to migrate database")?;
 
+    println!("Creating auth instance");
+
     let auth = Auth::new().await;
+
+    println!("Creating reflection service");
 
     let reflection_service =
         build_reflection_service().context("reflection service build failed")?;
 
+    println!("Creating v1 service");
+
     let v1_service = build_v1_service(&auth, &database);
+
+    println!("Building server");
 
     Server::builder()
         .add_service(reflection_service)

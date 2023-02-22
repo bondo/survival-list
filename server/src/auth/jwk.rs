@@ -1,5 +1,3 @@
-use std::env;
-
 #[derive(Debug)]
 pub struct JwkConfiguration {
     pub jwk_url: String,
@@ -8,22 +6,33 @@ pub struct JwkConfiguration {
 }
 
 #[cfg(debug_assertions)]
-fn expect_env_var(name: &str, default: &str) -> String {
-    return env::var(name).unwrap_or(String::from(default));
+fn get_secret(name: &str) -> String {
+    match std::env::var(name) {
+        Ok(value) => value,
+        Err(_) => {
+            println!("Failed to read ENV variable {name}");
+            panic!("Failed to read ENV variable {name}");
+        }
+    }
 }
 
 #[cfg(not(debug_assertions))]
-fn expect_env_var(name: &str, _default: &str) -> String {
-    return env::var(name).expect(&format!(
-        "Environment variable {name} is not defined",
-        name = name
-    ));
+fn get_secret(name: &str) -> String {
+    let path = format!("/secrets/{name}");
+
+    match std::fs::read_to_string(path) {
+        Ok(value) => value,
+        Err(_) => {
+            println!("Failed to read file {path}");
+            panic!("Failed to read file {path}");
+        }
+    }
 }
 
 pub fn get_configuration() -> JwkConfiguration {
     JwkConfiguration {
-        jwk_url: expect_env_var("JWK_URL", "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"),
-        audience: expect_env_var("JWK_AUDIENCE", "my-firebase-app-12345"),
-        issuer: expect_env_var("JWK_ISSUER", "https://securetoken.google.com/my-firebase-app-12345"),
+        jwk_url: get_secret("JWK_URL"),
+        audience: get_secret("JWK_AUDIENCE"),
+        issuer: get_secret("JWK_ISSUER"),
     }
 }

@@ -33,6 +33,7 @@ impl Drop for JwkAuth {
 impl JwkAuth {
     pub async fn new() -> JwkAuth {
         let jwk_key_result = fetch_keys().await;
+        println!("Fetch keys result: ${jwk_key_result:?}");
         let jwk_keys: JwkKeys = match jwk_key_result {
             Ok(keys) => keys,
             Err(_) => {
