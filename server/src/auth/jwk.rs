@@ -18,7 +18,7 @@ fn get_secret(name: &str) -> String {
 
 #[cfg(not(debug_assertions))]
 fn get_secret(name: &str) -> String {
-    let path = format!("/secrets/{name}");
+    let path = format!("/secrets/{name}/latest");
 
     match std::fs::read_to_string(&path) {
         Ok(value) => value,

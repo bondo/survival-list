@@ -20,10 +20,10 @@ pub struct TaskResult {
 
 impl Database {
     pub async fn new() -> Result<Self, sqlx::Error> {
-        let url = fs::read_to_string("/secrets/POSTGRES_CONNECTION").unwrap_or_else(|_| {
+        let url = fs::read_to_string("/secrets/POSTGRES_CONNECTION/latest").unwrap_or_else(|_| {
             dotenv().ok();
             env::var("DATABASE_URL").expect(
-                "File /secrets/POSTGRES_CONNECTION or environment variable DATABASE_URL missing",
+                "File /secrets/POSTGRES_CONNECTION/latest or environment variable DATABASE_URL missing",
             )
         });
         let pool = PgPoolOptions::new().connect(url.as_str()).await?;
