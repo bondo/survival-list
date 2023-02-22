@@ -31,17 +31,11 @@ pub struct JwkKeys {
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 
 pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys> {
-    println!("fetch_keys_for_config: start");
-
     let http_response = reqwest::get(&config.jwk_url)
         .await
-        .context("failed to fetch keys")
-        .unwrap();
-
-    println!("fetch_keys_for_config: got response");
+        .context("failed to fetch keys")?;
 
     let max_age = get_max_age(&http_response).unwrap_or(FALLBACK_TIMEOUT);
-    println!("fetch_keys_for_config: got max age");
 
     let result = Result::Ok(
         http_response
@@ -49,7 +43,6 @@ pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys>
             .await
             .context("failed to decode response")?,
     );
-    println!("fetch_keys_for_config: got result");
 
     result.map(|res| JwkKeys {
         keys: res.keys,
