@@ -35,7 +35,9 @@ pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys>
 
     let http_response = reqwest::get(&config.jwk_url)
         .await
-        .context("failed to fetch keys")?;
+        .context("failed to fetch keys")
+        .unwrap();
+
     println!("fetch_keys_for_config: got response");
 
     let max_age = get_max_age(&http_response).unwrap_or(FALLBACK_TIMEOUT);
