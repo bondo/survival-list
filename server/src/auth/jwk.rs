@@ -1,3 +1,7 @@
+use std::env;
+
+use dotenvy::dotenv;
+
 #[derive(Debug)]
 pub struct JwkConfiguration {
     pub jwk_url: String,
@@ -5,28 +9,19 @@ pub struct JwkConfiguration {
     pub issuer: String,
 }
 
-#[cfg(debug_assertions)]
-fn get_secret(name: &str) -> String {
-    match std::env::var(name) {
-        Ok(value) => value,
-        Err(_) => {
-            println!("Failed to read ENV variable {name}");
-            panic!("Failed to read ENV variable {name}");
-        }
-    }
-}
-
-#[cfg(not(debug_assertions))]
 fn get_secret(name: &str) -> String {
     let path = format!("/secrets/{name}/latest");
 
-    match std::fs::read_to_string(&path) {
-        Ok(value) => value,
-        Err(_) => {
-            println!("Failed to read file {path}");
-            panic!("Failed to read file {path}");
-        }
+    if let Ok(value) = std::fs::read_to_string(&path) {
+        return value;
     }
+
+    dotenv().ok();
+    if let Ok(value) = env::var(name) {
+        return value;
+    }
+
+    panic!("Failed to read secret {name}, tried env and path {path}");
 }
 
 pub fn get_configuration() -> JwkConfiguration {

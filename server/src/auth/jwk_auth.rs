@@ -2,10 +2,12 @@ use std::{sync::Arc, time::Duration};
 
 use jsonwebtoken::TokenData;
 use tokio::{
+    runtime::Handle,
     sync::{
         oneshot::{self, error::TryRecvError, Sender},
         Mutex, RwLock,
     },
+    task,
     time::sleep,
 };
 
@@ -21,8 +23,7 @@ pub struct JwkAuth {
 
 impl Drop for JwkAuth {
     fn drop(&mut self) {
-        // Stop the update thread when the updater is destructed
-        let mut guard = self.cleanup.blocking_lock();
+        let mut guard = task::block_in_place(|| Handle::current().block_on(self.cleanup.lock()));
         println!("Stopping...");
         if let Some(shutdown_tx) = guard.take() {
             let _ = shutdown_tx.send("stop");
@@ -52,7 +53,7 @@ impl JwkAuth {
     }
 
     pub fn verify(&self, token: &String) -> Option<TokenData<Claims>> {
-        let verifier = self.verifier.blocking_read();
+        let verifier = task::block_in_place(|| Handle::current().block_on(self.verifier.read()));
         verifier.verify(token)
     }
 
@@ -66,7 +67,7 @@ impl JwkAuth {
                 let duration = match fetch_keys().await {
                     Ok(jwk_keys) => {
                         {
-                            let mut verifier = verifier_ref.blocking_write();
+                            let mut verifier = verifier_ref.write().await;
                             verifier.set_keys(jwk_keys.keys);
                         }
 

@@ -1,5 +1,6 @@
-use std::{error::Error, time::Duration};
+use std::time::Duration;
 
+use anyhow::Result;
 use serde::Deserialize;
 
 use super::{
@@ -29,11 +30,7 @@ pub struct JwkKeys {
 
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 
-pub async fn fetch_keys_for_config(
-    config: &JwkConfiguration,
-) -> Result<JwkKeys, Box<dyn std::error::Error>> {
-    println!("Fetch auth keys for config");
-
+pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys> {
     let http_response = reqwest::get(&config.jwk_url).await?;
     let max_age = get_max_age(&http_response).unwrap_or(FALLBACK_TIMEOUT);
     let result = Result::Ok(http_response.json::<KeyResponse>().await?);
@@ -44,8 +41,6 @@ pub async fn fetch_keys_for_config(
     });
 }
 
-pub async fn fetch_keys() -> Result<JwkKeys, Box<dyn Error>> {
-    println!("Fetch auth keys");
-
+pub async fn fetch_keys() -> Result<JwkKeys> {
     return fetch_keys_for_config(&jwk::get_configuration()).await;
 }
