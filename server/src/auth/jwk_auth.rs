@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use anyhow::Context;
 use futures_core::Future;
 use jsonwebtoken::TokenData;
 use tokio::{
@@ -38,14 +39,11 @@ impl Drop for JwkAuth {
 
 impl JwkAuth {
     pub async fn new() -> JwkAuth {
-        let jwk_key_result = fetch_keys().await;
-        println!("Fetch keys result: ${jwk_key_result:?}");
-        let jwk_keys: JwkKeys = match jwk_key_result {
-            Ok(keys) => keys,
-            Err(_) => {
-                panic!("Unable to fetch jwk keys! Cannot verify user tokens! Shutting down...")
-            }
-        };
+        let jwk_keys = fetch_keys()
+            .await
+            .context("Unable to fetch jwk keys! Cannot verify user tokens! Shutting down...")
+            .unwrap();
+
         let verifier = Arc::new(RwLock::new(JwkVerifier::new(jwk_keys.keys)));
 
         let mut instance = JwkAuth {
