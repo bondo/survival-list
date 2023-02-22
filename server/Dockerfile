@@ -4,9 +4,15 @@ FROM rust:1.67.0-alpine3.17 as build
 
 RUN apk add --no-cache musl-dev
 
+RUN rustup component add clippy
+
+ARG RUSTFLAGS="-Dwarnings"
+
 # Copy local code to the container image.
 WORKDIR /usr/src/app
 COPY . .
+
+RUN cargo clippy --all-targets --all-features
 
 # Install production dependencies and build a release artifact.
 RUN cargo build --release

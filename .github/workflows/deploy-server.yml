@@ -29,6 +29,8 @@ jobs:
           path: server-production
 
       - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
 
       - uses: bufbuild/buf-lint-action@v1
         with:
@@ -39,28 +41,10 @@ jobs:
           input: "production/proto"
           against: "server-production/proto"
 
-  run-clippy:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: server
-
-    env:
-      RUSTFLAGS: "-Dwarnings"
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Run Clippy
-        run: cargo clippy --all-targets --all-features
-
   build-image:
     runs-on: ubuntu-latest
 
-    needs:
-      - validate-protos
-      - run-clippy
+    needs: validate-protos
 
     outputs:
       image-digest: ${{ steps.build-and-deploy.outputs.digest }}
