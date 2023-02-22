@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use futures_core::Future;
 use jsonwebtoken::TokenData;
 use tokio::{
     runtime::Handle,
@@ -21,9 +22,13 @@ pub struct JwkAuth {
     cleanup: Mutex<Option<Sender<&'static str>>>,
 }
 
+fn await_sync<F: Future>(future: F) -> F::Output {
+    task::block_in_place(|| Handle::current().block_on(future))
+}
+
 impl Drop for JwkAuth {
     fn drop(&mut self) {
-        let mut guard = task::block_in_place(|| Handle::current().block_on(self.cleanup.lock()));
+        let mut guard = await_sync(self.cleanup.lock());
         println!("Stopping...");
         if let Some(shutdown_tx) = guard.take() {
             let _ = shutdown_tx.send("stop");
@@ -53,7 +58,7 @@ impl JwkAuth {
     }
 
     pub fn verify(&self, token: &String) -> Option<TokenData<Claims>> {
-        let verifier = task::block_in_place(|| Handle::current().block_on(self.verifier.read()));
+        let verifier = await_sync(self.verifier.read());
         verifier.verify(token)
     }
 
