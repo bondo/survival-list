@@ -4,7 +4,7 @@ use jsonwebtoken::TokenData;
 use tokio::{
     sync::{
         oneshot::{self, error::TryRecvError, Sender},
-        Mutex,
+        Mutex, RwLock,
     },
     time::sleep,
 };
@@ -15,7 +15,7 @@ use super::{
 };
 
 pub struct JwkAuth {
-    verifier: Arc<Mutex<JwkVerifier>>,
+    verifier: Arc<RwLock<JwkVerifier>>,
     cleanup: Mutex<Option<Sender<&'static str>>>,
 }
 
@@ -40,7 +40,7 @@ impl JwkAuth {
                 panic!("Unable to fetch jwk keys! Cannot verify user tokens! Shutting down...")
             }
         };
-        let verifier = Arc::new(Mutex::new(JwkVerifier::new(jwk_keys.keys)));
+        let verifier = Arc::new(RwLock::new(JwkVerifier::new(jwk_keys.keys)));
 
         let mut instance = JwkAuth {
             verifier: verifier,
@@ -52,7 +52,7 @@ impl JwkAuth {
     }
 
     pub fn verify(&self, token: &String) -> Option<TokenData<Claims>> {
-        let verifier = self.verifier.blocking_lock();
+        let verifier = self.verifier.blocking_read();
         verifier.verify(token)
     }
 
@@ -66,7 +66,7 @@ impl JwkAuth {
                 let duration = match fetch_keys().await {
                     Ok(jwk_keys) => {
                         {
-                            let mut verifier = verifier_ref.blocking_lock();
+                            let mut verifier = verifier_ref.blocking_write();
                             verifier.set_keys(jwk_keys.keys);
                         }
 
