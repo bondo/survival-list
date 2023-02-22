@@ -47,10 +47,6 @@ jobs:
     outputs:
       image-digest: ${{ steps.build-and-deploy.outputs.digest }}
 
-    defaults:
-      run:
-        working-directory: ./server
-
     steps:
       - uses: actions/checkout@v3
         with:
@@ -66,7 +62,7 @@ jobs:
         id: build-and-deploy
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: server
           push: true
           tags: bjarkebjarke/survival-list-server:latest
 
