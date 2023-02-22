@@ -7,6 +7,7 @@ on:
       - production
     paths:
       - "server/**"
+      - ".github/workflows/deploy-server.yml"
 
 env:
   PROJECT_ID: "survival-list-server"
