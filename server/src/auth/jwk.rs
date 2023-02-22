@@ -20,7 +20,7 @@ fn get_secret(name: &str) -> String {
 fn get_secret(name: &str) -> String {
     let path = format!("/secrets/{name}");
 
-    match std::fs::read_to_string(path) {
+    match std::fs::read_to_string(&path) {
         Ok(value) => value,
         Err(_) => {
             println!("Failed to read file {path}");
