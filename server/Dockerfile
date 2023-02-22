@@ -2,7 +2,7 @@
 # https://hub.docker.com/_/rust
 FROM rust:1.67.0-alpine3.17 as build
 
-RUN apk add --no-cache musl-dev pkgconfig openssl-dev
+RUN apk add --no-cache musl-dev
 
 # Copy local code to the container image.
 WORKDIR /usr/src/app
