@@ -44,15 +44,13 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./server
+        working-directory: server
 
     env:
       RUSTFLAGS: "-Dwarnings"
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          path: production
 
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
@@ -69,8 +67,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: production
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2

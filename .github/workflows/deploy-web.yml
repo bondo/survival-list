@@ -38,11 +38,9 @@ jobs:
     needs: validate-protos
     defaults:
       run:
-        working-directory: ./client
+        working-directory: client
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: production
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
