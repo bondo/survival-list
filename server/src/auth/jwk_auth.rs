@@ -1,17 +1,22 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering::Relaxed},
+        Arc,
+    },
+    time::Duration,
+};
 
 use anyhow::Context;
 use futures_core::Future;
 use jsonwebtoken::TokenData;
-use log::{info, warn};
+use log::info;
 use tokio::{
     runtime::Handle,
     sync::{
-        oneshot::{self, error::TryRecvError, Sender},
+        oneshot::{self, Sender},
         Mutex, RwLock,
     },
-    task,
-    time::sleep,
+    task, time,
 };
 
 use super::{
@@ -21,7 +26,7 @@ use super::{
 
 pub struct JwkAuth {
     verifier: Arc<RwLock<JwkVerifier>>,
-    cleanup: Mutex<Option<Sender<&'static str>>>,
+    cleanup: Arc<(Mutex<Option<Sender<()>>>, AtomicBool)>,
 }
 
 fn await_sync<F: Future>(future: F) -> F::Output {
@@ -30,10 +35,13 @@ fn await_sync<F: Future>(future: F) -> F::Output {
 
 impl Drop for JwkAuth {
     fn drop(&mut self) {
-        let mut guard = await_sync(self.cleanup.lock());
-        warn!("Stopping...");
+        info!("Dropping JwkAuth");
+
+        self.cleanup.1.store(true, Relaxed);
+
+        let mut guard = await_sync(self.cleanup.0.lock());
         if let Some(shutdown_tx) = guard.take() {
-            let _ = shutdown_tx.send("stop");
+            shutdown_tx.send(()).ok();
         }
     }
 }
@@ -49,7 +57,7 @@ impl JwkAuth {
 
         let mut instance = JwkAuth {
             verifier,
-            cleanup: Mutex::new(None),
+            cleanup: Arc::new((Mutex::new(None), AtomicBool::new(false))),
         };
 
         instance.start_key_update().await;
@@ -62,16 +70,26 @@ impl JwkAuth {
     }
 
     async fn start_key_update(&mut self) {
-        let verifier_ref = Arc::clone(&self.verifier);
-
-        let (shutdown_tx, mut shutdown_rx) = oneshot::channel();
+        let verifier = Arc::clone(&self.verifier);
+        let cleanup = Arc::clone(&self.cleanup);
 
         tokio::spawn(async move {
             loop {
+                if cleanup.1.load(Relaxed) {
+                    info!("Stopping key update thread");
+                    break;
+                }
+
+                let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
+                {
+                    let mut cleanup = cleanup.0.lock().await;
+                    *cleanup = Some(shutdown_tx);
+                }
+
                 let duration = match fetch_keys().await {
                     Ok(jwk_keys) => {
                         {
-                            let mut verifier = verifier_ref.write().await;
+                            let mut verifier = verifier.write().await;
                             verifier.set_keys(jwk_keys.keys);
                         }
 
@@ -83,15 +101,14 @@ impl JwkAuth {
                     }
                     Err(_) => Duration::from_secs(10),
                 };
-                sleep(duration).await;
 
-                if let Ok(_) | Err(TryRecvError::Closed) = shutdown_rx.try_recv() {
+                if cleanup.1.load(Relaxed) {
+                    info!("Stopping key update thread");
                     break;
                 }
+
+                time::timeout(duration, shutdown_rx).await.ok();
             }
         });
-
-        let mut cleanup = self.cleanup.lock().await;
-        *cleanup = Some(shutdown_tx);
     }
 }
