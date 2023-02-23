@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use log::info;
 
 mod auth;
 mod db;
@@ -15,7 +16,7 @@ async fn main() -> Result<()> {
         .unwrap_or(8080);
     let addr = ([0, 0, 0, 0], port).into();
 
-    println!("Listening on http://{addr}");
+    info!("Listening on http://{addr}");
 
     server::start(addr).await.context("server startup error")
 }

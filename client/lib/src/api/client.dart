@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:grpc/grpc.dart';
 import 'package:survival_list/src/authentication_controller.dart';
 import 'package:survival_list/src/generated/api/v1/api.pbgrpc.dart';
@@ -10,13 +11,25 @@ class Client {
   static initialize(AuthenticationController authenticationController) {
     _authenticationController = authenticationController;
 
-    final channel = ClientChannel('survival-list-server.bjarkebjarke.dk',
-        port: 443,
-        options:
-            const ChannelOptions(credentials: ChannelCredentials.secure()));
-    _client = APIClient(channel,
-        options: CallOptions(
-            timeout: const Duration(seconds: 30), providers: [_authProvider]));
+    if (kDebugMode) {
+      final channel = ClientChannel('10.0.2.2',
+          port: 8080,
+          options:
+              const ChannelOptions(credentials: ChannelCredentials.insecure()));
+      _client = APIClient(channel,
+          options: CallOptions(
+              timeout: const Duration(seconds: 30),
+              providers: [_authProvider]));
+    } else {
+      final channel = ClientChannel('survival-list-server.bjarkebjarke.dk',
+          port: 443,
+          options:
+              const ChannelOptions(credentials: ChannelCredentials.secure()));
+      _client = APIClient(channel,
+          options: CallOptions(
+              timeout: const Duration(seconds: 30),
+              providers: [_authProvider]));
+    }
   }
 
   static Future<void> _authProvider(

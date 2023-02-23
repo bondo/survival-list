@@ -1,34 +1,35 @@
 use std::net::SocketAddr;
 
 use anyhow::{Context, Result};
+use log::info;
 use tokio::signal;
 use tonic::transport::Server;
 
 use crate::{auth::Auth, db::Database, service::build_v1_service};
 
 pub async fn start(addr: SocketAddr) -> Result<()> {
-    println!("Creating database connection");
+    info!("Creating database connection");
 
     let database = Database::new()
         .await
         .context("should be able to connect to database")?;
 
-    println!("Migrating database");
+    info!("Migrating database");
 
     database
         .migrate()
         .await
         .context("should be able to migrate database")?;
 
-    println!("Creating auth instance");
+    info!("Creating auth instance");
 
     let auth = Auth::new().await;
 
-    println!("Creating v1 service");
+    info!("Creating v1 service");
 
     let v1_service = build_v1_service(&auth, &database);
 
-    println!("Building server");
+    info!("Building server");
 
     Server::builder()
         .add_service(v1_service)

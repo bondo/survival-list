@@ -3,6 +3,7 @@ use std::{sync::Arc, time::Duration};
 use anyhow::Context;
 use futures_core::Future;
 use jsonwebtoken::TokenData;
+use log::{info, warn};
 use tokio::{
     runtime::Handle,
     sync::{
@@ -30,7 +31,7 @@ fn await_sync<F: Future>(future: F) -> F::Output {
 impl Drop for JwkAuth {
     fn drop(&mut self) {
         let mut guard = await_sync(self.cleanup.lock());
-        println!("Stopping...");
+        warn!("Stopping...");
         if let Some(shutdown_tx) = guard.take() {
             let _ = shutdown_tx.send("stop");
         }
@@ -74,7 +75,7 @@ impl JwkAuth {
                             verifier.set_keys(jwk_keys.keys);
                         }
 
-                        println!(
+                        info!(
                             "Updated JWK keys. Next refresh will be in {:?}",
                             jwk_keys.validity
                         );
