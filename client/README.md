@@ -38,6 +38,8 @@ protoc --dart_out=grpc:client/lib/src/generated -Iproto proto/api/v1/api.proto
 
 ### aab
 
+bump version in `pubspec.yaml`, then
+
 ```
 flutter build appbundle
 jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ~/upload-keystore.jks -signedjar release.aab build/app/outputs/bundle/release/app-release.aab upload
