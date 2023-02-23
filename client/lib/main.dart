@@ -25,6 +25,8 @@ void main() async {
   final authenticationController =
       AuthenticationController(FirebaseAuth.instance);
 
+  authenticationController.initialize();
+
   Client.initialize(authenticationController);
 
   // Set up the SettingsController, which will glue user settings to multiple
