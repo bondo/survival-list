@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "730713275888-9cvmeviu3b3spe1bq8v5lib2usl6ahbo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.bjarkebjarke.survival_list",
+            "certificate_hash": "b6e6e5bca3ae67b03112370b897af9209e1f7540"
+          }
+        },
+        {
           "client_id": "730713275888-bu1ffhc1s0ii6doi71gtbkl1vvjd156m.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -27,15 +35,8 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "730713275888-4n4ipi6a3flagj15v76td4265k7uvpr8.apps.googleusercontent.com",
+              "client_id": "730713275888-bu1ffhc1s0ii6doi71gtbkl1vvjd156m.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "730713275888-k6mt8jv73bq4e139hsqeoja41rs3m3pm.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.survivalList"
-              }
             }
           ]
         }
