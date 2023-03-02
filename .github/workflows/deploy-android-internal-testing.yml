@@ -1,4 +1,5 @@
-name: Deploy to Play Store internal testing track
+name: deploy-android-internal-testing
+run-name: Deploy client to Play Store internal testing track
 
 on:
   push:
@@ -9,7 +10,31 @@ on:
       - ".github/workflows/deploy-android-internal-testing.yml"
 
 jobs:
-  validate-protos:
+  validate-version-bumped:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: android-client-internal-testing
+
+      - id: current-version
+        uses: jbutcher5/read-yaml@1.6
+        with:
+          file: "./client/pubspec.yaml"
+          key-path: '["version"]'
+
+      - uses: actions/checkout@v3
+
+      - id: new-version
+        uses: jbutcher5/read-yaml@1.6
+        with:
+          file: "./client/pubspec.yaml"
+          key-path: '["version"]'
+
+      - run: test $(printf '${{ steps.new-version.outputs.data }}\n${{ steps.current-version.outputs.data }}' | sort -V | head -n1) != '${{ steps.new-version.outputs.data }}'
+
+  validate-server-api:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +58,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    needs: validate-protos
+    needs:
+      - validate-version-bumped
+      - validate-server-api
 
     defaults:
       run:
@@ -65,7 +92,7 @@ jobs:
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: build/app/outputs/bundle/release
+          releaseDirectory: client/build/app/outputs/bundle/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -79,11 +106,11 @@ jobs:
         with:
           serviceAccountJson: service_account.json
           packageName: dk.bjarkebjarke.survival_list
-          releaseFile: build/app/outputs/bundle/release/app-release.aab
+          releaseFile: client/build/app/outputs/bundle/release/app-release.aab
           track: internal-testing
           whatsNewDirectory: whatsnew
-          mappingFile: build/app/outputs/mapping/release/mapping.txt
-          debugSymbols: build/app/intermediates/merged_native_libs/release/out/lib
+          mappingFile: client/build/app/outputs/mapping/release/mapping.txt
+          debugSymbols: client/build/app/intermediates/merged_native_libs/release/out/lib
 
       - name: Tag Repo
         uses: richardsimko/update-tag@v1
