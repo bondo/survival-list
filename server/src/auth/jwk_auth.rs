@@ -1,10 +1,4 @@
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering::Relaxed},
-        Arc,
-    },
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use anyhow::Context;
 use futures_core::Future;
@@ -13,8 +7,8 @@ use log::info;
 use tokio::{
     runtime::Handle,
     sync::{
-        oneshot::{self, Sender},
-        Mutex, RwLock,
+        watch::{self, Receiver, Sender},
+        RwLock,
     },
     task, time,
 };
@@ -24,9 +18,24 @@ use super::{
     verifier::{Claims, JwkVerifier},
 };
 
-struct Cleanup {
-    notifier: Mutex<Option<Sender<()>>>,
-    should_close: AtomicBool,
+pub struct Cleanup {
+    sender: Sender<bool>,
+    receiver: Receiver<bool>,
+}
+
+impl Cleanup {
+    fn new() -> Self {
+        let (sender, receiver) = watch::channel(false);
+        Self { sender, receiver }
+    }
+
+    fn send_exit_signal(&self) {
+        self.sender.send(true).ok();
+    }
+
+    fn should_exit(&self) -> bool {
+        *self.receiver.borrow()
+    }
 }
 
 pub struct JwkAuth {
@@ -40,14 +49,7 @@ fn await_sync<F: Future>(future: F) -> F::Output {
 
 impl Drop for JwkAuth {
     fn drop(&mut self) {
-        info!("Dropping JwkAuth");
-
-        self.cleanup.should_close.store(true, Relaxed);
-
-        let mut guard = await_sync(self.cleanup.notifier.lock());
-        if let Some(shutdown_tx) = guard.take() {
-            shutdown_tx.send(()).ok();
-        }
+        self.cleanup.send_exit_signal();
     }
 }
 
@@ -60,12 +62,9 @@ impl JwkAuth {
 
         let verifier = Arc::new(RwLock::new(JwkVerifier::new(jwk_keys.keys)));
 
-        let mut instance = JwkAuth {
+        let instance = JwkAuth {
             verifier,
-            cleanup: Arc::new(Cleanup {
-                notifier: Mutex::new(None),
-                should_close: AtomicBool::new(false),
-            }),
+            cleanup: Arc::new(Cleanup::new()),
         };
 
         instance.start_key_update().await;
@@ -77,46 +76,46 @@ impl JwkAuth {
         verifier.verify(token)
     }
 
-    async fn start_key_update(&mut self) {
+    async fn start_key_update(&self) {
         let verifier = Arc::clone(&self.verifier);
+
         let cleanup = Arc::clone(&self.cleanup);
 
         tokio::spawn(async move {
+            let mut cleanup_receiver = cleanup.receiver.clone();
+
             loop {
-                if cleanup.should_close.load(Relaxed) {
+                if cleanup.should_exit() {
                     info!("Stopping key update thread");
                     break;
                 }
-
-                let duration = match fetch_keys().await {
-                    Ok(jwk_keys) => {
-                        {
-                            let mut verifier = verifier.write().await;
-                            verifier.set_keys(jwk_keys.keys);
-                        }
-
-                        info!(
-                            "Updated JWK keys. Next refresh will be in {:?}",
-                            jwk_keys.validity
-                        );
-                        jwk_keys.validity
+                tokio::select! {
+                    _ = cleanup_receiver.changed() => {
+                        continue;
                     }
-                    Err(_) => Duration::from_secs(10),
-                };
-
-                let (cleanup_tx, cleanup_rx) = oneshot::channel::<()>();
-                {
-                    let mut cleanup = cleanup.notifier.lock().await;
-                    *cleanup = Some(cleanup_tx);
+                    _ = key_update(&verifier) => {}
                 }
-
-                if cleanup.should_close.load(Relaxed) {
-                    info!("Stopping key update thread");
-                    break;
-                }
-
-                time::timeout(duration, cleanup_rx).await.ok();
             }
         });
     }
+}
+
+async fn key_update(verifier: &Arc<RwLock<JwkVerifier>>) {
+    let duration = match fetch_keys().await {
+        Ok(jwk_keys) => {
+            {
+                let mut verifier = verifier.write().await;
+                verifier.set_keys(jwk_keys.keys);
+            }
+
+            info!(
+                "Updated JWK keys. Next refresh will be in {:?}",
+                jwk_keys.validity
+            );
+            jwk_keys.validity
+        }
+        Err(_) => Duration::from_secs(10),
+    };
+
+    time::sleep(duration).await;
 }
