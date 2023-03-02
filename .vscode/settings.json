@@ -1,20 +1,28 @@
 {
   "cSpell.words": [
+    "adkll",
+    "appbundle",
     "appspot",
     "bjarkebjarke",
     "bufbuild",
+    "buildx",
     "Clippy",
     "cloudrun",
+    "Condvar",
     "DOCKERHUB",
     "dotenvy",
     "Dwarnings",
+    "gradlew",
     "jsonwebtoken",
     "oneshot",
     "proto",
     "protobuf",
     "protos",
+    "pubspec",
     "reqwest",
     "richardsimko",
-    "RUSTFLAGS"
+    "RUSTFLAGS",
+    "subosito",
+    "whatsnew"
   ]
 }
