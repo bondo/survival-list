@@ -32,14 +32,16 @@ jobs:
           file: "./client/pubspec.yaml"
           key-path: '["version"]'
 
-      - name: Check version greater than released
+      - name: Check new version greater than current
         run: test $(printf '${{ steps.new-version.outputs.data }}\n${{ steps.current-version.outputs.data }}' | sort -V | head -n1) != '${{ steps.new-version.outputs.data }}'
 
-      - name: Check build number greater then released
+      - name: Extract build numbers
         run: |
-          printf 'current_build_number=%d\n' $(echo '${{ steps.current-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/') >> $GITHUB_ENV
-          printf 'new_build_number=%d\n' $(echo '${{ steps.new-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/') >> $GITHUB_ENV
-          test '${{ env.current_build_number }}' -gt '${{ env.new_build_number }}'
+          echo "current_build_number=$(echo '${{ steps.current-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/')" >> $GITHUB_ENV
+          echo "new_build_number=$(echo '${{ steps.new-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/')" >> $GITHUB_ENV
+
+      - name: Check new build number greater than current
+        run: test '${{ env.new_build_number }}' -gt '${{ env.current_build_number }}'
 
   validate-server-api:
     runs-on: ubuntu-latest
