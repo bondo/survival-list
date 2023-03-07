@@ -37,8 +37,8 @@ jobs:
 
       - name: Check build number greater then released
         run: |
-          printf 'current_build_number=$d\n' $(echo '${{ steps.current-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/')' >> $GITHUB_ENV
-          printf 'new_build_number=$d\n' $(echo '${{ steps.new-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/')' >> $GITHUB_ENV
+          printf 'current_build_number=%d\n' $(echo '${{ steps.current-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/') >> $GITHUB_ENV
+          printf 'new_build_number=%d\n' $(echo '${{ steps.new-version.outputs.data }}' | sed 's/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*+\([0-9][0-9]*\)$/\1/') >> $GITHUB_ENV
           test '${{ env.current_build_number }}' -gt '${{ env.new_build_number }}'
 
   validate-server-api:
