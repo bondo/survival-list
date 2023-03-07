@@ -57,6 +57,8 @@ jobs:
           path: server-production
 
       - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
 
       - name: Check that new client API is not ahead of server API
         uses: bufbuild/buf-breaking-action@v1
