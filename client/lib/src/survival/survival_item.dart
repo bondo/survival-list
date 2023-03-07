@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:survival_list/src/api/client.dart';
+import 'package:survival_list/api/client.dart';
 
 class SurvivalItem {
   SurvivalItem({required this.id, required this.title, required this.checked});
@@ -10,9 +10,9 @@ class SurvivalItem {
 }
 
 class SurvivalItemListRefetchContainer extends ChangeNotifier {
-  Future<List<SurvivalItem>> future;
-
   SurvivalItemListRefetchContainer() : future = Client.getTasks();
+
+  Future<List<SurvivalItem>> future;
 
   Future<List<SurvivalItem>> refetch() {
     future = Client.getTasks();

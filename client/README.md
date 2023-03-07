@@ -13,7 +13,7 @@ images](https://flutter.dev/docs/development/ui/assets-and-images#resolution-awa
 ## Localization
 
 This project generates localized messages based on arb files found in
-the `lib/src/localization` directory.
+the `lib/localization` directory.
 
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter
@@ -31,7 +31,7 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 ### Update generated proto files
 
 ```
-protoc --dart_out=grpc:client/lib/src/generated -Iproto proto/api/v1/api.proto
+protoc --dart_out=grpc:client/lib/generated -Iproto proto/api/v1/api.proto
 ```
 
 ## Manual client build

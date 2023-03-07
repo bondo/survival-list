@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'settings_service.dart';
+import 'package:survival_list/settings/settings_service.dart';
 
 class SettingsController with ChangeNotifier {
   SettingsController(this._settingsService);

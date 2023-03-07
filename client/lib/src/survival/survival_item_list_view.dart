@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:survival_list/src/settings/settings_view.dart';
-import 'survival_item.dart';
-import 'survival_item_create_view.dart';
-import 'survival_item_list_tile.dart';
+import 'package:survival_list/settings/settings_view.dart';
+import 'package:survival_list/src/survival/survival_item.dart';
+import 'package:survival_list/src/survival/survival_item_create_view.dart';
+import 'package:survival_list/src/survival/survival_item_list_tile.dart';
 
 class SurvivalItemListView extends StatelessWidget {
   const SurvivalItemListView({super.key});
@@ -13,8 +13,9 @@ class SurvivalItemListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppLocalizations l10n = AppLocalizations.of(context)!;
-    var itemsContainer = Provider.of<SurvivalItemListRefetchContainer>(context);
+    final l10n = AppLocalizations.of(context)!;
+    final itemsContainer =
+        Provider.of<SurvivalItemListRefetchContainer>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.pageSurvivalTitle),
@@ -32,11 +33,14 @@ class SurvivalItemListView extends StatelessWidget {
       ),
 
       floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.restorablePushNamed(
-                context, SurvivalItemCreateView.routeName);
-          },
-          child: const Icon(Icons.add)),
+        onPressed: () {
+          Navigator.restorablePushNamed(
+            context,
+            SurvivalItemCreateView.routeName,
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
 
       // To work with lists that may contain a large number of items, it’s best
       // to use the ListView.builder constructor.
@@ -45,46 +49,49 @@ class SurvivalItemListView extends StatelessWidget {
       // building all Widgets up front, the ListView.builder constructor lazily
       // builds Widgets as they’re scrolled into view.
       body: FutureBuilder<List<SurvivalItem>>(
-          future: itemsContainer.future,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('${snapshot.error}'));
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            var items = snapshot.data!;
+        future: itemsContainer.future,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('${snapshot.error}'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final items = snapshot.data!;
 
-            return RefreshIndicator(
-              onRefresh: itemsContainer.refetch,
-              child: ListView.builder(
-                // Providing a restorationId allows the ListView to restore the
-                // scroll position when a user leaves and returns to the app after it
-                // has been killed while running in the background.
-                restorationId: 'survivalItemListView',
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return SurvivalItemListTile(
-                    item: items[index],
-                  );
-                },
-              ),
-            );
-          }),
+          return RefreshIndicator(
+            onRefresh: itemsContainer.refetch,
+            child: ListView.builder(
+              // Providing a restorationId allows the ListView to restore the
+              // scroll position when a user leaves and returns to the app after it
+              // has been killed while running in the background.
+              restorationId: 'survivalItemListView',
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return SurvivalItemListTile(
+                  item: items[index],
+                );
+              },
+            ),
+          );
+        },
+      ),
 
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: const Icon(Icons.check_box),
-              label: l10n.bottomNavigationIconLabelSurvival),
+            icon: const Icon(Icons.check_box),
+            label: l10n.bottomNavigationIconLabelSurvival,
+          ),
           BottomNavigationBarItem(
-              icon: const Icon(Icons.list),
-              label: l10n.bottomNavigationIconLabelTodo),
+            icon: const Icon(Icons.list),
+            label: l10n.bottomNavigationIconLabelTodo,
+          ),
           BottomNavigationBarItem(
-              icon: const Icon(Icons.home),
-              label: l10n.bottomNavigationIconLabelSchedule),
+            icon: const Icon(Icons.home),
+            label: l10n.bottomNavigationIconLabelSchedule,
+          ),
         ],
-        currentIndex: 0,
         onTap: (int index) {},
       ),
     );

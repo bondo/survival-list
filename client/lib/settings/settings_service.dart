@@ -9,22 +9,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// you'd like to store settings on a web server, use the http package.
 class SettingsService {
   Future<ThemeMode> themeMode() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? themeStr = prefs.getString('theme');
-    ThemeMode? themeMode = themeStr == null
+    final preferences = await SharedPreferences.getInstance();
+    final themeStr = preferences.getString('theme');
+    final themeMode = themeStr == null
         ? null
         : EnumToString.fromString(ThemeMode.values, themeStr);
     return themeMode ?? ThemeMode.system;
   }
 
   Future<void> updateThemeMode(ThemeMode theme) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('theme', EnumToString.convertToString(theme));
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString('theme', EnumToString.convertToString(theme));
   }
 
   Future<Locale?> locale() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? languageCode = prefs.getString('languageCode');
+    final preferences = await SharedPreferences.getInstance();
+    final languageCode = preferences.getString('languageCode');
     if (languageCode == null) {
       return null;
     }
@@ -32,11 +32,11 @@ class SettingsService {
   }
 
   Future<void> updateLocale(Locale? locale) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final preferences = await SharedPreferences.getInstance();
     if (locale == null) {
-      await prefs.remove('languageCode');
+      await preferences.remove('languageCode');
     } else {
-      await prefs.setString('languageCode', locale.languageCode);
+      await preferences.setString('languageCode', locale.languageCode);
     }
   }
 }

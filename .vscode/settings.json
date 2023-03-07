@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "adkll",
+    "apksigner",
     "appbundle",
     "appspot",
     "bjarkebjarke",
@@ -9,21 +10,34 @@
     "Clippy",
     "cloudrun",
     "Condvar",
+    "digestalg",
     "DOCKERHUB",
     "dotenvy",
     "Dwarnings",
+    "endtemplate",
+    "formz",
     "gradlew",
+    "Iproto",
+    "jarsigner",
     "jbutcher",
     "jsonwebtoken",
+    "mocktail",
     "oneshot",
+    "overriden",
+    "pbgrpc",
     "proto",
     "protobuf",
+    "protoc",
     "protos",
     "pubspec",
     "reqwest",
     "richardsimko",
     "RUSTFLAGS",
+    "sigalg",
+    "signedjar",
     "subosito",
-    "whatsnew"
+    "unawaited",
+    "whatsnew",
+    "zipalign"
   ]
 }
