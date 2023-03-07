@@ -2,6 +2,14 @@
 
 A Flutter project for the Survival List clients.
 
+## Firebase
+
+Update `lib/firebase_options.dart`:
+
+```
+flutterfire configure
+```
+
 ## Assets
 
 The `assets` directory houses images, fonts, and any other files you want to
