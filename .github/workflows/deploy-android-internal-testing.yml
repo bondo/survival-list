@@ -100,7 +100,6 @@ jobs:
           releaseFiles: client/build/app/outputs/bundle/release/app-release.aab
           track: internal
           status: draft
-          userFraction: 1.0
           whatsNewDirectory: client/whatsnew
           mappingFile: client/build/app/outputs/mapping/release/mapping.txt
           debugSymbols: client/build/app/intermediates/merged_native_libs/release/out/lib
