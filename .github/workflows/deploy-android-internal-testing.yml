@@ -71,10 +71,6 @@ jobs:
       - validate-version-bumped
       - validate-server-api
 
-    defaults:
-      run:
-        working-directory: client
-
     steps:
       - uses: actions/checkout@v3
 
@@ -82,9 +78,9 @@ jobs:
         with:
           channel: "stable"
 
-      - run: flutter pub get
+      - run: cd client && flutter pub get
 
-      - run: flutter build appbundle
+      - run: cd client && flutter build appbundle
 
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
@@ -102,6 +98,7 @@ jobs:
           releaseFiles: client/build/app/outputs/bundle/release/app-release.aab
           track: internal
           status: draft
+          userFraction: 1.0
           whatsNewDirectory: client/whatsnew
           mappingFile: client/build/app/outputs/mapping/release/mapping.txt
           debugSymbols: client/build/app/intermediates/merged_native_libs/release/out/lib
