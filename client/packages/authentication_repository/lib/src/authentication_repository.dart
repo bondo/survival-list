@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:cache/cache.dart';
@@ -115,35 +114,27 @@ class AuthenticationRepository {
   ///
   /// Throws a [LogInWithGoogleFailure] if an exception occurs.
   Future<void> logInWithGoogle() async {
-    developer.log('start', name: 'logInWithGoogle');
+    print('logInWithGoogle: start');
     try {
       final googleUser = await _googleSignIn.signIn();
-      developer.log('got user', name: 'logInWithGoogle');
+      print('logInWithGoogle: got user');
 
       final googleAuth = await googleUser!.authentication;
-      developer.log('got auth', name: 'logInWithGoogle');
+      print('logInWithGoogle: got auth');
 
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      developer.log('got credentials', name: 'logInWithGoogle');
+      print('logInWithGoogle: got credentials');
 
       await _firebaseAuth.signInWithCredential(credential);
-      developer.log('got signed in', name: 'logInWithGoogle');
+      print('logInWithGoogle: got signed in');
     } on firebase_auth.FirebaseAuthException catch (e) {
-      developer.log(
-        'expected exception',
-        name: 'logInWithGoogle',
-        error: jsonEncode(e),
-      );
+      print('logInWithGoogle: expected exception - ${jsonEncode(e)}');
       throw LogInWithGoogleFailure.fromCode(e.code);
     } catch (e) {
-      developer.log(
-        'unexpected exception',
-        name: 'logInWithGoogle',
-        error: jsonEncode(e),
-      );
+      print('logInWithGoogle: unexpected exception - ${jsonEncode(e)}');
       throw const LogInWithGoogleFailure();
     }
   }
