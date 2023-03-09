@@ -63,8 +63,8 @@ class SurvivalItemListView extends StatelessWidget {
             onRefresh: itemsContainer.refetch,
             child: ListView.builder(
               // Providing a restorationId allows the ListView to restore the
-              // scroll position when a user leaves and returns to the app after it
-              // has been killed while running in the background.
+              // scroll position when a user leaves and returns to the app after
+              // it has been killed while running in the background.
               restorationId: 'survivalItemListView',
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {

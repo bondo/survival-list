@@ -8,9 +8,9 @@ import 'package:survival_list/settings/settings_controller.dart';
 
 class App extends StatelessWidget {
   const App({
-    super.key,
     required AuthenticationRepository authenticationRepository,
     required SettingsController settingsController,
+    super.key,
   })  : _authenticationRepository = authenticationRepository,
         _settingsController = settingsController;
 
@@ -41,9 +41,9 @@ class App extends StatelessWidget {
 
 class AppView extends StatelessWidget {
   const AppView({
-    super.key,
     required Locale? locale,
     required ThemeMode themeMode,
+    super.key,
   })  : _locale = locale,
         _themeMode = themeMode;
 

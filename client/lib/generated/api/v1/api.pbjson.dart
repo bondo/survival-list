@@ -3,11 +3,12 @@
 //  source: api/v1/api.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name, dangling_library_doc_comments, lines_longer_than_80_chars, require_trailing_commas
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+
 @$core.Deprecated('Use createTaskRequestDescriptor instead')
 const CreateTaskRequest$json = const {
   '1': 'CreateTaskRequest',
@@ -17,14 +18,16 @@ const CreateTaskRequest$json = const {
 };
 
 /// Descriptor for `CreateTaskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGU=');
+final $typed_data.Uint8List createTaskRequestDescriptor = $convert
+    .base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGU=');
 @$core.Deprecated('Use getTasksRequestDescriptor instead')
 const GetTasksRequest$json = const {
   '1': 'GetTasksRequest',
 };
 
 /// Descriptor for `GetTasksRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksRequestDescriptor = $convert.base64Decode('Cg9HZXRUYXNrc1JlcXVlc3Q=');
+final $typed_data.Uint8List getTasksRequestDescriptor =
+    $convert.base64Decode('Cg9HZXRUYXNrc1JlcXVlc3Q=');
 @$core.Deprecated('Use createTaskResponseDescriptor instead')
 const CreateTaskResponse$json = const {
   '1': 'CreateTaskResponse',
@@ -35,7 +38,8 @@ const CreateTaskResponse$json = const {
 };
 
 /// Descriptor for `CreateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZQ==');
+final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode(
+    'ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZQ==');
 @$core.Deprecated('Use getTasksResponseDescriptor instead')
 const GetTasksResponse$json = const {
   '1': 'GetTasksResponse',
@@ -46,4 +50,5 @@ const GetTasksResponse$json = const {
 };
 
 /// Descriptor for `GetTasksResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGU=');
+final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode(
+    'ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGU=');

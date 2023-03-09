@@ -21,14 +21,14 @@ void main() async {
   final authenticationRepository = AuthenticationRepository();
   await authenticationRepository.user.first;
 
-  // TODO: Blocify
+  // TODO(bba): Blocify
   Client.initialize(authenticationRepository);
 
-  // TODO: Blocify
+  // TODO(bba): Blocify
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
   if (settingsController.locale != null) {
-    // TODO: Update on locale change
+    // TODO(bba): Update on locale change
     Intl.systemLocale = settingsController.locale.toString();
   }
 

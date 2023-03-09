@@ -7,7 +7,7 @@ import 'package:survival_list/settings/settings_controller.dart';
 /// When a user changes a setting, the SettingsController is updated and
 /// Widgets that listen to the SettingsController are rebuilt.
 class SettingsView extends StatelessWidget {
-  const SettingsView({super.key, required this.controller});
+  const SettingsView({required this.controller, super.key});
 
   static const routeName = '/settings';
 
@@ -28,7 +28,8 @@ class SettingsView extends StatelessWidget {
             DropdownButton<ThemeMode>(
               // Read the selected themeMode from the controller
               value: controller.themeMode,
-              // Call the updateThemeMode method any time the user selects a theme.
+              // Call the updateThemeMode method any time the user
+              // selects a theme.
               onChanged: controller.updateThemeMode,
               items: [
                 DropdownMenuItem(

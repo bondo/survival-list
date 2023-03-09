@@ -1,3 +1,4 @@
+/// In-memory cache
 library cache;
 
 /// {@template cache_client}

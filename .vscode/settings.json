@@ -9,6 +9,7 @@
     "buildx",
     "Clippy",
     "cloudrun",
+    "combinators",
     "Condvar",
     "digestalg",
     "DOCKERHUB",

@@ -4,7 +4,7 @@ import 'package:survival_list/src/survival/survival_item.dart';
 import 'package:survival_list/src/survival/survival_item_details_view.dart';
 
 class SurvivalItemListTile extends StatefulWidget {
-  const SurvivalItemListTile({super.key, required this.item});
+  const SurvivalItemListTile({required this.item, super.key});
 
   final SurvivalItem item;
 
