@@ -14,38 +14,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze-packages:
+  analyze-dart-packages:
     strategy:
       matrix:
-        include:
-          - package: cache
-            kind: dart
-          - package: survival_list_api
-            kind: dart
-          - package: survival_list_repository
-            kind: dart
-          - package: authentication_repository
-            kind: flutter
-          - package: local_storage_survival_list_api
-            kind: flutter
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/${{ matrix.kind }}_package.yml@v1
+        package: [cache, survival_list_api, survival_list_repository]
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+    with:
+      working_directory: client/packages/${{ matrix.package }}/
+
+  analyze-flutter-packages:
+    strategy:
+      matrix:
+        package: [authentication_repository, local_storage_survival_list_api]
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
     with:
       flutter_channel: stable
       working_directory: client/packages/${{ matrix.package }}/
-
-  # analyze-dart-packages:
-  #   strategy:
-  #     matrix:
-  #       package: [cache, survival_list_api, survival_list_repository]
-  #   uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
-  #   with:
-  #     working_directory: client/packages/${{ matrix.package }}/
-
-  # analyze-flutter-packages:
-  #   strategy:
-  #     matrix:
-  #       package: [authentication_repository, local_storage_survival_list_api]
-  #   uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
-  #   with:
-  #     flutter_channel: stable
-  #     working_directory: client/packages/${{ matrix.package }}/
