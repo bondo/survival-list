@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "client/packages/**"
+      - ".github/workflows/client-package-code-analysis.yml"
 
 jobs:
   analyze-dart-packages:
@@ -15,8 +16,8 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.package }}
       cancel-in-progress: true
-    working-directory: client/packages/${{ matrix.package }}/
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+      working_directory: client/packages/${{ matrix.package }}/
 
   analyze-flutter-packages:
     strategy:
@@ -25,7 +26,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.package }}
       cancel-in-progress: true
-    working-directory: client/packages/${{ matrix.package }}/
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
     with:
       flutter_channel: stable
+      working_directory: client/packages/${{ matrix.package }}/
