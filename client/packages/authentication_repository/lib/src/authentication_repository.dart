@@ -114,27 +114,17 @@ class AuthenticationRepository {
   ///
   /// Throws a [LogInWithGoogleFailure] if an exception occurs.
   Future<void> logInWithGoogle() async {
-    print('logInWithGoogle: start');
     try {
       final googleUser = await _googleSignIn.signIn();
-      print('logInWithGoogle: got user');
-
       final googleAuth = await googleUser!.authentication;
-      print('logInWithGoogle: got auth');
-
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      print('logInWithGoogle: got credentials');
-
       await _firebaseAuth.signInWithCredential(credential);
-      print('logInWithGoogle: got signed in');
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('logInWithGoogle: expected exception - ${jsonEncode(e)}');
       throw LogInWithGoogleFailure.fromCode(e.code);
     } catch (e) {
-      print('logInWithGoogle: unexpected exception - ${jsonEncode(e)}');
       throw const LogInWithGoogleFailure();
     }
   }

@@ -1,33 +1,14 @@
-use std::env;
-
-use dotenvy::dotenv;
-
 #[derive(Debug)]
 pub struct JwkConfiguration {
-    pub jwk_url: String,
-    pub audience: String,
-    pub issuer: String,
-}
-
-fn get_secret(name: &str) -> String {
-    let path = format!("/secrets/{name}/latest");
-
-    if let Ok(value) = std::fs::read_to_string(&path) {
-        return value;
-    }
-
-    dotenv().ok();
-    if let Ok(value) = env::var(name) {
-        return value;
-    }
-
-    panic!("Failed to read secret {name}, tried env and path {path}");
+    pub jwk_url: &'static str,
+    pub audience: &'static str,
+    pub issuer: &'static str,
 }
 
 pub fn get_configuration() -> JwkConfiguration {
     JwkConfiguration {
-        jwk_url: get_secret("JWK_URL"),
-        audience: get_secret("JWK_AUDIENCE"),
-        issuer: get_secret("JWK_ISSUER"),
+        jwk_url: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+        audience: "survival-list-authentication",
+        issuer: "https://securetoken.google.com/survival-list-authentication",
     }
 }

@@ -1,20 +1,28 @@
 {
   "project_info": {
-    "project_number": "730713275888",
-    "project_id": "survival-list-server",
-    "storage_bucket": "survival-list-server.appspot.com"
+    "project_number": "717004881219",
+    "project_id": "survival-list-authentication",
+    "storage_bucket": "survival-list-authentication.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:730713275888:android:1aa8983987c568a2bbf135",
+        "mobilesdk_app_id": "1:717004881219:android:4fac28c3bfdb14ba5a83f6",
         "android_client_info": {
           "package_name": "dk.bjarkebjarke.survival_list"
         }
       },
       "oauth_client": [
         {
-          "client_id": "730713275888-9cvmeviu3b3spe1bq8v5lib2usl6ahbo.apps.googleusercontent.com",
+          "client_id": "717004881219-7o21do6o9r79ksb8liurv2djp9gpejot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.bjarkebjarke.survival_list",
+            "certificate_hash": "ca0c795047559b71c6b96f30bcf2bffdf639cd65"
+          }
+        },
+        {
+          "client_id": "717004881219-e9hdte1arsm7r2f1j5paq5ke4kar3eln.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "dk.bjarkebjarke.survival_list",
@@ -22,20 +30,20 @@
           }
         },
         {
-          "client_id": "730713275888-bu1ffhc1s0ii6doi71gtbkl1vvjd156m.apps.googleusercontent.com",
+          "client_id": "717004881219-cqbjk98v40sec84suhae24qd808k1fpi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD69KOuyVLKbUnh2-wYzACey1CjLBC_AoE"
+          "current_key": "AIzaSyBHP1stURvGqIlwLKRf9cACp2tgkonTATE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "730713275888-bu1ffhc1s0ii6doi71gtbkl1vvjd156m.apps.googleusercontent.com",
+              "client_id": "717004881219-cqbjk98v40sec84suhae24qd808k1fpi.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

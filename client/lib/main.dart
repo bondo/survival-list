@@ -32,8 +32,10 @@ void main() async {
     Intl.systemLocale = settingsController.locale.toString();
   }
 
-  runApp(App(
-    authenticationRepository: authenticationRepository,
-    settingsController: settingsController,
-  ));
+  runApp(
+    App(
+      authenticationRepository: authenticationRepository,
+      settingsController: settingsController,
+    ),
+  );
 }

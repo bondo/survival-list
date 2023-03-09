@@ -86,8 +86,8 @@ impl JwkVerifier {
         };
 
         let mut validation = Validation::new(algorithm);
-        validation.set_audience(&[&self.config.audience]);
-        validation.set_issuer(&[&self.config.issuer]);
+        validation.set_audience(&[self.config.audience]);
+        validation.set_issuer(&[self.config.issuer]);
 
         let key = match DecodingKey::from_rsa_components(&key.n, &key.e) {
             Ok(key) => key,

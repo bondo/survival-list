@@ -31,7 +31,7 @@ pub struct JwkKeys {
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 
 pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys> {
-    let http_response = reqwest::get(&config.jwk_url)
+    let http_response = reqwest::get(config.jwk_url)
         .await
         .context("failed to fetch keys")?;
 
