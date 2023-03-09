@@ -1,0 +1,12 @@
+name: grpc_survival_list_api
+description: An implementation of the Survival List API that uses gRPC.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+
+dev_dependencies:
+  mocktail: ^0.3.0
+  test: ^1.19.2
+  very_good_analysis: ^4.0.0

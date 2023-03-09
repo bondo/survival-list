@@ -25,9 +25,9 @@ dependencies:
   font_awesome_flutter: ^10.4.0
   formz: ^0.5.0+1
   grpc: ^3.1.0
+  grpc_survival_list_api:
+    path: packages/grpc_survival_list_api
   intl: ^0.17.0
-  local_storage_survival_list_api:
-    path: packages/local_storage_survival_list_api
   protobuf: ^2.1.0
   provider: ^6.0.5
   shared_preferences: ^2.0.17
