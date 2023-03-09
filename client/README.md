@@ -27,6 +27,10 @@ To support additional languages, please visit the tutorial on
 [Internationalizing Flutter
 apps](https://flutter.dev/docs/development/accessibility-and-localization/internationalization)
 
+### Update client localization
+
+Run `flutter gen-l10n`
+
 ## gRPC
 
 ### Setup
@@ -38,9 +42,7 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 
 ### Update generated proto files
 
-```
-protoc --dart_out=grpc:client/lib/generated -Iproto proto/api/v1/api.proto
-```
+See [packages/grpc_survival_list_client/README.md](./packages/grpc_survival_list_client/README.md)
 
 ## Manual client build
 

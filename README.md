@@ -1,14 +1,9 @@
-# survival-list
+# Survival List
 
-## Deploy
+## Client
 
-- Run `cargo sqlx prepare`
-- Push to production branch (`git push origin main:production`)
+See [client/README.md](./client/README.md)
 
-## Update client localization
+## Server
 
-- Run `flutter gen-l10n`
-
-## Play with API
-
-- Run `grpcui -plaintext localhost:8080` after `cargo serve`
+See [server/README.md](./server/README.md)

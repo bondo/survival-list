@@ -1,6 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:grpc/grpc.dart';
-import 'package:survival_list/generated/api/v1/api.pbgrpc.dart';
+import 'package:grpc_survival_list_client/grpc_survival_list_client.dart';
 import 'package:survival_list/src/survival/survival_item.dart';
 
 class Client {

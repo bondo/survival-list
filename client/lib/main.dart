@@ -29,6 +29,7 @@ void main() async {
   await settingsController.loadSettings();
   if (settingsController.locale != null) {
     // TODO(bba): Update on locale change
+    // See https://docs.flutter.dev/development/accessibility-and-localization/internationalization#overriding-the-locale
     Intl.systemLocale = settingsController.locale.toString();
   }
 

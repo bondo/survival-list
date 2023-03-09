@@ -11,11 +11,14 @@ abstract class SurvivalListApi {
   /// Provides a [Stream] of all items.
   Stream<List<Item>> getItems();
 
-  Future<void> createItem(Item item);
+  /// Creates an unchecked `item` with [title].
+  Future<void> createItem(String title);
 
+  /// Updates an [item]
   Future<void> updateItem(Item item);
 
-  Future<void> deleteItem(Item item);
+  /// Delete the `todo` with the given id.
+  Future<void> deleteItem(int id);
 }
 
 class ItemNotFoundException implements Exception {}

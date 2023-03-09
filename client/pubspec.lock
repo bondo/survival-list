@@ -268,11 +268,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  flutter_localizations:
-    dependency: "direct main"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -386,6 +381,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0+1"
+  grpc_survival_list_client:
+    dependency: "direct main"
+    description:
+      path: "packages/grpc_survival_list_client"
+      relative: true
+    source: path
+    version: "0.0.0"
   http:
     dependency: transitive
     description:
@@ -595,7 +597,7 @@ packages:
     source: hosted
     version: "4.2.4"
   protobuf:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: protobuf
       sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
