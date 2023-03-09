@@ -1,0 +1,31 @@
+name: client-package-code-analysis
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "client/packages/**"
+
+jobs:
+  analyze-dart-packages:
+    strategy:
+      matrix:
+        package: [cache, survival_list_api, survival_list_repository]
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.package }}
+      cancel-in-progress: true
+    working-directory: client/packages/${{ matrix.package }}/
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+
+  analyze-flutter-packages:
+    strategy:
+      matrix:
+        package: [authentication_repository, local_storage_survival_list_api]
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.package }}
+      cancel-in-progress: true
+    working-directory: client/packages/${{ matrix.package }}/
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      flutter_channel: stable

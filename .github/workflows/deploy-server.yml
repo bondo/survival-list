@@ -9,6 +9,10 @@ on:
       - "server/**"
       - ".github/workflows/deploy-server.yml"
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   PROJECT_ID: "survival-list-server"
   SERVICE: "survival-list-server"

@@ -26,9 +26,15 @@ dependencies:
   formz: ^0.5.0+1
   grpc: ^3.1.0
   intl: ^0.17.0
+  local_storage_survival_list_api:
+    path: packages/local_storage_survival_list_api
   protobuf: ^2.1.0
   provider: ^6.0.5
   shared_preferences: ^2.0.17
+  survival_list_api:
+    path: packages/survival_list_api
+  survival_list_repository:
+    path: packages/survival_list_repository
 
 dev_dependencies:
   bloc_test: ^9.1.1

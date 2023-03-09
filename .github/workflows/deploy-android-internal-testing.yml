@@ -9,6 +9,10 @@ on:
       - "client/pubspec.yaml"
       - ".github/workflows/deploy-android-internal-testing.yml"
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   validate-version-bumped:
     runs-on: ubuntu-latest
