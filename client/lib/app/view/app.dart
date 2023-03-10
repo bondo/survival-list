@@ -5,35 +5,46 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:survival_list/app/app.dart';
 import 'package:survival_list/settings/settings_controller.dart';
+import 'package:survival_list_repository/survival_list_repository.dart';
 
 class App extends StatelessWidget {
   const App({
     required AuthenticationRepository authenticationRepository,
     required SettingsController settingsController,
+    required SurvivalListRepository survivalListRepository,
     super.key,
   })  : _authenticationRepository = authenticationRepository,
+        _survivalListRepository = survivalListRepository,
         _settingsController = settingsController;
 
   final AuthenticationRepository _authenticationRepository;
   final SettingsController _settingsController;
+  final SurvivalListRepository _survivalListRepository;
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: _authenticationRepository,
-      child: BlocProvider(
-        create: (_) => AppBloc(
-          authenticationRepository: _authenticationRepository,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(
+          value: _authenticationRepository,
+          child: BlocProvider(
+            create: (_) => AppBloc(
+              authenticationRepository: _authenticationRepository,
+            ),
+          ),
         ),
-        child: AnimatedBuilder(
-          animation: _settingsController,
-          builder: (context, child) {
-            return AppView(
-              locale: _settingsController.locale,
-              themeMode: _settingsController.themeMode,
-            );
-          },
+        RepositoryProvider.value(
+          value: _survivalListRepository,
         ),
+      ],
+      child: AnimatedBuilder(
+        animation: _settingsController,
+        builder: (context, child) {
+          return AppView(
+            locale: _settingsController.locale,
+            themeMode: _settingsController.themeMode,
+          );
+        },
       ),
     );
   }
