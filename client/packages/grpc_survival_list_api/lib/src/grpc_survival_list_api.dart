@@ -80,7 +80,11 @@ class GrpcSurvivalListApi extends SurvivalListApi {
 
   @override
   Future<void> createItem(String title) async {
-    await _client.createTask(CreateTaskRequest(title: title));
+    final response = await _client.createTask(CreateTaskRequest(title: title));
+    _itemsStreamController.add([
+      ..._itemsStreamController.value,
+      Item(id: response.id, title: response.title)
+    ]);
   }
 
   @override
