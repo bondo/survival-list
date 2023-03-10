@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:survival_list/settings/settings_view.dart';
 import 'package:survival_list/src/survival/survival_item.dart';
 import 'package:survival_list/src/survival/survival_item_create_view.dart';
@@ -14,8 +13,8 @@ class SurvivalItemListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final itemsContainer =
-        Provider.of<SurvivalItemListRefetchContainer>(context);
+    // final itemsContainer =
+    //     Provider.of<SurvivalItemListRefetchContainer>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.pageSurvivalTitle),
@@ -49,7 +48,7 @@ class SurvivalItemListView extends StatelessWidget {
       // building all Widgets up front, the ListView.builder constructor lazily
       // builds Widgets as they’re scrolled into view.
       body: FutureBuilder<List<SurvivalItem>>(
-        future: itemsContainer.future,
+        future: Future.value(const []), // itemsContainer.future,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('${snapshot.error}'));
@@ -60,7 +59,9 @@ class SurvivalItemListView extends StatelessWidget {
           final items = snapshot.data!;
 
           return RefreshIndicator(
-            onRefresh: itemsContainer.refetch,
+            onRefresh: () async {
+              // itemsContainer.refetch()
+            },
             child: ListView.builder(
               // Providing a restorationId allows the ListView to restore the
               // scroll position when a user leaves and returns to the app after

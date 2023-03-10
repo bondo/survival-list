@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:survival_list/api/client.dart';
 import 'package:survival_list/app/app.dart';
 import 'package:survival_list/firebase_options.dart';
 import 'package:survival_list/settings/settings_controller.dart';
@@ -22,14 +21,13 @@ void main() async {
   await authenticationRepository.user.first;
 
   // TODO(bba): Blocify
-  Client.initialize(authenticationRepository);
+  // Client.initialize(authenticationRepository);
 
   // TODO(bba): Blocify
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
   if (settingsController.locale != null) {
     // TODO(bba): Update on locale change
-    // See https://docs.flutter.dev/development/accessibility-and-localization/internationalization#overriding-the-locale
     Intl.systemLocale = settingsController.locale.toString();
   }
 

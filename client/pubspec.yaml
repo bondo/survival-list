@@ -28,7 +28,6 @@ dependencies:
   grpc_survival_list_client: # TODO(bba): Don't use directly
     path: packages/grpc_survival_list_client
   intl: ^0.17.0
-  provider: ^6.0.5
   shared_preferences: ^2.0.17 # TODO(bba): Move to settings repository
   survival_list_api: # TODO(bba): Don't use directly
     path: packages/survival_list_api

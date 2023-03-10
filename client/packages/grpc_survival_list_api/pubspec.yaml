@@ -6,6 +6,16 @@ publish_to: none
 environment:
   sdk: ">=2.19.0 <3.0.0"
 
+dependencies:
+  authentication_repository:
+    path: ../authentication_repository
+  grpc: ^3.1.0
+  grpc_survival_list_client:
+    path: ../grpc_survival_list_client
+  rxdart: ^0.27.7
+  survival_list_api:
+    path: ../survival_list_api
+
 dev_dependencies:
   mocktail: ^0.3.0
   test: ^1.19.2
