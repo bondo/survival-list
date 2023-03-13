@@ -8,11 +8,15 @@ import 'package:survival_list/app/app.dart';
 import 'package:survival_list/home/home.dart';
 import 'package:survival_list/login/login.dart';
 import 'package:survival_list/settings/settings_controller.dart';
+import 'package:survival_list_repository/survival_list_repository.dart';
 
 class MockUser extends Mock implements User {}
 
 class MockAuthenticationRepository extends Mock
     implements AuthenticationRepository {}
+
+class MockSurvivalListRepository extends Mock
+    implements SurvivalListRepository {}
 
 class MockSettingsController extends Mock implements SettingsController {}
 
@@ -22,11 +26,13 @@ void main() {
   group('App', () {
     late AuthenticationRepository authenticationRepository;
     late SettingsController settingsController;
+    late SurvivalListRepository survivalListRepository;
     late User user;
 
     setUp(() {
       authenticationRepository = MockAuthenticationRepository();
       settingsController = MockSettingsController();
+      survivalListRepository = MockSurvivalListRepository();
       user = MockUser();
       when(() => authenticationRepository.user).thenAnswer(
         (_) => const Stream.empty(),
@@ -43,6 +49,7 @@ void main() {
         App(
           authenticationRepository: authenticationRepository,
           settingsController: settingsController,
+          survivalListRepository: survivalListRepository,
         ),
       );
       await tester.pump();

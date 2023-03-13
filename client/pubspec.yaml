@@ -20,6 +20,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.2
+  flutter_localizations:
+    sdk: flutter
   font_awesome_flutter: ^10.4.0
   formz: ^0.5.0+1
   grpc: ^3.1.0 # TODO(bba): Move to grpc_survival_list_api package

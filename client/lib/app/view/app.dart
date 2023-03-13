@@ -27,24 +27,24 @@ class App extends StatelessWidget {
       providers: [
         RepositoryProvider.value(
           value: _authenticationRepository,
-          child: BlocProvider(
-            create: (_) => AppBloc(
-              authenticationRepository: _authenticationRepository,
-            ),
-          ),
         ),
         RepositoryProvider.value(
           value: _survivalListRepository,
         ),
       ],
-      child: AnimatedBuilder(
-        animation: _settingsController,
-        builder: (context, child) {
-          return AppView(
-            locale: _settingsController.locale,
-            themeMode: _settingsController.themeMode,
-          );
-        },
+      child: BlocProvider(
+        create: (context) => AppBloc(
+          authenticationRepository: context.read<AuthenticationRepository>(),
+        ),
+        child: AnimatedBuilder(
+          animation: _settingsController,
+          builder: (context, child) {
+            return AppView(
+              locale: _settingsController.locale,
+              themeMode: _settingsController.themeMode,
+            );
+          },
+        ),
       ),
     );
   }
