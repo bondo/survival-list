@@ -89,7 +89,7 @@ class GrpcSurvivalListApi extends SurvivalListApi {
 
   @override
   Future<void> deleteItem(int id) {
-    // TODO: implement deleteItem
+    // TODO(bba): implement deleteItem
     throw UnimplementedError();
   }
 
@@ -98,7 +98,7 @@ class GrpcSurvivalListApi extends SurvivalListApi {
 
   @override
   Future<void> updateItem(Item item) {
-    // TODO: implement updateItem
+    // TODO(bba): implement updateItem
     throw UnimplementedError();
   }
 }
