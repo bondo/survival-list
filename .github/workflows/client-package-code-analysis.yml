@@ -17,13 +17,7 @@ jobs:
   analyze-dart-packages:
     strategy:
       matrix:
-        package:
-          [
-            cache,
-            grpc_survival_list_api,
-            survival_list_api,
-            survival_list_repository,
-          ]
+        package: [cache, survival_list_api, survival_list_repository]
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
     with:
       working_directory: client/packages/${{ matrix.package }}/
@@ -31,7 +25,7 @@ jobs:
   analyze-flutter-packages:
     strategy:
       matrix:
-        package: [authentication_repository]
+        package: [authentication_repository, grpc_survival_list_api]
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
     with:
       flutter_channel: stable
