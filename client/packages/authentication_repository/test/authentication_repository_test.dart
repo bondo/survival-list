@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 import 'package:authentication_repository/authentication_repository.dart';
+import 'package:authentication_repository/src/exceptions.dart';
 import 'package:cache/cache.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
