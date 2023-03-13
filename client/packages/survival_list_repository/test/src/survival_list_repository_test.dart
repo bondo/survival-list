@@ -70,20 +70,20 @@ void main() {
       });
     });
 
-    group('createItem', () {
-      test('makes correct api request', () {
-        const newItemTitle = 'title 4';
+    group('saveItem', () {
+      test('create new item', () {
+        const newItem = Item(
+          title: 'new item 1 title',
+        );
 
         final subject = createSubject();
 
-        expect(subject.createItem(newItemTitle), completes);
+        expect(subject.saveItem(newItem), completes);
 
-        verify(() => api.createItem(newItemTitle)).called(1);
+        verify(() => api.createItem(newItem.title)).called(1);
       });
-    });
 
-    group('updateItem', () {
-      test('makes correct api request', () {
+      test('update existing item', () {
         const newItem = Item(
           id: 1,
           title: 'new item 1 title',
@@ -91,7 +91,7 @@ void main() {
 
         final subject = createSubject();
 
-        expect(subject.updateItem(newItem), completes);
+        expect(subject.saveItem(newItem), completes);
 
         verify(() => api.updateItem(newItem)).called(1);
       });

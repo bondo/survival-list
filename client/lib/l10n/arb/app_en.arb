@@ -1,0 +1,99 @@
+{
+  "appTitle": "Survival List",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "bottomNavigationIconLabelSurvival": "Survival",
+  "bottomNavigationIconLabelItem": "Item",
+  "bottomNavigationIconLabelSchedule": "Schedule",
+  "pageSettingsTitle": "Settings",
+  "pageSettingsThemeSystem": "System Theme",
+  "pageSettingsThemeLight": "Light Theme",
+  "pageSettingsThemeDark": "Dark Theme",
+  "pageSettingsLanguageDefault": "Default Language",
+  "pageSettingsLanguageEnglish": "English",
+  "pageSettingsLanguageDanish": "Danish",
+  "pageSurvivalTitle": "Survival Items",
+  "pageSurvivalItemTitle": "Survival Item {i}",
+  "@pageSurvivalItemTitle": {
+    "placeholders": {
+      "i": {}
+    }
+  },
+  "pageItemCreateTitle": "Create new todo",
+
+  "scheduleAppBarTitle": "Flutter Items",
+  "@scheduleAppBarTitle": {
+    "description": "Title text shown in the AppBar of the Items Overview Page"
+  },
+  "scheduleFilterTooltip": "Filter",
+  "@scheduleFilterTooltip": {
+    "description": "Tooltip text shown in the filter dropdown of the Items Overview Page"
+  },
+  "scheduleFilterAll": "All",
+  "@scheduleFilterAll": {
+    "description": "Text shown in the filter dropdown of the Items Overview Page for the option to display all todos"
+  },
+  "scheduleFilterActiveOnly": "Active only",
+  "@scheduleFilterActiveOnly": {
+    "description": "Text shown in the filter dropdown of the Items Overview Page for the option to display active todos only"
+  },
+  "scheduleFilterCompletedOnly": "Completed only",
+  "@scheduleFilterCompletedOnly": {
+    "description": "Text shown in the filter dropdown of the Items Overview Page for the option to display completed todos only"
+  },
+  "scheduleMarkAllCompleteButtonText": "Mark all complete",
+  "@scheduleMarkAllCompleteButtonText": {
+    "description": "Button text shown in the options dropdown of the Items Overview Page that marks all current todos as complete"
+  },
+  "scheduleClearCompletedButtonText": "Clear completed",
+  "@scheduleClearCompletedButtonText": {
+    "description": "Button text shown in the options dropdown of the Items Overview Page that deletes all completed todos"
+  },
+  "scheduleEmptyText": "No todos found with the selected filters.",
+  "@scheduleEmptyText": {
+    "description": "Text shown in the Items Overview Page when no todos are found with the selected filters"
+  },
+  "scheduleItemDeletedSnackbarText": "Item \"{todoTitle}\" deleted.",
+  "@scheduleItemDeletedSnackbarText": {
+    "description": "Snackbar text shown when a todo is deleted from the Items Overview Page",
+    "placeholders": {
+      "todoTitle": {
+        "description": "The title of the todo that was deleted"
+      }
+    }
+  },
+  "scheduleUndoDeletionButtonText": "Undo",
+  "@scheduleUndoDeletionButtonText": {
+    "description": "Button text shown in the snackbar that undoes a deletion of a todo"
+  },
+  "scheduleErrorSnackbarText": "An error occurred while loading todos.",
+  "@scheduleErrorSnackbarText": {
+    "description": "Snackbar text shown when an error occurs while loading todos"
+  },
+  "scheduleOptionsTooltip": "Options",
+  "@scheduleOptionsTooltip": {
+    "description": "Tooltip text shown in the options dropdown of the Items Overview Page"
+  },
+
+  "editItemEditAppBarTitle": "Edit Item",
+  "@editItemEditAppBarTitle": {
+    "description": "Title text shown in the AppBar of the Item Edit Page when editing an existing todo"
+  },
+  "editItemAddAppBarTitle": "Add Item",
+  "@editItemAddAppBarTitle": {
+    "description": "Title text shown in the AppBar of the Item Edit Page when adding a new todo"
+  },
+  "editItemTitleLabel": "Title",
+  "@editItemTitleLabel": {
+    "description": "Label text shown in the title input field of the Item Edit Page"
+  },
+  "editItemDescriptionLabel": "Description",
+  "@editItemDescriptionLabel": {
+    "description": "Label text shown in the description input field of the Item Edit Page"
+  },
+  "editItemSaveButtonTooltip": "Save changes",
+  "@editItemSaveButtonTooltip": {
+    "description": "Tooltip text shown in the save button on the Item Edit Page"
+  }
+}

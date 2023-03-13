@@ -4,12 +4,12 @@ import 'package:meta/meta.dart';
 @immutable
 class Item extends Equatable {
   const Item({
-    required this.id,
     required this.title,
+    this.id,
     this.isCompleted = false,
   });
 
-  final int id;
+  final int? id;
   final String title;
   final bool isCompleted;
 

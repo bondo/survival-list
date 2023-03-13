@@ -12,11 +12,14 @@ class SurvivalListRepository {
   /// Provides a [Stream] of all items.
   Stream<List<Item>> getItems() => _api.getItems();
 
-  /// Creates an unchecked `item` with [title].
-  Future<void> createItem(String title) => _api.createItem(title);
-
-  /// Updates an [item]
-  Future<void> updateItem(Item item) => _api.updateItem(item);
+  /// Saves an [item]
+  Future<void> saveItem(Item item) {
+    if (item.id == null) {
+      return _api.createItem(item.title);
+    } else {
+      return _api.updateItem(item);
+    }
+  }
 
   /// Delete the `todo` with the given id.
   Future<void> deleteItem(int id) => _api.deleteItem(id);

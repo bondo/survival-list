@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list/settings/settings_controller.dart';
 
 /// Displays the various settings that can be customized by the user.
@@ -15,7 +15,7 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.pageSettingsTitle),

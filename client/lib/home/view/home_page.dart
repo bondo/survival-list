@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:survival_list/app/app.dart';
+import 'package:survival_list/edit_item/edit_item.dart';
 import 'package:survival_list/home/home.dart';
+import 'package:survival_list/schedule/schedule.dart';
+// import 'package:survival_list/survival/survival.dart';
+// import 'package:survival_list/todos/todos.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,34 +13,81 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final user = context.select((AppBloc bloc) => bloc.state.user);
+    return BlocProvider(
+      create: (_) => HomeCubit(),
+      child: const HomeView(),
+    );
+  }
+}
+
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedTab = context.select((HomeCubit cubit) => cubit.state.tab);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: <Widget>[
-          IconButton(
-            key: const Key('homePage_logout_iconButton'),
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              context.read<AppBloc>().add(const AppLogoutRequested());
-            },
-          )
-        ],
+      body: IndexedStack(
+        index: selectedTab.index,
+        // children: const [SurvivalPage(), TodoPage(), SchedulePage()],
+        children: const [SchedulePage(), SchedulePage(), SchedulePage()],
       ),
-      body: Align(
-        alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Avatar(photo: user.photo),
-            const SizedBox(height: 4),
-            Text(user.email ?? '', style: textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(user.name ?? '', style: textTheme.headlineSmall),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        key: const Key('homeView_addItem_floatingActionButton'),
+        onPressed: () => Navigator.of(context).push(EditItemPage.route()),
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _HomeTabButton(
+              groupValue: selectedTab,
+              value: HomeTab.survival,
+              icon: const Icon(Icons.check_box_rounded),
+              // label: l10n.bottomNavigationIconLabelSurvival,
+            ),
+            _HomeTabButton(
+              groupValue: selectedTab,
+              value: HomeTab.todo,
+              icon: const Icon(Icons.list_rounded),
+              // label: l10n.bottomNavigationIconLabelTodo,
+            ),
+            _HomeTabButton(
+              groupValue: selectedTab,
+              value: HomeTab.schedule,
+              icon: const Icon(Icons.home_rounded),
+              // label: l10n.bottomNavigationIconLabelSchedule,
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HomeTabButton extends StatelessWidget {
+  const _HomeTabButton({
+    required this.groupValue,
+    required this.value,
+    required this.icon,
+  });
+
+  final HomeTab groupValue;
+  final HomeTab value;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () => context.read<HomeCubit>().setTab(value),
+      iconSize: 32,
+      color:
+          groupValue != value ? null : Theme.of(context).colorScheme.secondary,
+      icon: icon,
     );
   }
 }

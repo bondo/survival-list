@@ -1,0 +1,79 @@
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:survival_list/schedule/schedule.dart';
+import 'package:survival_list_repository/survival_list_repository.dart';
+
+part 'schedule_event.dart';
+part 'schedule_state.dart';
+
+class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
+  ScheduleBloc({
+    required SurvivalListRepository survivalListRepository,
+  })  : _survivalListRepository = survivalListRepository,
+        super(const ScheduleState()) {
+    on<ScheduleSubscriptionRequested>(_onSubscriptionRequested);
+    on<ScheduleItemCompletionToggled>(_onItemCompletionToggled);
+    on<ScheduleItemDeleted>(_onItemDeleted);
+    on<ScheduleUndoDeletionRequested>(_onUndoDeletionRequested);
+    on<ScheduleFilterChanged>(_onFilterChanged);
+  }
+
+  final SurvivalListRepository _survivalListRepository;
+
+  Future<void> _onSubscriptionRequested(
+    ScheduleSubscriptionRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(state.copyWith(status: () => ScheduleStatus.loading));
+
+    await emit.forEach<List<Item>>(
+      _survivalListRepository.getItems(),
+      onData: (todos) => state.copyWith(
+        status: () => ScheduleStatus.success,
+        todos: () => todos,
+      ),
+      onError: (_, __) => state.copyWith(
+        status: () => ScheduleStatus.failure,
+      ),
+    );
+  }
+
+  Future<void> _onItemCompletionToggled(
+    ScheduleItemCompletionToggled event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final newItem = event.item.copyWith(isCompleted: event.isCompleted);
+    await _survivalListRepository.saveItem(newItem);
+  }
+
+  Future<void> _onItemDeleted(
+    ScheduleItemDeleted event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    if (event.item.id != null) {
+      emit(state.copyWith(lastDeletedItem: () => event.item));
+      await _survivalListRepository.deleteItem(event.item.id!);
+    }
+  }
+
+  Future<void> _onUndoDeletionRequested(
+    ScheduleUndoDeletionRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    assert(
+      state.lastDeletedItem != null,
+      'Last deleted item can not be null.',
+    );
+
+    final item = state.lastDeletedItem!;
+    emit(state.copyWith(lastDeletedItem: () => null));
+    await _survivalListRepository.saveItem(item);
+  }
+
+  void _onFilterChanged(
+    ScheduleFilterChanged event,
+    Emitter<ScheduleState> emit,
+  ) {
+    emit(state.copyWith(filter: () => event.filter));
+  }
+}

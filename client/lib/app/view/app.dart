@@ -2,8 +2,8 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:survival_list/app/app.dart';
+import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list/settings/settings_controller.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -72,8 +72,7 @@ class AppView extends StatelessWidget {
       supportedLocales: AppLocalizations.supportedLocales,
 
       // Title
-      onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
 
       // Theme
       theme: ThemeData(),

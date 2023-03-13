@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list/src/survival/survival_item.dart';
 import 'package:survival_list/src/survival/survival_item_details_view.dart';
 
@@ -15,7 +15,7 @@ class SurvivalItemListTile extends StatefulWidget {
 class _SurvivalItemListTileState extends State<SurvivalItemListTile> {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = context.l10n;
     return CheckboxListTile(
       title: Text(l10n.pageSurvivalItemTitle(widget.item.id)),
       value: widget.item.checked,
