@@ -129,6 +129,23 @@ void main() {
           throwsA(isA<LogInWithGoogleFailure>()),
         );
       });
+
+      test('converts LogInWithGoogleFailure when expected exception occurs',
+          () async {
+        when(() => firebaseAuth.signInWithCredential(any())).thenThrow(
+          firebase_auth.FirebaseAuthException(code: 'user-disabled'),
+        );
+        expect(
+          authenticationRepository.logInWithGoogle(),
+          throwsA(
+            isA<LogInWithGoogleFailure>().having(
+              (e) => e.message,
+              'message',
+              contains('This user has been disabled'),
+            ),
+          ),
+        );
+      });
     });
 
     group('logOut', () {
@@ -195,6 +212,20 @@ void main() {
           () => cache.read<User>(key: AuthenticationRepository.userCacheKey),
         ).thenReturn(user);
         expect(authenticationRepository.currentUser, equals(user));
+      });
+    });
+
+    group('currentToken', () {
+      test('returns value when calling currentToken', () async {
+        final firebaseUser = MockFirebaseUser();
+        const idToken = 'id-token';
+        when(firebaseUser.getIdToken).thenAnswer((_) => Future.value(idToken));
+        when(() => firebaseAuth.currentUser).thenReturn(firebaseUser);
+
+        final resultToken = await authenticationRepository.currentToken;
+
+        verify(() => firebaseAuth.currentUser).called(1);
+        expect(resultToken, equals(idToken));
       });
     });
   });
