@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/home/home.dart';
 import 'package:survival_list/l10n/l10n.dart';
 
 class HomeNavigationBar extends StatelessWidget {
-  const HomeNavigationBar({super.key});
+  const HomeNavigationBar({
+    required this.onNavigate,
+    required this.selectedTab,
+    super.key,
+  });
+
+  final ValueChanged<HomeTab> onNavigate;
+  final HomeTab selectedTab;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final selectedTab = context.select((HomeCubit cubit) => cubit.state.tab);
 
     return BottomNavigationBar(
       items: HomeTab.values.map(
@@ -33,8 +38,7 @@ class HomeNavigationBar extends StatelessWidget {
           }
         },
       ).toList(),
-      onTap: (int index) =>
-          context.read<HomeCubit>().setTab(HomeTab.values[index]),
+      onTap: (int index) => onNavigate(HomeTab.values[index]),
       currentIndex: selectedTab.index,
     );
   }

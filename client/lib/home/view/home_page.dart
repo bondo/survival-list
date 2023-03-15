@@ -48,7 +48,10 @@ class HomeView extends StatelessWidget {
         onPressed: () => Navigator.of(context).push(EditItemPage.route()),
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: const HomeNavigationBar(),
+      bottomNavigationBar: HomeNavigationBar(
+        onNavigate: context.read<HomeCubit>().setTab,
+        selectedTab: selectedTab,
+      ),
     );
   }
 }
