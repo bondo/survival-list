@@ -20,5 +20,6 @@
       "i": {}
     }
   },
-  "pageItemCreateTitle": "Opret ny todo"
+  "pageItemCreateTitle": "Opret ny todo",
+  "scheduleOptionsLogOut": "Log ud"
 }

@@ -1,3 +1,4 @@
+import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +14,7 @@ class SchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ScheduleBloc(
+        authenticationRepository: context.read<AuthenticationRepository>(),
         survivalListRepository: context.read<SurvivalListRepository>(),
       )..add(const ScheduleSubscriptionRequested()),
       child: const ScheduleView(),

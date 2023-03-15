@@ -44,6 +44,14 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 
 See [packages/grpc_survival_list_client/README.md](./packages/grpc_survival_list_client/README.md)
 
+## Remote debug
+
+- Enable usb debugger
+- Connect phone with usb
+- Run `adb tcpip 5555`
+- Disconnect usb
+- Run `adb connect 10.244.34.201`
+
 ## Manual client build
 
 ### aab

@@ -86,7 +86,7 @@ class SurvivalItemListView extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.list),
-            label: l10n.bottomNavigationIconLabelItem,
+            label: l10n.bottomNavigationIconLabelTodo,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.home),

@@ -4,7 +4,7 @@
     "description": "The title of the application"
   },
   "bottomNavigationIconLabelSurvival": "Survival",
-  "bottomNavigationIconLabelItem": "Item",
+  "bottomNavigationIconLabelTodo": "Todo",
   "bottomNavigationIconLabelSchedule": "Schedule",
   "pageSettingsTitle": "Settings",
   "pageSettingsThemeSystem": "System Theme",
@@ -95,5 +95,6 @@
   "editItemSaveButtonTooltip": "Save changes",
   "@editItemSaveButtonTooltip": {
     "description": "Tooltip text shown in the save button on the Item Edit Page"
-  }
+  },
+  "scheduleOptionsLogOut": "Log out"
 }

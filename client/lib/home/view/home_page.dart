@@ -30,64 +30,25 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       body: IndexedStack(
         index: selectedTab.index,
-        // children: const [SurvivalPage(), TodoPage(), SchedulePage()],
-        children: const [SchedulePage(), SchedulePage(), SchedulePage()],
+        children: HomeTab.values.map(
+          (tab) {
+            switch (tab) {
+              case HomeTab.survival:
+                return const SchedulePage(); // SurvivalPage
+              case HomeTab.todo:
+                return const SchedulePage(); // TodoPage
+              case HomeTab.schedule:
+                return const SchedulePage();
+            }
+          },
+        ).toList(),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         key: const Key('homeView_addItem_floatingActionButton'),
         onPressed: () => Navigator.of(context).push(EditItemPage.route()),
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _HomeTabButton(
-              groupValue: selectedTab,
-              value: HomeTab.survival,
-              icon: const Icon(Icons.check_box_rounded),
-              // label: l10n.bottomNavigationIconLabelSurvival,
-            ),
-            _HomeTabButton(
-              groupValue: selectedTab,
-              value: HomeTab.todo,
-              icon: const Icon(Icons.list_rounded),
-              // label: l10n.bottomNavigationIconLabelTodo,
-            ),
-            _HomeTabButton(
-              groupValue: selectedTab,
-              value: HomeTab.schedule,
-              icon: const Icon(Icons.home_rounded),
-              // label: l10n.bottomNavigationIconLabelSchedule,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeTabButton extends StatelessWidget {
-  const _HomeTabButton({
-    required this.groupValue,
-    required this.value,
-    required this.icon,
-  });
-
-  final HomeTab groupValue;
-  final HomeTab value;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => context.read<HomeCubit>().setTab(value),
-      iconSize: 32,
-      color:
-          groupValue != value ? null : Theme.of(context).colorScheme.secondary,
-      icon: icon,
+      bottomNavigationBar: const HomeNavigationBar(),
     );
   }
 }

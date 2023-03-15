@@ -45,3 +45,7 @@ class ScheduleFilterChanged extends ScheduleEvent {
   @override
   List<Object> get props => [filter];
 }
+
+class ScheduleLogoutRequested extends ScheduleEvent {
+  const ScheduleLogoutRequested();
+}
