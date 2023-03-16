@@ -1,12 +1,13 @@
 # Use the official Rust image.
 # https://hub.docker.com/_/rust
-FROM rust:1.67.0-alpine3.17 as build
+FROM rust:1.68.0-alpine3.17 as build
 
 RUN apk add --no-cache musl-dev
 
 RUN rustup component add clippy
 
 ARG RUSTFLAGS="-Dwarnings"
+ARG CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
 
 # Copy local code to the container image.
 WORKDIR /usr/src/app

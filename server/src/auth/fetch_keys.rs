@@ -51,5 +51,5 @@ pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys>
 }
 
 pub async fn fetch_keys() -> Result<JwkKeys> {
-    return fetch_keys_for_config(&jwk::get_configuration()).await;
+    fetch_keys_for_config(&jwk::get_configuration()).await
 }
