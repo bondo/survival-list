@@ -1,7 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
 use anyhow::Context;
-use futures_core::Future;
 use jsonwebtoken::TokenData;
 use log::info;
 use tokio::{
@@ -10,7 +9,7 @@ use tokio::{
         watch::{self, Receiver, Sender},
         RwLock,
     },
-    task, time,
+    time,
 };
 
 use super::{
@@ -43,10 +42,6 @@ pub struct JwkAuth {
     cleanup: Arc<Cleanup>,
 }
 
-fn await_sync<F: Future>(future: F) -> F::Output {
-    task::block_in_place(|| Handle::current().block_on(future))
-}
-
 impl Drop for JwkAuth {
     fn drop(&mut self) {
         self.cleanup.send_exit_signal();
@@ -72,7 +67,7 @@ impl JwkAuth {
     }
 
     pub fn verify(&self, token: &str) -> Option<TokenData<Claims>> {
-        let verifier = await_sync(self.verifier.read());
+        let verifier = Handle::current().block_on(self.verifier.read());
         verifier.verify(token)
     }
 
