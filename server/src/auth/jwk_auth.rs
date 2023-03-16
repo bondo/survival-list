@@ -43,7 +43,7 @@ pub struct JwkAuth {
     cleanup: Arc<Cleanup>,
 }
 
-fn await_sync<F: Future>(future: F) -> F::Output {
+fn block_on<F: Future>(future: F) -> F::Output {
     task::block_in_place(|| Handle::current().block_on(future))
 }
 
@@ -72,7 +72,7 @@ impl JwkAuth {
     }
 
     pub fn verify(&self, token: &str) -> Option<TokenData<Claims>> {
-        let verifier = await_sync(self.verifier.read());
+        let verifier = block_on(self.verifier.read());
         verifier.verify(token)
     }
 
