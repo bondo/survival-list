@@ -9,7 +9,10 @@ abstract class SurvivalListApi {
   const SurvivalListApi();
 
   /// Provides a [Stream] of all items.
-  Stream<List<Item>> getItems();
+  Stream<List<Item>> get items;
+
+  /// Provides a [Stream] of fetching states.
+  Stream<bool> get isFetching;
 
   /// Creates an unchecked `item` with [title].
   Future<void> createItem(String title);

@@ -33,7 +33,7 @@ void main() {
 
     setUp(() {
       api = MockSurvivalListApi();
-      when(() => api.getItems()).thenAnswer((_) => Stream.value(items));
+      when(() => api.items).thenAnswer((_) => Stream.value(items));
       when(() => api.createItem(any())).thenAnswer((_) async {});
       when(() => api.updateItem(any())).thenAnswer((_) async {});
       when(() => api.deleteItem(any())).thenAnswer((_) async {});
@@ -55,16 +55,16 @@ void main() {
         final subject = createSubject();
 
         expect(
-          subject.getItems(),
+          subject.items,
           isNot(throwsA(anything)),
         );
 
-        verify(() => api.getItems()).called(1);
+        verify(() => api.items).called(1);
       });
 
       test('returns stream of current list items', () {
         expect(
-          createSubject().getItems(),
+          createSubject().items,
           emits(items),
         );
       });

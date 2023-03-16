@@ -17,8 +17,7 @@ void main() async {
   await authenticationRepository.user.first;
 
   final survivalListApi =
-      GrpcSurvivalListApi(authenticationRepository: authenticationRepository)
-        ..startServerSubscription();
+      GrpcSurvivalListApi(authenticationRepository: authenticationRepository);
 
   await bootstrap(
     authenticationRepository: authenticationRepository,

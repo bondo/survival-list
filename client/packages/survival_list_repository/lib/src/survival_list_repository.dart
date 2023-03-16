@@ -10,7 +10,10 @@ class SurvivalListRepository {
   final SurvivalListApi _api;
 
   /// Provides a [Stream] of all items.
-  Stream<List<Item>> getItems() => _api.getItems();
+  Stream<List<Item>> get items => _api.items;
+
+  /// Provides a [Stream] of fetching states.
+  Stream<bool> get isFetching => _api.isFetching;
 
   /// Saves an [item]
   Future<void> saveItem(Item item) {

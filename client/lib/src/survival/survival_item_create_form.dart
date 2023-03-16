@@ -84,12 +84,12 @@ class _SurvivalItemCreateFormState extends State<SurvivalItemCreateForm> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final snackBarController =
-                        ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
-                  }
+                  // if (_formKey.currentState!.validate()) {
+                  //   final snackBarController =
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //     const SnackBar(content: Text('Processing Data')),
+                  //   );
+                  // }
                 },
                 child: const Text('Submit'),
               ),
