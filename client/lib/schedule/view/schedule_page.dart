@@ -101,33 +101,31 @@ class ScheduleView extends StatelessWidget {
               }
             }
 
-            return CupertinoScrollbar(
-              child: ListView(
-                children: [
-                  for (final item in state.filteredItems)
-                    ItemListTile(
-                      item: item,
-                      onToggleCompleted: (isCompleted) {
-                        context.read<ScheduleBloc>().add(
-                              ScheduleItemCompletionToggled(
-                                item: item,
-                                isCompleted: isCompleted,
-                              ),
-                            );
-                      },
-                      onDismissed: (_) {
-                        context
-                            .read<ScheduleBloc>()
-                            .add(ScheduleItemDeleted(item));
-                      },
-                      onTap: () {
-                        Navigator.of(context).push(
-                          EditItemPage.route(item: item),
-                        );
-                      },
-                    ),
-                ],
-              ),
+            return ListView(
+              children: [
+                for (final item in state.filteredItems)
+                  ItemListTile(
+                    item: item,
+                    onToggleCompleted: (isCompleted) {
+                      context.read<ScheduleBloc>().add(
+                            ScheduleItemCompletionToggled(
+                              item: item,
+                              isCompleted: isCompleted,
+                            ),
+                          );
+                    },
+                    onDismissed: (_) {
+                      context
+                          .read<ScheduleBloc>()
+                          .add(ScheduleItemDeleted(item));
+                    },
+                    onTap: () {
+                      Navigator.of(context).push(
+                        EditItemPage.route(item: item),
+                      );
+                    },
+                  ),
+              ],
             );
           },
         ),
