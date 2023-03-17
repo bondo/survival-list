@@ -123,7 +123,15 @@ class SurvivalListApi {
   }
 
   Future<void> updateItem(Item item) {
-    // TODO(bba): implement updateItem
+    // TODO(bba): implement updateItem (everything but checked status)
+    throw UnimplementedError();
+  }
+
+  Future<void> toggleItem({
+    required Item item,
+    required bool isCompleted,
+  }) {
+    // TODO(bba): implement toggleItem
     throw UnimplementedError();
   }
 }

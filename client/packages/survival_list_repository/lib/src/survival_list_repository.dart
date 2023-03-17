@@ -22,6 +22,13 @@ class SurvivalListRepository {
   /// Updates an [Item]
   Future<void> updateItem(Item item) => _api.updateItem(item);
 
+  /// Toggles an [Item]
+  Future<void> toggleItem({
+    required Item item,
+    required bool isCompleted,
+  }) =>
+      _api.toggleItem(item: item, isCompleted: isCompleted);
+
   /// Delete the `todo` with the given id.
   Future<void> deleteItem(int id) => _api.deleteItem(id);
 }

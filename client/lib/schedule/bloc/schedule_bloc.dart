@@ -54,8 +54,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     ScheduleItemCompletionToggled event,
     Emitter<ScheduleState> emit,
   ) async {
-    final newItem = event.item.copyWith(isCompleted: event.isCompleted);
-    await _survivalListRepository.updateItem(newItem);
+    await _survivalListRepository.toggleItem(item: event.item, isCompleted: event.isCompleted);
   }
 
   Future<void> _onItemDeleted(
