@@ -259,6 +259,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0+1"
+  generated_grpc_api:
+    dependency: transitive
+    description:
+      path: "packages/generated_grpc_api"
+      relative: true
+    source: path
+    version: "0.0.0"
   google_identity_services_web:
     dependency: transitive
     description:
