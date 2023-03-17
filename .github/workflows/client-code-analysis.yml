@@ -46,12 +46,7 @@ jobs:
   analyze-flutter-packages:
     strategy:
       matrix:
-        package:
-          [
-            authentication_repository,
-            survival_list_api,
-            survival_list_repository,
-          ]
+        package: [authentication_repository, survival_list_repository]
 
     defaults:
       run:

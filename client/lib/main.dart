@@ -11,7 +11,6 @@ import 'package:survival_list/app/app.dart';
 import 'package:survival_list/firebase_options.dart';
 import 'package:survival_list/settings/settings_controller.dart';
 import 'package:survival_list/settings/settings_service.dart';
-import 'package:survival_list_api/survival_list_api.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
 void main() async {
@@ -31,7 +30,7 @@ void main() async {
   await authenticationRepository.user.first;
 
   final survivalListRepository = SurvivalListRepository(
-    api: SurvivalListApi(authenticationRepository: authenticationRepository),
+    authenticationRepository: authenticationRepository,
   );
 
   // TODO(bba): Blocify

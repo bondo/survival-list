@@ -34,7 +34,7 @@ packages:
     source: hosted
     version: "2.10.0"
   authentication_repository:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../authentication_repository"
       relative: true
@@ -96,7 +96,7 @@ packages:
     source: hosted
     version: "3.0.2"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
@@ -183,7 +183,7 @@ packages:
     source: sdk
     version: "0.0.0"
   generated_grpc_api:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../generated_grpc_api"
       relative: true
@@ -246,7 +246,7 @@ packages:
     source: hosted
     version: "1.4.0"
   grpc:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: grpc
       sha256: a73c16e4f6a4a819be892bb2c73cc1d0b00e36095f69b0738cc91a733e3d27ba
@@ -310,7 +310,7 @@ packages:
     source: hosted
     version: "0.2.0"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       sha256: "6c268b42ed578a53088d834796959e4a1814b5e9e164f147f580a386e5decf42"
@@ -342,7 +342,7 @@ packages:
     source: hosted
     version: "3.7.0"
   protobuf:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: protobuf
       sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
@@ -402,13 +402,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  survival_list_api:
-    dependency: "direct main"
-    description:
-      path: "../survival_list_api"
-      relative: true
-    source: path
-    version: "0.1.0+1"
   term_glyph:
     dependency: transitive
     description:
