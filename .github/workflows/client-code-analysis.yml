@@ -81,3 +81,33 @@ jobs:
 
       - name: 🕵️ Analyze
         run: flutter analyze lib
+
+  analyze-client:
+    defaults:
+      run:
+        working-directory: client/
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: 📦 Install Dependencies
+        run: |
+          flutter pub global activate very_good_cli
+          very_good --analytics false
+          very_good packages get --recursive
+
+      # - name: ✨ Check Formatting
+      #   run: dart format --set-exit-if-changed lib
+
+      - name: 🕵️ Analyze
+        run: flutter analyze lib
