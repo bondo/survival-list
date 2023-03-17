@@ -22,7 +22,6 @@ class SurvivalListApi {
 
   final AuthenticationRepository _authenticationRepository;
 
-  final _isCreatingStreamController = BehaviorSubject<bool>.seeded(false);
   final _isFetchingStreamController = BehaviorSubject<bool>.seeded(false);
   final _itemsStreamController =
       BehaviorSubject<Map<int, Item>>.seeded(HashMap());
@@ -103,18 +102,11 @@ class SurvivalListApi {
   }
 
   Future<void> createItem(String title) async {
-    assert(!_isCreatingStreamController.value, 'Cannot create while creating');
+    final response = await _client.createTask(CreateTaskRequest(title: title));
 
-    _isCreatingStreamController.add(true);
-    try {
-      final response =
-          await _client.createTask(CreateTaskRequest(title: title));
-      final newValue = HashMap<int, Item>.from(_itemsStreamController.value);
-      newValue[response.id] = Item(id: response.id, title: response.title);
-      _itemsStreamController.add(newValue);
-    } finally {
-      _isCreatingStreamController.add(false);
-    }
+    final newValue = HashMap<int, Item>.from(_itemsStreamController.value);
+    newValue[response.id] = Item(id: response.id, title: response.title);
+    _itemsStreamController.add(newValue);
   }
 
   Future<void> deleteItem(int id) {
@@ -124,10 +116,6 @@ class SurvivalListApi {
 
   Stream<Map<int, Item>> get items {
     return _itemsStreamController.asBroadcastStream();
-  }
-
-  Stream<bool> get isCreating {
-    return _isCreatingStreamController.asBroadcastStream();
   }
 
   Stream<bool> get isFetching {

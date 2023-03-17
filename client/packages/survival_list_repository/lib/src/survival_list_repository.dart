@@ -1,4 +1,3 @@
-import 'package:rxdart/rxdart.dart';
 import 'package:survival_list_api/survival_list_api.dart';
 
 /// {@template survival_list_repository}
@@ -15,9 +14,7 @@ class SurvivalListRepository {
       _api.items.map((items) => items.values.toList());
 
   /// Provides a [Stream] of loading states.
-  Stream<bool> get isLoading =>
-      ZipStream.zip2(_api.isCreating, _api.isFetching, (a, b) => a || b)
-          .distinct();
+  Stream<bool> get isLoading => _api.isFetching;
 
   /// Creates an [item]
   Future<void> createItem(String title) => _api.createItem(title);
