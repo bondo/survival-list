@@ -8,12 +8,12 @@ part 'edit_item_state.dart';
 class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
   EditItemBloc({
     required SurvivalListRepository survivalListRepository,
-    required Item? initialItem,
+    required Item item,
   })  : _survivalListRepository = survivalListRepository,
         super(
           EditItemState(
-            initialItem: initialItem,
-            title: initialItem?.title ?? '',
+            item: item,
+            title: item.title,
           ),
         ) {
     on<EditItemTitleChanged>(_onTitleChanged);
@@ -34,12 +34,12 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     Emitter<EditItemState> emit,
   ) async {
     emit(state.copyWith(status: EditItemStatus.loading));
-    final item = (state.initialItem ?? const Item(title: '')).copyWith(
+    final item = state.item.copyWith(
       title: state.title,
     );
 
     try {
-      await _survivalListRepository.saveItem(item);
+      await _survivalListRepository.updateItem(item);
       emit(state.copyWith(status: EditItemStatus.success));
     } catch (e) {
       emit(state.copyWith(status: EditItemStatus.failure));

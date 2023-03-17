@@ -122,7 +122,7 @@ class ScheduleView extends StatelessWidget {
                       },
                       onTap: () {
                         Navigator.of(context).push(
-                          EditItemPage.route(initialItem: item),
+                          EditItemPage.route(item: item),
                         );
                       },
                     ),

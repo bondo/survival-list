@@ -55,17 +55,15 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     final newItem = event.item.copyWith(isCompleted: event.isCompleted);
-    await _survivalListRepository.saveItem(newItem);
+    await _survivalListRepository.updateItem(newItem);
   }
 
   Future<void> _onItemDeleted(
     ScheduleItemDeleted event,
     Emitter<ScheduleState> emit,
   ) async {
-    if (event.item.id != null) {
-      emit(state.copyWith(lastDeletedItem: () => event.item));
-      await _survivalListRepository.deleteItem(event.item.id!);
-    }
+    emit(state.copyWith(lastDeletedItem: () => event.item));
+    await _survivalListRepository.deleteItem(event.item.id);
   }
 
   Future<void> _onLogoutRequested(
@@ -86,7 +84,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
     final item = state.lastDeletedItem!;
     emit(state.copyWith(lastDeletedItem: () => null));
-    await _survivalListRepository.saveItem(item);
+    await _survivalListRepository.createItem(item.title);
   }
 
   void _onFilterChanged(

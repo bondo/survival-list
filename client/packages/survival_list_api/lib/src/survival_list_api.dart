@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart';
@@ -23,7 +24,8 @@ class SurvivalListApi {
 
   final _isCreatingStreamController = BehaviorSubject<bool>.seeded(false);
   final _isFetchingStreamController = BehaviorSubject<bool>.seeded(false);
-  final _itemsStreamController = BehaviorSubject<List<Item>>.seeded(const []);
+  final _itemsStreamController =
+      BehaviorSubject<Map<int, Item>>.seeded(HashMap());
 
   StreamSubscription<bool>? _userNotEmptySubscription;
 
@@ -56,7 +58,7 @@ class SurvivalListApi {
       if (isNotEmpty) {
         unawaited(_fetchItems());
       } else {
-        _itemsStreamController.add(const []);
+        _itemsStreamController.add(HashMap());
       }
     });
   }
@@ -86,11 +88,11 @@ class SurvivalListApi {
     }
 
     _pendingItemsResponse = _client.getTasks(GetTasksRequest());
-    final result = <Item>[];
+    final result = HashMap<int, Item>();
     _pendingItemsResponse!
         .map((response) => Item(id: response.id, title: response.title))
         .listen(
-      result.add,
+      (item) => result[item.id] = item,
       onDone: () {
         _pendingItemsResponse = null;
         _itemsStreamController.add(result);
@@ -101,11 +103,18 @@ class SurvivalListApi {
   }
 
   Future<void> createItem(String title) async {
-    final response = await _client.createTask(CreateTaskRequest(title: title));
-    _itemsStreamController.add([
-      ..._itemsStreamController.value,
-      Item(id: response.id, title: response.title)
-    ]);
+    assert(!_isCreatingStreamController.value, 'Cannot create while creating');
+
+    _isCreatingStreamController.add(true);
+    try {
+      final response =
+          await _client.createTask(CreateTaskRequest(title: title));
+      final newValue = HashMap<int, Item>.from(_itemsStreamController.value);
+      newValue[response.id] = Item(id: response.id, title: response.title);
+      _itemsStreamController.add(newValue);
+    } finally {
+      _isCreatingStreamController.add(false);
+    }
   }
 
   Future<void> deleteItem(int id) {
@@ -113,7 +122,7 @@ class SurvivalListApi {
     throw UnimplementedError();
   }
 
-  Stream<List<Item>> get items {
+  Stream<Map<int, Item>> get items {
     return _itemsStreamController.asBroadcastStream();
   }
 

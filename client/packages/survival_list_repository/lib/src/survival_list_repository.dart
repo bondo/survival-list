@@ -11,21 +11,19 @@ class SurvivalListRepository {
   final SurvivalListApi _api;
 
   /// Provides a [Stream] of all items.
-  Stream<List<Item>> get items => _api.items;
+  Stream<List<Item>> get items =>
+      _api.items.map((items) => items.values.toList());
 
   /// Provides a [Stream] of loading states.
   Stream<bool> get isLoading =>
       ZipStream.zip2(_api.isCreating, _api.isFetching, (a, b) => a || b)
           .distinct();
 
-  /// Saves an [item]
-  Future<void> saveItem(Item item) {
-    if (item.id == null) {
-      return _api.createItem(item.title);
-    } else {
-      return _api.updateItem(item);
-    }
-  }
+  /// Creates an [item]
+  Future<void> createItem(String title) => _api.createItem(title);
+
+  /// Updates an [item]
+  Future<void> updateItem(Item item) => _api.updateItem(item);
 
   /// Delete the `todo` with the given id.
   Future<void> deleteItem(int id) => _api.deleteItem(id);

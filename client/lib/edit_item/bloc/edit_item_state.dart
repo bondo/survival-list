@@ -11,30 +11,28 @@ extension EditItemStatusX on EditItemStatus {
 
 class EditItemState extends Equatable {
   const EditItemState({
+    required this.item,
+    required this.title,
     this.status = EditItemStatus.initial,
-    this.initialItem,
-    this.title = '',
   });
 
   final EditItemStatus status;
-  final Item? initialItem;
+  final Item item;
   final String title;
-
-  bool get isNewItem => initialItem == null;
 
   EditItemState copyWith({
     EditItemStatus? status,
-    Item? initialItem,
+    Item? item,
     String? title,
     String? description,
   }) {
     return EditItemState(
       status: status ?? this.status,
-      initialItem: initialItem ?? this.initialItem,
+      item: item ?? this.item,
       title: title ?? this.title,
     );
   }
 
   @override
-  List<Object?> get props => [status, initialItem, title];
+  List<Object?> get props => [status, item, title];
 }

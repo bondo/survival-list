@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:survival_list/edit_item/edit_item.dart';
+import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/home/home.dart';
 import 'package:survival_list/schedule/schedule.dart';
 // import 'package:survival_list/survival/survival.dart';
@@ -45,7 +45,7 @@ class HomeView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('homeView_addItem_floatingActionButton'),
-        onPressed: () => Navigator.of(context).push(EditItemPage.route()),
+        onPressed: () => Navigator.of(context).push(CreateItemPage.route()),
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: HomeNavigationBar(
