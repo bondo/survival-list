@@ -17,16 +17,67 @@ jobs:
   analyze-dart-packages:
     strategy:
       matrix:
-        package: [cache, survival_list_repository]
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
-    with:
-      working_directory: client/packages/${{ matrix.package }}/
+        package: [cache]
+
+    defaults:
+      run:
+        working-directory: client/packages/${{ matrix.package }}/
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🎯 Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: 📦 Install Dependencies
+        run: dart pub get
+
+      - name: ✨ Check Formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: 🕵️ Analyze
+        run: dart analyze --fatal-infos --fatal-warnings lib
 
   analyze-flutter-packages:
     strategy:
       matrix:
-        package: [authentication_repository, survival_list_api]
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
-    with:
-      flutter_channel: stable
-      working_directory: client/packages/${{ matrix.package }}/
+        package:
+          [
+            authentication_repository,
+            survival_list_api,
+            survival_list_repository,
+          ]
+
+    defaults:
+      run:
+        working-directory: client/packages/${{ matrix.package }}/
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: 📦 Install Dependencies
+        run: |
+          flutter pub global activate very_good_cli
+          very_good --analytics false
+          very_good packages get --recursive
+
+      - name: ✨ Check Formatting
+        run: dart format --set-exit-if-changed lib
+
+      - name: 🕵️ Analyze
+        run: flutter analyze lib
