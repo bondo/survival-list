@@ -16,10 +16,10 @@ class SurvivalListRepository {
   /// Provides a [Stream] of loading states.
   Stream<bool> get isLoading => _api.isFetching;
 
-  /// Creates an [item]
+  /// Creates an [Item]
   Future<void> createItem(String title) => _api.createItem(title);
 
-  /// Updates an [item]
+  /// Updates an [Item]
   Future<void> updateItem(Item item) => _api.updateItem(item);
 
   /// Delete the `todo` with the given id.
