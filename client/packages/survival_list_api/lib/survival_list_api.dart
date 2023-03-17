@@ -1,5 +1,4 @@
-/// The interface and models for an API providing access to
-/// the Survival List server.
+/// The local interface for the Survival List API.
 library survival_list_api;
 
 export 'src/models/models.dart';

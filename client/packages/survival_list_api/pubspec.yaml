@@ -7,10 +7,15 @@ environment:
   sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
+  authentication_repository:
+    path: ../authentication_repository
   equatable: ^2.0.5
+  grpc: ^3.1.0
   meta: ^1.8.0
+  protobuf: ^2.1.0
+  rxdart: ^0.27.7
 
 dev_dependencies:
-  mocktail: ^0.3.0
-  test: ^1.19.2
+  build_runner: ^2.3.3
+  protoc_builder: ^0.3.1
   very_good_analysis: ^4.0.0

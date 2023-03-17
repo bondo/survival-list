@@ -24,25 +24,16 @@ dependencies:
     sdk: flutter
   font_awesome_flutter: ^10.4.0
   formz: ^0.5.0+1
-  grpc: ^3.1.0 # TODO(bba): Move to grpc_survival_list_api package
-  grpc_survival_list_api: # TODO(bba): Don't use directly
-    path: packages/grpc_survival_list_api
-  grpc_survival_list_client: # TODO(bba): Don't use directly
-    path: packages/grpc_survival_list_client
   intl: ^0.17.0
   rxdart: ^0.27.7
   shared_preferences: ^2.0.17 # TODO(bba): Move to settings repository
-  survival_list_api: # TODO(bba): Don't use directly
+  survival_list_api:
     path: packages/survival_list_api
   survival_list_repository:
     path: packages/survival_list_repository
 
 dev_dependencies:
-  bloc_test: ^9.1.1
   flutter_lints: ^2.0.0
-  flutter_test:
-    sdk: flutter
-  mocktail: ^0.3.0
   very_good_analysis: ^4.0.0+1
 
 flutter:
