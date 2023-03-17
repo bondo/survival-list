@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:authentication_repository/authentication_repository.dart';
+import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:survival_list_api/generated/api/v1/api.pbgrpc.dart';
 import 'package:survival_list_api/survival_list_api.dart';
 
 /// {@template survival_list_api}

@@ -10,12 +10,12 @@ dependencies:
   authentication_repository:
     path: ../authentication_repository
   equatable: ^2.0.5
+  generated_grpc_api:
+    path: ../generated_grpc_api
   grpc: ^3.1.0
   meta: ^1.8.0
   protobuf: ^2.1.0
   rxdart: ^0.27.7
 
 dev_dependencies:
-  build_runner: ^2.3.3
-  protoc_builder: ^0.3.1
   very_good_analysis: ^4.0.0

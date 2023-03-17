@@ -7,6 +7,6 @@ targets:
     builders:
       protoc_builder:
         options:
-          out_dir: "lib/generated"
+          out_dir: "lib"
           grpc: true
           use_installed_protoc: true
