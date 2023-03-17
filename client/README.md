@@ -42,7 +42,7 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 
 ### Update generated proto files
 
-See [packages/generated_grpc_ap/README.md](./packages/generated_grpc_ap/README.md)
+See [packages/generated_grpc_api/README.md](./packages/generated_grpc_api/README.md)
 
 ## Remote debug
 
