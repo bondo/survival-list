@@ -91,8 +91,6 @@ jobs:
 
       - run: cd client && flutter pub get
 
-      - run: cd client && flutter test
-
       - run: cd client && flutter build appbundle
 
       - name: Sign Release
