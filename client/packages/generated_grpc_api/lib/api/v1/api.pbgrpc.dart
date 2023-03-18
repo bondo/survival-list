@@ -20,6 +20,24 @@ class APIClient extends $grpc.Client {
           ($0.CreateTaskRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.CreateTaskResponse.fromBuffer(value));
+  static final _$updateTask =
+      $grpc.ClientMethod<$0.UpdateTaskRequest, $0.UpdateTaskResponse>(
+          '/api.v1.API/UpdateTask',
+          ($0.UpdateTaskRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.UpdateTaskResponse.fromBuffer(value));
+  static final _$toggleTaskCompleted = $grpc.ClientMethod<
+          $0.ToggleTaskCompletedRequest, $0.ToggleTaskCompletedResponse>(
+      '/api.v1.API/ToggleTaskCompleted',
+      ($0.ToggleTaskCompletedRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.ToggleTaskCompletedResponse.fromBuffer(value));
+  static final _$deleteTask =
+      $grpc.ClientMethod<$0.DeleteTaskRequest, $0.DeleteTaskResponse>(
+          '/api.v1.API/DeleteTask',
+          ($0.DeleteTaskRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.DeleteTaskResponse.fromBuffer(value));
   static final _$getTasks =
       $grpc.ClientMethod<$0.GetTasksRequest, $0.GetTasksResponse>(
           '/api.v1.API/GetTasks',
@@ -36,6 +54,24 @@ class APIClient extends $grpc.Client {
       $0.CreateTaskRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$createTask, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.UpdateTaskResponse> updateTask(
+      $0.UpdateTaskRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$updateTask, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ToggleTaskCompletedResponse> toggleTaskCompleted(
+      $0.ToggleTaskCompletedRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$toggleTaskCompleted, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.DeleteTaskResponse> deleteTask(
+      $0.DeleteTaskRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$deleteTask, request, options: options);
   }
 
   $grpc.ResponseStream<$0.GetTasksResponse> getTasks($0.GetTasksRequest request,
@@ -57,6 +93,29 @@ abstract class APIServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.CreateTaskRequest.fromBuffer(value),
         ($0.CreateTaskResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UpdateTaskRequest, $0.UpdateTaskResponse>(
+        'UpdateTask',
+        updateTask_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.UpdateTaskRequest.fromBuffer(value),
+        ($0.UpdateTaskResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ToggleTaskCompletedRequest,
+            $0.ToggleTaskCompletedResponse>(
+        'ToggleTaskCompleted',
+        toggleTaskCompleted_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.ToggleTaskCompletedRequest.fromBuffer(value),
+        ($0.ToggleTaskCompletedResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DeleteTaskRequest, $0.DeleteTaskResponse>(
+        'DeleteTask',
+        deleteTask_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.DeleteTaskRequest.fromBuffer(value),
+        ($0.DeleteTaskResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.GetTasksRequest, $0.GetTasksResponse>(
         'GetTasks',
         getTasks_Pre,
@@ -71,6 +130,22 @@ abstract class APIServiceBase extends $grpc.Service {
     return createTask(call, await request);
   }
 
+  $async.Future<$0.UpdateTaskResponse> updateTask_Pre($grpc.ServiceCall call,
+      $async.Future<$0.UpdateTaskRequest> request) async {
+    return updateTask(call, await request);
+  }
+
+  $async.Future<$0.ToggleTaskCompletedResponse> toggleTaskCompleted_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.ToggleTaskCompletedRequest> request) async {
+    return toggleTaskCompleted(call, await request);
+  }
+
+  $async.Future<$0.DeleteTaskResponse> deleteTask_Pre($grpc.ServiceCall call,
+      $async.Future<$0.DeleteTaskRequest> request) async {
+    return deleteTask(call, await request);
+  }
+
   $async.Stream<$0.GetTasksResponse> getTasks_Pre($grpc.ServiceCall call,
       $async.Future<$0.GetTasksRequest> request) async* {
     yield* getTasks(call, await request);
@@ -78,6 +153,12 @@ abstract class APIServiceBase extends $grpc.Service {
 
   $async.Future<$0.CreateTaskResponse> createTask(
       $grpc.ServiceCall call, $0.CreateTaskRequest request);
+  $async.Future<$0.UpdateTaskResponse> updateTask(
+      $grpc.ServiceCall call, $0.UpdateTaskRequest request);
+  $async.Future<$0.ToggleTaskCompletedResponse> toggleTaskCompleted(
+      $grpc.ServiceCall call, $0.ToggleTaskCompletedRequest request);
+  $async.Future<$0.DeleteTaskResponse> deleteTask(
+      $grpc.ServiceCall call, $0.DeleteTaskRequest request);
   $async.Stream<$0.GetTasksResponse> getTasks(
       $grpc.ServiceCall call, $0.GetTasksRequest request);
 }
