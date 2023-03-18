@@ -22,7 +22,8 @@ jobs:
         with:
           ref: android-client-internal-testing
 
-      - id: current-version
+      - name: Read current version
+        id: current-version
         uses: jbutcher5/read-yaml@1.6
         with:
           file: "./client/pubspec.yaml"
@@ -30,7 +31,8 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - id: new-version
+      - name: Read new version
+        id: new-version
         uses: jbutcher5/read-yaml@1.6
         with:
           file: "./client/pubspec.yaml"
