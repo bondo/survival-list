@@ -24,9 +24,9 @@ impl TaskId {
     }
 }
 
-impl Into<i32> for TaskId {
-    fn into(self) -> i32 {
-        self.0
+impl From<TaskId> for i32 {
+    fn from(value: TaskId) -> Self {
+        value.0
     }
 }
 
