@@ -44,6 +44,7 @@ jobs:
         uses: andymckay/cancel-action@0.3
 
       - name: Check new version greater than current
+        if: success()
         run: test $(printf '${{ steps.new-version.outputs.data }}\n${{ steps.current-version.outputs.data }}' | sort -V | head -n1) != '${{ steps.new-version.outputs.data }}'
 
       - name: Extract build numbers
