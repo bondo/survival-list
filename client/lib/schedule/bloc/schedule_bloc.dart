@@ -62,7 +62,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(lastDeletedItem: () => event.item));
-    await _survivalListRepository.deleteItem(event.item.id);
+    await _survivalListRepository.deleteItem(event.item);
   }
 
   Future<void> _onLogoutRequested(

@@ -6,7 +6,7 @@ class Item extends Equatable {
   const Item({
     required this.id,
     required this.title,
-    this.isCompleted = false,
+    required this.isCompleted,
   });
 
   final int id;

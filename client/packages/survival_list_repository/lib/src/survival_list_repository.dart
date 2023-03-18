@@ -89,7 +89,13 @@ class SurvivalListRepository {
     _pendingItemsResponse = _client.getTasks(GetTasksRequest());
     final result = HashMap<int, Item>();
     _pendingItemsResponse!
-        .map((response) => Item(id: response.id, title: response.title))
+        .map(
+      (response) => Item(
+        id: response.id,
+        title: response.title,
+        isCompleted: response.isCompleted,
+      ),
+    )
         .listen(
       (item) => result[item.id] = item,
       onDone: () {
@@ -101,17 +107,30 @@ class SurvivalListRepository {
     );
   }
 
-  Future<void> createItem(String title) async {
-    final response = await _client.createTask(CreateTaskRequest(title: title));
-
+  void _upsertItem(Item item) {
     final newValue = HashMap<int, Item>.from(_itemsStreamController.value);
-    newValue[response.id] = Item(id: response.id, title: response.title);
+    newValue[item.id] = item;
     _itemsStreamController.add(newValue);
   }
 
-  Future<void> deleteItem(int id) {
-    // TODO(bba): implement deleteItem
-    throw UnimplementedError();
+  Future<void> createItem(String title) async {
+    final response = await _client.createTask(CreateTaskRequest(title: title));
+    _upsertItem(
+      Item(id: response.id, title: response.title, isCompleted: false),
+    );
+  }
+
+  Future<void> deleteItem(Item item) async {
+    final newValue = HashMap<int, Item>.from(_itemsStreamController.value)
+      ..remove(item.id);
+    _itemsStreamController.add(newValue);
+
+    try {
+      await _client.deleteTask(DeleteTaskRequest(id: item.id));
+    } catch (e) {
+      _upsertItem(item);
+      rethrow;
+    }
   }
 
   Stream<List<Item>> get items {
@@ -124,16 +143,40 @@ class SurvivalListRepository {
     return _isFetchingStreamController.asBroadcastStream();
   }
 
-  Future<void> updateItem(Item item) {
-    // TODO(bba): implement updateItem (everything but checked status)
-    throw UnimplementedError();
+  Future<void> updateItem(Item newItem) async {
+    final oldItem = _itemsStreamController.value[newItem.id];
+    if (oldItem == null) {
+      throw Exception('Existing item not found');
+    }
+
+    _upsertItem(newItem);
+
+    try {
+      await _client
+          .updateTask(UpdateTaskRequest(id: newItem.id, title: newItem.title));
+    } catch (e) {
+      _upsertItem(oldItem);
+      rethrow;
+    }
   }
 
   Future<void> toggleItem({
     required Item item,
     required bool isCompleted,
-  }) {
-    // TODO(bba): implement toggleItem
-    throw UnimplementedError();
+  }) async {
+    final newItem = item.copyWith(isCompleted: isCompleted);
+    _upsertItem(newItem);
+
+    try {
+      await _client.toggleTaskCompleted(
+        ToggleTaskCompletedRequest(
+          id: newItem.id,
+          isCompleted: newItem.isCompleted,
+        ),
+      );
+    } catch (e) {
+      _upsertItem(item);
+      rethrow;
+    }
   }
 }
