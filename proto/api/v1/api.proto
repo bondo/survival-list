@@ -27,6 +27,7 @@ message UpdateTaskRequest {
 message UpdateTaskResponse {
     int32 id = 1;
     string title = 2;
+    bool is_completed = 3;
 }
 
 message ToggleTaskCompletedRequest {
@@ -53,4 +54,5 @@ message GetTasksRequest {
 message GetTasksResponse {
     int32 id = 1;
     string title = 2;
+    bool is_completed = 3;
 }

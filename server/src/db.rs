@@ -40,6 +40,7 @@ impl Display for TaskId {
 pub struct TaskResult {
     pub id: TaskId,
     pub title: Option<String>,
+    pub completed_at: Option<PrimitiveDateTime>,
 }
 
 #[derive(Debug)]
@@ -76,7 +77,8 @@ impl Database {
             r#"
                 SELECT
                     id as "id: TaskId",
-                    title
+                    title,
+                    completed_at
                 FROM
                     tasks
             "#
@@ -97,7 +99,8 @@ impl Database {
                 )
                 RETURNING
                     id as "id: TaskId",
-                    title
+                    title,
+                    completed_at
             "#,
             title
         )
@@ -118,7 +121,8 @@ impl Database {
                     id = $1
                 RETURNING
                     id as "id: TaskId",
-                    title
+                    title,
+                    completed_at
             "#,
             id.0,
             title,

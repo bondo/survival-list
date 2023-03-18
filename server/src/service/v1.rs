@@ -51,6 +51,7 @@ impl api_server::Api for Service {
                 error!("v1:update_task: Got task without title (id {})", task.id);
                 "N/A".to_string()
             }),
+            is_completed: task.completed_at.is_some(),
         }))
     }
 
@@ -97,6 +98,7 @@ impl api_server::Api for Service {
                         error!("v1:get_tasks: Got task without title (id {})", task.id);
                         "N/A".to_string()
                     }),
+                    is_completed: task.completed_at.is_some(),
                 }))
                 .await
                 .unwrap();

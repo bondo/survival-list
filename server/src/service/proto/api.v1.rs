@@ -27,6 +27,8 @@ pub struct UpdateTaskResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(bool, tag = "3")]
+    pub is_completed: bool,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -66,6 +68,8 @@ pub struct GetTasksResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(bool, tag = "3")]
+    pub is_completed: bool,
 }
 /// Generated server implementations.
 pub mod api_server {
