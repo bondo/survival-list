@@ -4,6 +4,9 @@ package api.v1;
 
 service API {
     rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
+    rpc UpdateTask (UpdateTaskRequest) returns (UpdateTaskResponse);
+    rpc ToggleTaskCompleted (ToggleTaskCompletedRequest) returns (ToggleTaskCompletedResponse);
+    rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse);
     rpc GetTasks (GetTasksRequest) returns (stream GetTasksResponse);
 }
 
@@ -11,12 +14,40 @@ message CreateTaskRequest {
     string title = 1;
 }
 
-message GetTasksRequest {
-}
-
 message CreateTaskResponse {
     int32 id = 1;
     string title = 2;
+}
+
+message UpdateTaskRequest {
+    int32 id = 1;
+    string title = 2;
+}
+
+message UpdateTaskResponse {
+    int32 id = 1;
+    string title = 2;
+}
+
+message ToggleTaskCompletedRequest {
+    int32 id = 1;
+    bool is_completed = 2;
+}
+
+message ToggleTaskCompletedResponse {
+    int32 id = 1;
+    bool is_completed = 2;
+}
+
+message DeleteTaskRequest {
+    int32 id = 1;
+}
+
+message DeleteTaskResponse {
+    int32 id = 1;
+}
+
+message GetTasksRequest {
 }
 
 message GetTasksResponse {

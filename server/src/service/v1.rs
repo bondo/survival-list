@@ -5,7 +5,7 @@ use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
-use crate::db::Database;
+use crate::db::{Database, TaskId};
 
 include!("proto/api.v1.rs");
 
@@ -28,12 +28,54 @@ impl api_server::Api for Service {
         let request = request.into_inner();
         let task = self.db.create_task(&request.title).await?;
         Ok(Response::new(CreateTaskResponse {
-            id: task.id,
+            id: task.id.into(),
             title: task.title.unwrap_or_else(|| {
                 error!("v1:create_task: Got task without title (id {})", task.id);
                 "N/A".to_string()
             }),
         }))
+    }
+
+    async fn update_task(
+        &self,
+        request: Request<UpdateTaskRequest>,
+    ) -> Result<Response<UpdateTaskResponse>, Status> {
+        let request = request.into_inner();
+        let task = self
+            .db
+            .update_task(TaskId::new(request.id), &request.title)
+            .await?;
+        Ok(Response::new(UpdateTaskResponse {
+            id: task.id.into(),
+            title: task.title.unwrap_or_else(|| {
+                error!("v1:update_task: Got task without title (id {})", task.id);
+                "N/A".to_string()
+            }),
+        }))
+    }
+
+    async fn toggle_task_completed(
+        &self,
+        request: Request<ToggleTaskCompletedRequest>,
+    ) -> Result<Response<ToggleTaskCompletedResponse>, Status> {
+        let request = request.into_inner();
+        let task = self
+            .db
+            .toggle_task_completed(TaskId::new(request.id), request.is_completed)
+            .await?;
+        Ok(Response::new(ToggleTaskCompletedResponse {
+            id: task.id.into(),
+            is_completed: task.completed_at.is_some(),
+        }))
+    }
+
+    async fn delete_task(
+        &self,
+        request: Request<DeleteTaskRequest>,
+    ) -> Result<Response<DeleteTaskResponse>, Status> {
+        let request = request.into_inner();
+        let id = self.db.delete_task(TaskId::new(request.id)).await?;
+        Ok(Response::new(DeleteTaskResponse { id: id.into() }))
     }
 
     type GetTasksStream = ReceiverStream<Result<GetTasksResponse, Status>>;
@@ -50,7 +92,7 @@ impl api_server::Api for Service {
 
             while let Some(res) = tasks.next().await {
                 tx.send(res.map(|task| GetTasksResponse {
-                    id: task.id,
+                    id: task.id.into(),
                     title: task.title.unwrap_or_else(|| {
                         error!("v1:get_tasks: Got task without title (id {})", task.id);
                         "N/A".to_string()

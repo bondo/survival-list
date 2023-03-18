@@ -9,6 +9,7 @@
     "buildx",
     "Clippy",
     "cloudrun",
+    "codegen",
     "combinators",
     "Condvar",
     "cupertino",
@@ -44,6 +45,7 @@
     "sigalg",
     "signedjar",
     "subosito",
+    "tcpip",
     "unawaited",
     "whatsnew",
     "zipalign"

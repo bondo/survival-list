@@ -6,15 +6,59 @@ pub struct CreateTaskRequest {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetTasksRequest {}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateTaskResponse {
     #[prost(int32, tag = "1")]
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateTaskRequest {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateTaskResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ToggleTaskCompletedRequest {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(bool, tag = "2")]
+    pub is_completed: bool,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ToggleTaskCompletedResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(bool, tag = "2")]
+    pub is_completed: bool,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteTaskRequest {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteTaskResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetTasksRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTasksResponse {
@@ -34,6 +78,18 @@ pub mod api_server {
             &self,
             request: tonic::Request<super::CreateTaskRequest>,
         ) -> Result<tonic::Response<super::CreateTaskResponse>, tonic::Status>;
+        async fn update_task(
+            &self,
+            request: tonic::Request<super::UpdateTaskRequest>,
+        ) -> Result<tonic::Response<super::UpdateTaskResponse>, tonic::Status>;
+        async fn toggle_task_completed(
+            &self,
+            request: tonic::Request<super::ToggleTaskCompletedRequest>,
+        ) -> Result<tonic::Response<super::ToggleTaskCompletedResponse>, tonic::Status>;
+        async fn delete_task(
+            &self,
+            request: tonic::Request<super::DeleteTaskRequest>,
+        ) -> Result<tonic::Response<super::DeleteTaskResponse>, tonic::Status>;
         /// Server streaming response type for the GetTasks method.
         type GetTasksStream: futures_core::Stream<
                 Item = Result<super::GetTasksResponse, tonic::Status>,
@@ -129,6 +185,118 @@ pub mod api_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = CreateTaskSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/UpdateTask" => {
+                    #[allow(non_camel_case_types)]
+                    struct UpdateTaskSvc<T: Api>(pub Arc<T>);
+                    impl<T: Api> tonic::server::UnaryService<super::UpdateTaskRequest>
+                    for UpdateTaskSvc<T> {
+                        type Response = super::UpdateTaskResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::UpdateTaskRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).update_task(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = UpdateTaskSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/ToggleTaskCompleted" => {
+                    #[allow(non_camel_case_types)]
+                    struct ToggleTaskCompletedSvc<T: Api>(pub Arc<T>);
+                    impl<
+                        T: Api,
+                    > tonic::server::UnaryService<super::ToggleTaskCompletedRequest>
+                    for ToggleTaskCompletedSvc<T> {
+                        type Response = super::ToggleTaskCompletedResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::ToggleTaskCompletedRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).toggle_task_completed(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ToggleTaskCompletedSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/DeleteTask" => {
+                    #[allow(non_camel_case_types)]
+                    struct DeleteTaskSvc<T: Api>(pub Arc<T>);
+                    impl<T: Api> tonic::server::UnaryService<super::DeleteTaskRequest>
+                    for DeleteTaskSvc<T> {
+                        type Response = super::DeleteTaskResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::DeleteTaskRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).delete_task(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = DeleteTaskSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
