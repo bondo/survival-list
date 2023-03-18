@@ -91,7 +91,7 @@ jobs:
 
       - run: cd client && flutter pub get
 
-      - run: cd client && flutter build appbundle
+      - run: cd client && flutter build appbundle --enable-experiment records
 
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1

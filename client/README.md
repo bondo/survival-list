@@ -59,14 +59,14 @@ See [packages/generated_grpc_api/README.md](./packages/generated_grpc_api/README
 bump version in `pubspec.yaml`, then
 
 ```
-flutter build appbundle
+flutter build appbundle --enable-experiment records
 jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ~/upload-keystore.jks -signedjar release.aab build/app/outputs/bundle/release/app-release.aab upload
 ```
 
 ### apk
 
 ```
-flutter build apk
+flutter build apk --enable-experiment records
 ~/Android/Sdk/build-tools/33.0.1/zipalign -p -v 4 build/app/outputs/flutter-apk/app-release.apk app-release-aligned.apk
 ~/Android/Sdk/build-tools/33.0.1/zipalign -vc 4 app-release-aligned.apk
 ~/Android/Sdk/build-tools/33.0.1/apksigner sign -verbose -ks ~/upload-keystore.jks --out app-release-signed.apk app-release-aligned.apk
