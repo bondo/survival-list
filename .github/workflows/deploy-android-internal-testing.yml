@@ -36,6 +36,13 @@ jobs:
           file: "./client/pubspec.yaml"
           key-path: '["version"]'
 
+      - name: Check if version changed
+        run: test '{{ steps.current-version.outputs.data }}' != '${{ steps.new-version.outputs.data }}'
+
+      - name: Cancel workflow if version unchanged
+        if: failure()
+        uses: andymckay/cancel-action@0.3
+
       - name: Check new version greater than current
         run: test $(printf '${{ steps.new-version.outputs.data }}\n${{ steps.current-version.outputs.data }}' | sort -V | head -n1) != '${{ steps.new-version.outputs.data }}'
 
@@ -49,6 +56,9 @@ jobs:
 
   validate-server-api:
     runs-on: ubuntu-latest
+
+    needs:
+      - validate-version-bumped
 
     steps:
       - uses: actions/checkout@v3
