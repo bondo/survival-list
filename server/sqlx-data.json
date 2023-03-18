@@ -1,17 +1,17 @@
 {
   "db": "PostgreSQL",
-  "6f98c667a1defe09ef607052f2547bd8ed102c3698f34e6a1d83ad79af436b44": {
+  "06daba80b27a9aec46c3c4331a353725e7cb6beb77e3ccc4c06a4696e74a750a": {
     "describe": {
       "columns": [
         {
-          "name": "id",
+          "name": "id: TaskId",
           "ordinal": 0,
           "type_info": "Int4"
         },
         {
-          "name": "title",
+          "name": "completed_at",
           "ordinal": 1,
-          "type_info": "Text"
+          "type_info": "Timestamp"
         }
       ],
       "nullable": [
@@ -20,17 +20,38 @@
       ],
       "parameters": {
         "Left": [
-          "Text"
+          "Int4",
+          "Bool"
         ]
       }
     },
-    "query": "\n                INSERT INTO tasks (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id,\n                    title\n            "
+    "query": "\n                UPDATE\n                    tasks\n                SET\n                    completed_at = CASE\n                        WHEN $2 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
   },
-  "db1d8615bd4597e0a108deedbcf4a956c0d49196ade2c732af2daf8f0036d4a6": {
+  "0a38a4263db5e25680c5a7280cc1405c5af305f36e14a1cb764da67ad481de14": {
     "describe": {
       "columns": [
         {
-          "name": "id",
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    tasks\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\"\n            "
+  },
+  "0d135aab26cdee63c92e2bba0380efbec22a11645472e1f6b0bb5ffacb353c2f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
           "ordinal": 0,
           "type_info": "Int4"
         },
@@ -38,16 +59,87 @@
           "name": "title",
           "ordinal": 1,
           "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
         }
       ],
       "nullable": [
         false,
+        true,
         true
       ],
       "parameters": {
         "Left": []
       }
     },
-    "query": "\n                SELECT\n                    id,\n                    title\n                FROM\n                    tasks\n            "
+    "query": "\n                SELECT\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at\n                FROM\n                    tasks\n            "
+  },
+  "155da0c5a5aeed9f52f42b50c1a2b48ba484dcbe953cb532ed02014e3b459b18": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    tasks\n                SET\n                    title = $2\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at\n            "
+  },
+  "312c98c98346c19d40e8c3bfcd87ec1ba305596d938bf6e254ee0ad6036484f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO tasks (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at\n            "
   }
 }
