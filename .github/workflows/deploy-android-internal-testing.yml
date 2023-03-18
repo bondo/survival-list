@@ -4,7 +4,7 @@ run-name: Deploy client to Play Store internal testing track
 on:
   push:
     branches:
-      - production
+      - deploy-client
     paths:
       - "client/pubspec.yaml"
       - ".github/workflows/deploy-android-internal-testing.yml"
@@ -36,15 +36,7 @@ jobs:
           file: "./client/pubspec.yaml"
           key-path: '["version"]'
 
-      - name: Check if version changed
-        run: test '{{ steps.current-version.outputs.data }}' != '${{ steps.new-version.outputs.data }}'
-
-      - name: Cancel workflow if version unchanged
-        if: failure()
-        uses: andymckay/cancel-action@0.3
-
       - name: Check new version greater than current
-        if: success()
         run: test $(printf '${{ steps.new-version.outputs.data }}\n${{ steps.current-version.outputs.data }}' | sort -V | head -n1) != '${{ steps.new-version.outputs.data }}'
 
       - name: Extract build numbers
@@ -64,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: production
+          path: deploy-client
 
       - uses: actions/checkout@v3
         with:
@@ -79,7 +71,7 @@ jobs:
         uses: bufbuild/buf-breaking-action@v1
         with:
           input: "server-production/proto"
-          against: "production/proto"
+          against: "deploy-client/proto"
 
   build-and-deploy:
     runs-on: ubuntu-latest
