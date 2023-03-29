@@ -231,7 +231,7 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to update task"))
+        .map_err(|_| Status::internal("Failed to delete task"))
         .map(|result| result.id)
     }
 }
