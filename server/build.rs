@@ -17,7 +17,13 @@ async fn main() -> Result<(), Error> {
     tonic_build::configure()
         .build_client(false)
         .out_dir("src/service/proto")
-        .compile(&["../proto/api/v1/api.proto"], &["../proto/"])?;
+        .compile(
+            &[
+                "../proto/api/v1/api.proto",
+                "../proto/google/type/date.proto",
+            ],
+            &["../proto/"],
+        )?;
 
     println!("cargo:rerun-if-changed=migrations");
 

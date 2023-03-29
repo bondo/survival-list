@@ -3,6 +3,10 @@
 pub struct CreateTaskRequest {
     #[prost(string, tag = "1")]
     pub title: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub start_date: ::core::option::Option<super::super::google::r#type::Date>,
+    #[prost(message, optional, tag = "3")]
+    pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -11,6 +15,10 @@ pub struct CreateTaskResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "3")]
+    pub start_date: ::core::option::Option<super::super::google::r#type::Date>,
+    #[prost(message, optional, tag = "4")]
+    pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -19,6 +27,10 @@ pub struct UpdateTaskRequest {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "3")]
+    pub start_date: ::core::option::Option<super::super::google::r#type::Date>,
+    #[prost(message, optional, tag = "4")]
+    pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -29,6 +41,10 @@ pub struct UpdateTaskResponse {
     pub title: ::prost::alloc::string::String,
     #[prost(bool, tag = "3")]
     pub is_completed: bool,
+    #[prost(message, optional, tag = "4")]
+    pub start_date: ::core::option::Option<super::super::google::r#type::Date>,
+    #[prost(message, optional, tag = "5")]
+    pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -70,6 +86,10 @@ pub struct GetTasksResponse {
     pub title: ::prost::alloc::string::String,
     #[prost(bool, tag = "3")]
     pub is_completed: bool,
+    #[prost(message, optional, tag = "4")]
+    pub start_date: ::core::option::Option<super::super::google::r#type::Date>,
+    #[prost(message, optional, tag = "5")]
+    pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
 }
 /// Generated server implementations.
 pub mod api_server {

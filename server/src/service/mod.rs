@@ -1,8 +1,9 @@
+mod proto;
 mod v1;
 
 use tonic::codegen::{CompressionEncoding, InterceptedService};
 
-use self::v1::api_server::ApiServer as ApiServerV1;
+use self::proto::api::v1::api_server::ApiServer as ApiServerV1;
 use self::v1::Service as ServiceV1;
 use crate::auth::Auth;
 use crate::db::Database;

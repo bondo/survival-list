@@ -1,0 +1,38 @@
+pub mod google {
+    pub mod r#type {
+        include!("google.r#type.rs");
+
+        impl From<sqlx::types::time::Date> for Date {
+            fn from(value: sqlx::types::time::Date) -> Self {
+                Self {
+                    year: value.year(),
+                    month: value.month() as i32,
+                    day: value.day() as i32,
+                }
+            }
+        }
+
+        impl TryFrom<Date> for sqlx::types::time::Date {
+            type Error = &'static str;
+
+            fn try_from(value: Date) -> Result<Self, Self::Error> {
+                let month = value
+                    .month
+                    .try_into()
+                    .or(Err("Month value out of range"))
+                    .and_then(|v| TryFrom::<u8>::try_from(v).or(Err("Month value out of range")))
+                    .or(Err("Month value out of range"))?;
+
+                let day = value.day.try_into().or(Err("Day value out of range"))?;
+
+                Self::from_calendar_date(value.year, month, day).or(Err("Invalid date"))
+            }
+        }
+    }
+}
+
+pub mod api {
+    pub mod v1 {
+        include!("api.v1.rs");
+    }
+}

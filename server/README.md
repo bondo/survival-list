@@ -7,6 +7,10 @@ Server for the Survival List project.
 - Install cargo-upgrades and cargo-edit: `cargo install -f cargo-upgrades cargo-edit`
 - Run `cargo upgrade`
 
+## Add migration
+
+`cargo sqlx migrate add <name>`
+
 ## Deploy
 
 - Run `cargo sqlx prepare`

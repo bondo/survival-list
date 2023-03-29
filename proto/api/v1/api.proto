@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package api.v1;
 
+import "google/type/date.proto";
+
 service API {
     rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
     rpc UpdateTask (UpdateTaskRequest) returns (UpdateTaskResponse);
@@ -12,22 +14,30 @@ service API {
 
 message CreateTaskRequest {
     string title = 1;
+    google.type.Date start_date = 2;
+    google.type.Date end_date = 3;
 }
 
 message CreateTaskResponse {
     int32 id = 1;
     string title = 2;
+    google.type.Date start_date = 3;
+    google.type.Date end_date = 4;
 }
 
 message UpdateTaskRequest {
     int32 id = 1;
     string title = 2;
+    google.type.Date start_date = 3;
+    google.type.Date end_date = 4;
 }
 
 message UpdateTaskResponse {
     int32 id = 1;
     string title = 2;
     bool is_completed = 3;
+    google.type.Date start_date = 4;
+    google.type.Date end_date = 5;
 }
 
 message ToggleTaskCompletedRequest {
@@ -55,4 +65,6 @@ message GetTasksResponse {
     int32 id = 1;
     string title = 2;
     bool is_completed = 3;
+    google.type.Date start_date = 4;
+    google.type.Date end_date = 5;
 }

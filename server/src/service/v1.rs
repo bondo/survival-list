@@ -1,13 +1,14 @@
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
+use sqlx::types::time::Date;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
-use crate::db::{Database, TaskId};
+use crate::db::{Database, TaskId, TaskPeriodInput};
 
-include!("proto/api.v1.rs");
+use super::proto::{api::v1::*, google::r#type::Date as ProtoDate};
 
 pub struct Service {
     db: Database,
@@ -19,6 +20,27 @@ impl Service {
     }
 }
 
+fn validate_period(
+    start_date: Option<ProtoDate>,
+    end_date: Option<ProtoDate>,
+) -> Result<TaskPeriodInput, Status> {
+    match (start_date, end_date) {
+        (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(
+            Date::try_from(start_date).map_err(Status::invalid_argument)?,
+        )),
+        (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(
+            Date::try_from(end_date).map_err(Status::invalid_argument)?,
+        )),
+        (Some(start_date), Some(end_date)) => Ok(TaskPeriodInput::StartAndEnd {
+            start: Date::try_from(start_date).map_err(Status::invalid_argument)?,
+            end: Date::try_from(end_date).map_err(Status::invalid_argument)?,
+        }),
+        (None, None) => Err(Status::failed_precondition(
+            "Either start or end date required",
+        )),
+    }
+}
+
 #[tonic::async_trait]
 impl api_server::Api for Service {
     async fn create_task(
@@ -26,13 +48,16 @@ impl api_server::Api for Service {
         request: Request<CreateTaskRequest>,
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let request = request.into_inner();
-        let task = self.db.create_task(&request.title).await?;
+        let period = validate_period(request.start_date, request.end_date)?;
+        let task = self.db.create_task(&request.title, &period).await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
             title: task.title.unwrap_or_else(|| {
                 error!("v1:create_task: Got task without title (id {})", task.id);
                 "N/A".to_string()
             }),
+            start_date: task.start_date.map(Into::into),
+            end_date: task.end_date.map(Into::into),
         }))
     }
 
@@ -41,9 +66,10 @@ impl api_server::Api for Service {
         request: Request<UpdateTaskRequest>,
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let request = request.into_inner();
+        let period = validate_period(request.start_date, request.end_date)?;
         let task = self
             .db
-            .update_task(TaskId::new(request.id), &request.title)
+            .update_task(TaskId::new(request.id), &request.title, &period)
             .await?;
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),
@@ -52,6 +78,8 @@ impl api_server::Api for Service {
                 "N/A".to_string()
             }),
             is_completed: task.completed_at.is_some(),
+            start_date: task.start_date.map(Into::into),
+            end_date: task.end_date.map(Into::into),
         }))
     }
 
@@ -99,6 +127,8 @@ impl api_server::Api for Service {
                         "N/A".to_string()
                     }),
                     is_completed: task.completed_at.is_some(),
+                    start_date: task.start_date.map(Into::into),
+                    end_date: task.end_date.map(Into::into),
                 }))
                 .await
                 .unwrap();
