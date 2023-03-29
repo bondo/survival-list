@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
@@ -20,24 +22,32 @@ impl Service {
     }
 }
 
-fn validate_period(
-    start_date: Option<ProtoDate>,
-    end_date: Option<ProtoDate>,
-) -> Result<TaskPeriodInput, Status> {
-    match (start_date, end_date) {
-        (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(
-            Date::try_from(start_date).map_err(Status::invalid_argument)?,
-        )),
-        (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(
-            Date::try_from(end_date).map_err(Status::invalid_argument)?,
-        )),
-        (Some(start_date), Some(end_date)) => Ok(TaskPeriodInput::StartAndEnd {
-            start: Date::try_from(start_date).map_err(Status::invalid_argument)?,
-            end: Date::try_from(end_date).map_err(Status::invalid_argument)?,
-        }),
-        (None, None) => Err(Status::failed_precondition(
-            "Either start or end date required",
-        )),
+impl TaskPeriodInput {
+    fn from_proto_dates(
+        start_date: Option<ProtoDate>,
+        end_date: Option<ProtoDate>,
+    ) -> Result<TaskPeriodInput, Status> {
+        match (start_date, end_date) {
+            (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(
+                Date::try_from(start_date).map_err(Status::invalid_argument)?,
+            )),
+            (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(
+                Date::try_from(end_date).map_err(Status::invalid_argument)?,
+            )),
+            (Some(start_date), Some(end_date)) => {
+                let start = Date::try_from(start_date).map_err(Status::invalid_argument)?;
+                let end = Date::try_from(end_date).map_err(Status::invalid_argument)?;
+
+                if end.cmp(&start) == Ordering::Less {
+                    return Err(Status::failed_precondition("End before start"));
+                }
+
+                Ok(TaskPeriodInput::StartAndEnd { start, end })
+            }
+            (None, None) => Err(Status::failed_precondition(
+                "Either start or end date required",
+            )),
+        }
     }
 }
 
@@ -48,7 +58,7 @@ impl api_server::Api for Service {
         request: Request<CreateTaskRequest>,
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let request = request.into_inner();
-        let period = validate_period(request.start_date, request.end_date)?;
+        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self.db.create_task(&request.title, &period).await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -66,7 +76,7 @@ impl api_server::Api for Service {
         request: Request<UpdateTaskRequest>,
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let request = request.into_inner();
-        let period = validate_period(request.start_date, request.end_date)?;
+        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
             .update_task(TaskId::new(request.id), &request.title, &period)
