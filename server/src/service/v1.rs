@@ -27,16 +27,18 @@ impl TaskPeriodInput {
         start_date: Option<ProtoDate>,
         end_date: Option<ProtoDate>,
     ) -> Result<TaskPeriodInput, Status> {
+        fn convert(date: ProtoDate) -> Result<Date, Status> {
+            date.try_into().map_err(Status::invalid_argument)
+        }
+
         match (start_date, end_date) {
-            (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(
-                Date::try_from(start_date).map_err(Status::invalid_argument)?,
-            )),
-            (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(
-                Date::try_from(end_date).map_err(Status::invalid_argument)?,
-            )),
+            (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(convert(start_date)?)),
+
+            (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(convert(end_date)?)),
+
             (Some(start_date), Some(end_date)) => {
-                let start = Date::try_from(start_date).map_err(Status::invalid_argument)?;
-                let end = Date::try_from(end_date).map_err(Status::invalid_argument)?;
+                let start = convert(start_date)?;
+                let end = convert(end_date)?;
 
                 if end.cmp(&start) == Ordering::Less {
                     return Err(Status::failed_precondition("End before start"));
@@ -44,6 +46,7 @@ impl TaskPeriodInput {
 
                 Ok(TaskPeriodInput::StartAndEnd { start, end })
             }
+
             (None, None) => Err(Status::failed_precondition(
                 "Either start or end date required",
             )),
