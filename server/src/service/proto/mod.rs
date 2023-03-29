@@ -16,12 +16,8 @@ pub mod google {
             type Error = &'static str;
 
             fn try_from(value: Date) -> Result<Self, Self::Error> {
-                let month = value
-                    .month
-                    .try_into()
-                    .or(Err("Month value out of range"))
-                    .and_then(|v| TryFrom::<u8>::try_from(v).or(Err("Month value out of range")))
-                    .or(Err("Month value out of range"))?;
+                let month: u8 = value.month.try_into().or(Err("Month value out of range"))?;
+                let month = TryFrom::try_from(month).or(Err("Month value out of range"))?;
 
                 let day = value.day.try_into().or(Err("Day value out of range"))?;
 
