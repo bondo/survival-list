@@ -32,7 +32,8 @@ class SurvivalListRepository {
   void _init() {
     _client = APIClient(
       ClientChannel(
-        'survival-list-server.bjarkebjarke.dk',
+        // 'survival-list-server.bjarkebjarke.dk',
+        'survival-list-server.fly.dev',
       ),
       options: CallOptions(
         timeout: const Duration(seconds: 30),

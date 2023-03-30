@@ -1,0 +1,17 @@
+app = "survival-list-server"
+primary_region = "arn"
+
+[env]
+  PORT = 54321
+  RUST_LOG = "info"
+
+[[services]]
+  internal_port = 54321
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["tls"]
+    port = "443"
+
+  [services.ports.tls_options]
+    alpn = ["h2"]
