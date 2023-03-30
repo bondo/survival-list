@@ -13,21 +13,29 @@ class CreateItemState extends Equatable {
   const CreateItemState({
     this.status = CreateItemStatus.initial,
     this.title = '',
+    this.startDate,
+    this.endDate,
   });
 
   final CreateItemStatus status;
   final String title;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   CreateItemState copyWith({
-    CreateItemStatus? status,
-    String? title,
+    CreateItemStatus Function()? status,
+    String Function()? title,
+    DateTime? Function()? startDate,
+    DateTime? Function()? endDate,
   }) {
     return CreateItemState(
-      status: status ?? this.status,
-      title: title ?? this.title,
+      status: status != null ? status() : this.status,
+      title: title != null ? title() : this.title,
+      startDate: startDate != null ? startDate() : this.startDate,
+      endDate: endDate != null ? endDate() : this.endDate,
     );
   }
 
   @override
-  List<Object?> get props => [status, title];
+  List<Object?> get props => [status, title, startDate, endDate];
 }

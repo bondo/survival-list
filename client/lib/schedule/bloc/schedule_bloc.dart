@@ -83,7 +83,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
     final item = state.lastDeletedItem!;
     emit(state.copyWith(lastDeletedItem: () => null));
-    await _survivalListRepository.createItem(item.title);
+    await _survivalListRepository.createItem(title: item.title,  startDate: item.startDate, endDate: item.endDate);
   }
 
   void _onFilterChanged(

@@ -13,6 +13,8 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
           const CreateItemState(),
         ) {
     on<CreateItemTitleChanged>(_onTitleChanged);
+    on<CreateItemStartDateChanged>(_onStartDateChanged);
+    on<CreateItemEndDateChanged>(_onEndDateChanged);
     on<CreateItemSubmitted>(_onSubmitted);
   }
 
@@ -22,20 +24,38 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     CreateItemTitleChanged event,
     Emitter<CreateItemState> emit,
   ) {
-    emit(state.copyWith(title: event.title));
+    emit(state.copyWith(title: () => event.title));
+  }
+
+  void _onStartDateChanged(
+    CreateItemStartDateChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(startDate: () => event.startDate));
+  }
+
+  void _onEndDateChanged(
+    CreateItemEndDateChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(endDate: () => event.endDate));
   }
 
   Future<void> _onSubmitted(
     CreateItemSubmitted event,
     Emitter<CreateItemState> emit,
   ) async {
-    emit(state.copyWith(status: CreateItemStatus.loading));
+    emit(state.copyWith(status: () => CreateItemStatus.loading));
 
     try {
-      await _survivalListRepository.createItem(state.title);
-      emit(state.copyWith(status: CreateItemStatus.success));
+      await _survivalListRepository.createItem(
+        title: state.title,
+        startDate: state.startDate,
+        endDate: state.endDate,
+      );
+      emit(state.copyWith(status: () => CreateItemStatus.success));
     } catch (e) {
-      emit(state.copyWith(status: CreateItemStatus.failure));
+      emit(state.copyWith(status: () => CreateItemStatus.failure));
     }
   }
 }

@@ -16,6 +16,24 @@ class EditItemTitleChanged extends EditItemEvent {
   List<Object> get props => [title];
 }
 
+class EditItemStartDateChanged extends EditItemEvent {
+  const EditItemStartDateChanged(this.startDate);
+
+  final DateTime? startDate;
+
+  @override
+  List<Object> get props => [startDate ?? 'null'];
+}
+
+class EditItemEndDateChanged extends EditItemEvent {
+  const EditItemEndDateChanged(this.endDate);
+
+  final DateTime? endDate;
+
+  @override
+  List<Object> get props => [endDate ?? 'null'];
+}
+
 class EditItemSubmitted extends EditItemEvent {
   const EditItemSubmitted();
 }

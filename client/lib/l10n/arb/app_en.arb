@@ -42,6 +42,8 @@
 
   "createItemAppBarTitle": "Add Item",
   "createItemTitleLabel": "Title",
+  "createItemStartDateLabel": "Start date",
+  "createItemEndDateLabel": "Deadline",
   "createItemSaveButtonTooltip": "Save changes",
 
   "editItemAppBarTitle": "Edit Item",

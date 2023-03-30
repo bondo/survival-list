@@ -13,33 +13,39 @@ const CreateTaskRequest$json = const {
   '1': 'CreateTaskRequest',
   '2': const [
     const {'1': 'title', '3': 1, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'start_date', '3': 2, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
+    const {'1': 'end_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
   ],
 };
 
 /// Descriptor for `CreateTaskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGU=');
+final $typed_data.Uint8List createTaskRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGUSMAoKc3RhcnRfZGF0ZRgCIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSCXN0YXJ0RGF0ZRIsCghlbmRfZGF0ZRgDIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSB2VuZERhdGU=');
 @$core.Deprecated('Use createTaskResponseDescriptor instead')
 const CreateTaskResponse$json = const {
   '1': 'CreateTaskResponse',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'start_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
+    const {'1': 'end_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
   ],
 };
 
 /// Descriptor for `CreateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZQ==');
+final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIwCgpzdGFydF9kYXRlGAMgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZQ==');
 @$core.Deprecated('Use updateTaskRequestDescriptor instead')
 const UpdateTaskRequest$json = const {
   '1': 'UpdateTaskRequest',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'start_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
+    const {'1': 'end_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
   ],
 };
 
 /// Descriptor for `UpdateTaskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateTaskRequestDescriptor = $convert.base64Decode('ChFVcGRhdGVUYXNrUmVxdWVzdBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxl');
+final $typed_data.Uint8List updateTaskRequestDescriptor = $convert.base64Decode('ChFVcGRhdGVUYXNrUmVxdWVzdBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEjAKCnN0YXJ0X2RhdGUYAyABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRl');
 @$core.Deprecated('Use updateTaskResponseDescriptor instead')
 const UpdateTaskResponse$json = const {
   '1': 'UpdateTaskResponse',
@@ -47,11 +53,13 @@ const UpdateTaskResponse$json = const {
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
     const {'1': 'is_completed', '3': 3, '4': 1, '5': 8, '10': 'isCompleted'},
+    const {'1': 'start_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
+    const {'1': 'end_date', '3': 5, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
   ],
 };
 
 /// Descriptor for `UpdateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVk');
+final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVkEjAKCnN0YXJ0X2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBSABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRl');
 @$core.Deprecated('Use toggleTaskCompletedRequestDescriptor instead')
 const ToggleTaskCompletedRequest$json = const {
   '1': 'ToggleTaskCompletedRequest',
@@ -108,8 +116,10 @@ const GetTasksResponse$json = const {
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
     const {'1': 'is_completed', '3': 3, '4': 1, '5': 8, '10': 'isCompleted'},
+    const {'1': 'start_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
+    const {'1': 'end_date', '3': 5, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
   ],
 };
 
 /// Descriptor for `GetTasksResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZA==');
+final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZQ==');

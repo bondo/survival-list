@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart';
+import 'package:generated_grpc_api/google/type/date.pb.dart';
 import 'package:grpc/grpc.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
@@ -94,6 +95,8 @@ class SurvivalListRepository {
         id: response.id,
         title: response.title,
         isCompleted: response.isCompleted,
+        startDate: _parseDate(response.startDate),
+        endDate: _parseDate(response.endDate),
       ),
     )
         .listen(
@@ -113,10 +116,36 @@ class SurvivalListRepository {
     _itemsStreamController.add(newValue);
   }
 
-  Future<void> createItem(String title) async {
-    final response = await _client.createTask(CreateTaskRequest(title: title));
+  Date? _buildDate(DateTime? date) {
+    return date == null
+        ? null
+        : Date(year: date.year, month: date.month, day: date.day);
+  }
+
+  DateTime _parseDate(Date date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  Future<void> createItem({
+    required String title,
+    required DateTime? startDate,
+    required DateTime? endDate,
+  }) async {
+    final response = await _client.createTask(
+      CreateTaskRequest(
+        title: title,
+        startDate: _buildDate(startDate),
+        endDate: _buildDate(endDate),
+      ),
+    );
     _upsertItem(
-      Item(id: response.id, title: response.title, isCompleted: false),
+      Item(
+        id: response.id,
+        title: response.title,
+        isCompleted: false,
+        startDate: _parseDate(response.startDate),
+        endDate: _parseDate(response.endDate),
+      ),
     );
   }
 
@@ -152,8 +181,14 @@ class SurvivalListRepository {
     _upsertItem(newItem);
 
     try {
-      await _client
-          .updateTask(UpdateTaskRequest(id: newItem.id, title: newItem.title));
+      await _client.updateTask(
+        UpdateTaskRequest(
+          id: newItem.id,
+          title: newItem.title,
+          startDate: _buildDate(newItem.startDate),
+          endDate: _buildDate(newItem.endDate),
+        ),
+      );
     } catch (e) {
       _upsertItem(oldItem);
       rethrow;
@@ -164,7 +199,7 @@ class SurvivalListRepository {
     required Item item,
     required bool isCompleted,
   }) async {
-    final newItem = item.copyWith(isCompleted: isCompleted);
+    final newItem = item.copyWith(isCompleted: () => isCompleted);
     _upsertItem(newItem);
 
     try {

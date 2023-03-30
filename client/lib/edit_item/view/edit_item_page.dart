@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/edit_item/edit_item.dart';
+import 'package:survival_list/form_field_widgets/date.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -70,7 +71,11 @@ class EditItemView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: const [_TitleField()],
+              children: const [
+                _TitleField(),
+                _StartDateField(),
+                _EndDateField()
+              ],
             ),
           ),
         ),
@@ -92,6 +97,7 @@ class _TitleField extends StatelessWidget {
       key: const Key('editItemView_title_textFormField'),
       initialValue: state.title,
       decoration: InputDecoration(
+        icon: const Icon(Icons.text_fields),
         enabled: !state.status.isLoadingOrSuccess,
         labelText: l10n.editItemTitleLabel,
         hintText: hintText,
@@ -104,6 +110,46 @@ class _TitleField extends StatelessWidget {
       onChanged: (value) {
         context.read<EditItemBloc>().add(EditItemTitleChanged(value));
       },
+    );
+  }
+}
+
+class _StartDateField extends StatelessWidget {
+  const _StartDateField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<EditItemBloc>().state;
+
+    return DateFormField(
+      value: state.startDate,
+      lastDate: state.endDate,
+      locale: l10n.localeName,
+      onChange: (pickedDate) {
+        context.read<EditItemBloc>().add(EditItemStartDateChanged(pickedDate));
+      },
+      label: l10n.createItemStartDateLabel,
+    );
+  }
+}
+
+class _EndDateField extends StatelessWidget {
+  const _EndDateField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<EditItemBloc>().state;
+
+    return DateFormField(
+      firstDate: state.startDate,
+      value: state.endDate,
+      locale: l10n.localeName,
+      onChange: (pickedDate) {
+        context.read<EditItemBloc>().add(EditItemEndDateChanged(pickedDate));
+      },
+      label: l10n.createItemEndDateLabel,
     );
   }
 }

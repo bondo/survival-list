@@ -9,19 +9,31 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import '../../google/type/date.pb.dart' as $1;
+
 class CreateTaskRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOM<$1.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..hasRequiredFields = false
   ;
 
   CreateTaskRequest._() : super();
   factory CreateTaskRequest({
     $core.String? title,
+    $1.Date? startDate,
+    $1.Date? endDate,
   }) {
     final _result = create();
     if (title != null) {
       _result.title = title;
+    }
+    if (startDate != null) {
+      _result.startDate = startDate;
+    }
+    if (endDate != null) {
+      _result.endDate = endDate;
     }
     return _result;
   }
@@ -54,12 +66,36 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(0);
   @$pb.TagNumber(1)
   void clearTitle() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $1.Date get startDate => $_getN(1);
+  @$pb.TagNumber(2)
+  set startDate($1.Date v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStartDate() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStartDate() => clearField(2);
+  @$pb.TagNumber(2)
+  $1.Date ensureStartDate() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $1.Date get endDate => $_getN(2);
+  @$pb.TagNumber(3)
+  set endDate($1.Date v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasEndDate() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEndDate() => clearField(3);
+  @$pb.TagNumber(3)
+  $1.Date ensureEndDate() => $_ensure(2);
 }
 
 class CreateTaskResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..hasRequiredFields = false
   ;
 
@@ -67,6 +103,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   factory CreateTaskResponse({
     $core.int? id,
     $core.String? title,
+    $1.Date? startDate,
+    $1.Date? endDate,
   }) {
     final _result = create();
     if (id != null) {
@@ -74,6 +112,12 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     }
     if (title != null) {
       _result.title = title;
+    }
+    if (startDate != null) {
+      _result.startDate = startDate;
+    }
+    if (endDate != null) {
+      _result.endDate = endDate;
     }
     return _result;
   }
@@ -115,12 +159,36 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $1.Date get startDate => $_getN(2);
+  @$pb.TagNumber(3)
+  set startDate($1.Date v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStartDate() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStartDate() => clearField(3);
+  @$pb.TagNumber(3)
+  $1.Date ensureStartDate() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $1.Date get endDate => $_getN(3);
+  @$pb.TagNumber(4)
+  set endDate($1.Date v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEndDate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEndDate() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Date ensureEndDate() => $_ensure(3);
 }
 
 class UpdateTaskRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..hasRequiredFields = false
   ;
 
@@ -128,6 +196,8 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   factory UpdateTaskRequest({
     $core.int? id,
     $core.String? title,
+    $1.Date? startDate,
+    $1.Date? endDate,
   }) {
     final _result = create();
     if (id != null) {
@@ -135,6 +205,12 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     }
     if (title != null) {
       _result.title = title;
+    }
+    if (startDate != null) {
+      _result.startDate = startDate;
+    }
+    if (endDate != null) {
+      _result.endDate = endDate;
     }
     return _result;
   }
@@ -176,6 +252,28 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $1.Date get startDate => $_getN(2);
+  @$pb.TagNumber(3)
+  set startDate($1.Date v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStartDate() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStartDate() => clearField(3);
+  @$pb.TagNumber(3)
+  $1.Date ensureStartDate() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $1.Date get endDate => $_getN(3);
+  @$pb.TagNumber(4)
+  set endDate($1.Date v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEndDate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEndDate() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Date ensureEndDate() => $_ensure(3);
 }
 
 class UpdateTaskResponse extends $pb.GeneratedMessage {
@@ -183,6 +281,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..hasRequiredFields = false
   ;
 
@@ -191,6 +291,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
+    $1.Date? startDate,
+    $1.Date? endDate,
   }) {
     final _result = create();
     if (id != null) {
@@ -201,6 +303,12 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     }
     if (isCompleted != null) {
       _result.isCompleted = isCompleted;
+    }
+    if (startDate != null) {
+      _result.startDate = startDate;
+    }
+    if (endDate != null) {
+      _result.endDate = endDate;
     }
     return _result;
   }
@@ -251,6 +359,28 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   $core.bool hasIsCompleted() => $_has(2);
   @$pb.TagNumber(3)
   void clearIsCompleted() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $1.Date get startDate => $_getN(3);
+  @$pb.TagNumber(4)
+  set startDate($1.Date v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasStartDate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearStartDate() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Date ensureStartDate() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $1.Date get endDate => $_getN(4);
+  @$pb.TagNumber(5)
+  set endDate($1.Date v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasEndDate() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearEndDate() => clearField(5);
+  @$pb.TagNumber(5)
+  $1.Date ensureEndDate() => $_ensure(4);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -503,6 +633,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..hasRequiredFields = false
   ;
 
@@ -511,6 +643,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
+    $1.Date? startDate,
+    $1.Date? endDate,
   }) {
     final _result = create();
     if (id != null) {
@@ -521,6 +655,12 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     }
     if (isCompleted != null) {
       _result.isCompleted = isCompleted;
+    }
+    if (startDate != null) {
+      _result.startDate = startDate;
+    }
+    if (endDate != null) {
+      _result.endDate = endDate;
     }
     return _result;
   }
@@ -571,5 +711,27 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   $core.bool hasIsCompleted() => $_has(2);
   @$pb.TagNumber(3)
   void clearIsCompleted() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $1.Date get startDate => $_getN(3);
+  @$pb.TagNumber(4)
+  set startDate($1.Date v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasStartDate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearStartDate() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Date ensureStartDate() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $1.Date get endDate => $_getN(4);
+  @$pb.TagNumber(5)
+  set endDate($1.Date v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasEndDate() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearEndDate() => clearField(5);
+  @$pb.TagNumber(5)
+  $1.Date ensureEndDate() => $_ensure(4);
 }
 
