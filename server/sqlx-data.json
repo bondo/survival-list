@@ -27,48 +27,6 @@
     },
     "query": "\n                UPDATE\n                    tasks\n                SET\n                    completed_at = CASE\n                        WHEN $2 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
   },
-  "09e3c3722e1c3db95e9a201f8177d3d648701c9970d0113e1578724ce2815a70": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 3,
-          "type_info": "Date"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 4,
-          "type_info": "Date"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        true,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n                SELECT\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n                FROM\n                    tasks\n            "
-  },
   "0a38a4263db5e25680c5a7280cc1405c5af305f36e14a1cb764da67ad481de14": {
     "describe": {
       "columns": [
@@ -134,6 +92,48 @@
       }
     },
     "query": "\n                INSERT INTO tasks (\n                    title,\n                    start_date,\n                    end_date\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
+  },
+  "55d472faaf9c2dad54f2eb05013e69f56249cf11c41ed92e693cfa2b29bfea1e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 3,
+          "type_info": "Date"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 4,
+          "type_info": "Date"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n                SELECT\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n                FROM\n                    tasks\n                WHERE\n                    completed_at IS NULL OR\n                    completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n            "
   },
   "8cddfd2c48d6f46461a68c41a1c3225b415d1794eea96b1586605172cfc49aea": {
     "describe": {
