@@ -5,11 +5,24 @@ package api.v1;
 import "google/type/date.proto";
 
 service API {
+    rpc Login (LoginRequest) returns (LoginResponse);
     rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
     rpc UpdateTask (UpdateTaskRequest) returns (UpdateTaskResponse);
     rpc ToggleTaskCompleted (ToggleTaskCompletedRequest) returns (ToggleTaskCompletedResponse);
     rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse);
     rpc GetTasks (GetTasksRequest) returns (stream GetTasksResponse);
+    rpc CreateGroup (CreateGroupRequest) returns (CreateGroupResponse);
+    rpc UpdateGroup (UpdateGroupRequest) returns (UpdateGroupResponse);
+    rpc LeaveGroup (LeaveGroupRequest) returns (LeaveGroupResponse);
+    rpc GetGroups (GetGroupsRequest) returns (stream GetGroupsResponse);
+}
+
+message LoginRequest {
+    string name = 1;
+    string picture_url = 2;
+}
+
+message LoginResponse {
 }
 
 message CreateTaskRequest {
@@ -67,4 +80,39 @@ message GetTasksResponse {
     bool is_completed = 3;
     google.type.Date start_date = 4;
     google.type.Date end_date = 5;
+}
+
+message CreateGroupRequest {
+    string title = 1;
+}
+
+message CreateGroupResponse {
+    int32 id = 1;
+    string title = 2;
+}
+
+message UpdateGroupRequest {
+    int32 id = 1;
+    string title = 2;
+}
+
+message UpdateGroupResponse {
+    int32 id = 1;
+    string title = 2;
+}
+
+message LeaveGroupRequest {
+    int32 id = 1;
+}
+
+message LeaveGroupResponse {
+    int32 id = 1;
+}
+
+message GetGroupsRequest {
+}
+
+message GetGroupsResponse {
+    int32 id = 1;
+    string title = 2;
 }

@@ -1,33 +1,26 @@
 {
   "db": "PostgreSQL",
-  "06daba80b27a9aec46c3c4331a353725e7cb6beb77e3ccc4c06a4696e74a750a": {
+  "1b57781ab048599c0618fa4387215aa421124c6a0b9b3ac1eee5fc27cc964e80": {
     "describe": {
       "columns": [
         {
-          "name": "id: TaskId",
+          "name": "id: UserId",
           "ordinal": 0,
           "type_info": "Int4"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 1,
-          "type_info": "Timestamp"
         }
       ],
       "nullable": [
-        false,
-        true
+        false
       ],
       "parameters": {
         "Left": [
-          "Int4",
-          "Bool"
+          "Text"
         ]
       }
     },
-    "query": "\n                UPDATE\n                    tasks\n                SET\n                    completed_at = CASE\n                        WHEN $2 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
+    "query": "\n                SELECT\n                    u.id as \"id: UserId\"\n                FROM\n                    users u\n                WHERE\n                    u.uid = $1\n            "
   },
-  "0a38a4263db5e25680c5a7280cc1405c5af305f36e14a1cb764da67ad481de14": {
+  "4b09bcb1e2b22f9c77ff526e735da2db64184396d97de7f011c97c4df8915399": {
     "describe": {
       "columns": [
         {
@@ -41,13 +34,108 @@
       ],
       "parameters": {
         "Left": [
+          "Int4",
           "Int4"
         ]
       }
     },
-    "query": "\n                DELETE FROM\n                    tasks\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\"\n            "
+    "query": "\n                DELETE FROM\n                    tasks t\n                WHERE\n                    t.id = $2 AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id\n                            WHERE\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
   },
-  "2f785d542606974133cda3d43029bbaf096240f3f4f6938f2da120dcfc67e8d9": {
+  "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
+  },
+  "750bfbbfcf1c2d3892e33262053754b11b89583d3c9f39cdf1b5bf4dcad9a3d8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
+  },
+  "8221e03847bc8f03d55fd449f3830f2a745c6d043bb31eba8c02bef6ace3386d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
+  },
+  "875656f3926f66d07ef733001145c0e2c55a7b025aad98dc9a5c96df8544b286": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    completed_at = CASE\n                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    t.id = $2 AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id\n                            WHERE\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
+  },
+  "98910ee7914b032fe69d4e13dd98f6d6ac0b6dbc3f3d1dc6185eec6ced01e48f": {
     "describe": {
       "columns": [
         {
@@ -85,15 +173,105 @@
       ],
       "parameters": {
         "Left": [
-          "Text",
-          "Date",
-          "Date"
+          "Int4"
         ]
       }
     },
-    "query": "\n                INSERT INTO tasks (\n                    title,\n                    start_date,\n                    end_date\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
+    "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date\n                FROM\n                    tasks t\n                WHERE\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id\n                            WHERE\n                                ug.user_id = $1\n                        )\n                    )\n            "
   },
-  "55d472faaf9c2dad54f2eb05013e69f56249cf11c41ed92e693cfa2b29bfea1e": {
+  "9a9577d0e3bf001ea543b7dbb54e0e40c03796a424391bc92db90ce2c96aebc1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "uid",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "picture_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = $2,\n                    picture_url = $3\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            "
+  },
+  "bb6f480e6ba0f41c183e174899512895064c8aad1ec47055c94dcbb8b6caeba7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO groups (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
+  },
+  "c42b3fe3bb44ec88e797bcba34bd09e399ee1feb4f61f847a77b21f95cf0ab9e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    users_groups ug\n                WHERE\n                    ug.user_id = $1 AND\n                    ug.group_id = $2\n            "
+  },
+  "c69f2e7d3374e4881e9f0b7d13351e8646b318f1d4e3563545921190a8341f11": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO users_groups (\n                    user_id,\n                    group_id\n                )\n                VALUES (\n                    $1,\n                    $2\n                )\n            "
+  },
+  "d2d48cd0e5ddd45ad2f229d4f2c9e5e23df718c7e3645621582dd5226ccf6018": {
     "describe": {
       "columns": [
         {
@@ -130,12 +308,18 @@
         true
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text",
+          "Date",
+          "Date"
+        ]
       }
     },
-    "query": "\n                SELECT\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n                FROM\n                    tasks\n                WHERE\n                    completed_at IS NULL OR\n                    completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n            "
+    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    title = $3,\n                    start_date = $4,\n                    end_date = $5\n                WHERE\n                    t.id = $2 AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id\n                            WHERE\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
   },
-  "8cddfd2c48d6f46461a68c41a1c3225b415d1794eea96b1586605172cfc49aea": {
+  "e3f70c33fe5269cffc83df9d97005dab307f45d92065e8df4a945487a45d888c": {
     "describe": {
       "columns": [
         {
@@ -180,6 +364,6 @@
         ]
       }
     },
-    "query": "\n                UPDATE\n                    tasks\n                SET\n                    title = $2,\n                    start_date = $3,\n                    end_date = $4\n                WHERE\n                    id = $1\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
+    "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
   }
 }

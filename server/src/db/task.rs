@@ -1,22 +1,15 @@
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
-use std::{env, fmt::Display, fs};
+use std::fmt::Display;
 
 use anyhow::Result;
-use dotenvy::dotenv;
 use sqlx::{
     self,
-    migrate::MigrateError,
-    postgres::PgPoolOptions,
     types::time::{Date, PrimitiveDateTime},
-    PgPool,
 };
 use tonic::Status;
 
-#[derive(Clone)]
-pub struct Database {
-    pool: PgPool,
-}
+use super::{database::Database, UserId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -85,38 +78,42 @@ impl TaskPeriodInput {
 }
 
 impl Database {
-    pub async fn new() -> Result<Self, sqlx::Error> {
-        let url = fs::read_to_string("/secrets/POSTGRES_CONNECTION/latest").unwrap_or_else(|_| {
-            dotenv().ok();
-            env::var("DATABASE_URL").expect(
-                "File /secrets/POSTGRES_CONNECTION/latest or environment variable DATABASE_URL missing",
-            )
-        });
-        let pool = PgPoolOptions::new().connect(url.as_str()).await?;
-        Ok(Database { pool })
-    }
-
-    pub async fn migrate(&self) -> Result<(), MigrateError> {
-        sqlx::migrate!().run(&self.pool).await
-    }
-
     #[allow(clippy::needless_lifetimes)]
-    pub fn get_tasks<'a>(&'a self) -> impl Stream<Item = Result<TaskResult, Status>> + 'a {
+    pub fn get_tasks<'a>(
+        &'a self,
+        user_id: UserId,
+    ) -> impl Stream<Item = Result<TaskResult, Status>> + 'a {
         sqlx::query_as!(
             TaskResult,
             r#"
                 SELECT
-                    id as "id: TaskId",
-                    title,
-                    completed_at,
-                    start_date,
-                    end_date
+                    t.id as "id: TaskId",
+                    t.title,
+                    t.completed_at,
+                    t.start_date,
+                    t.end_date
                 FROM
-                    tasks
+                    tasks t
                 WHERE
-                    completed_at IS NULL OR
-                    completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
-            "#
+                    (
+                        t.completed_at IS NULL OR
+                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
+                    ) AND
+                    (
+                        t.responsible_user_id = $1 OR
+                        EXISTS (
+                            SELECT
+                            FROM
+                                tasks_groups tg
+                            INNER JOIN
+                                users_groups ug ON
+                                    ug.group_id = tg.group_id
+                            WHERE
+                                ug.user_id = $1
+                        )
+                    )
+            "#,
+            user_id.0
         )
         .fetch(&self.pool)
         .map(|i| i.or(Err(Status::internal("unexpected error loading tasks"))))
@@ -124,6 +121,7 @@ impl Database {
 
     pub async fn create_task(
         &self,
+        user_id: UserId,
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
@@ -131,6 +129,7 @@ impl Database {
             TaskResult,
             r#"
                 INSERT INTO tasks (
+                    responsible_user_id,
                     title,
                     start_date,
                     end_date
@@ -138,7 +137,8 @@ impl Database {
                 VALUES (
                     $1,
                     $2,
-                    $3
+                    $3,
+                    $4
                 )
                 RETURNING
                     id as "id: TaskId",
@@ -147,6 +147,7 @@ impl Database {
                     start_date,
                     end_date
             "#,
+            user_id.0,
             title,
             period.start_date(),
             period.end_date()
@@ -158,7 +159,8 @@ impl Database {
 
     pub async fn update_task(
         &self,
-        id: TaskId,
+        user_id: UserId,
+        task_id: TaskId,
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
@@ -166,13 +168,26 @@ impl Database {
             TaskResult,
             r#"
                 UPDATE
-                    tasks
+                    tasks t
                 SET
-                    title = $2,
-                    start_date = $3,
-                    end_date = $4
+                    title = $3,
+                    start_date = $4,
+                    end_date = $5
                 WHERE
-                    id = $1
+                    t.id = $2 AND
+                    (
+                        t.responsible_user_id = $1 OR
+                        EXISTS (
+                            SELECT
+                            FROM
+                                tasks_groups tg
+                            INNER JOIN
+                                users_groups ug ON
+                                    ug.group_id = tg.group_id
+                            WHERE
+                                ug.user_id = $1
+                        )
+                    )
                 RETURNING
                     id as "id: TaskId",
                     title,
@@ -180,7 +195,8 @@ impl Database {
                     start_date,
                     end_date
             "#,
-            id.0,
+            user_id.0,
+            task_id.0,
             title,
             period.start_date(),
             period.end_date()
@@ -192,26 +208,41 @@ impl Database {
 
     pub async fn toggle_task_completed(
         &self,
-        id: TaskId,
+        user_id: UserId,
+        task_id: TaskId,
         is_completed: bool,
     ) -> Result<ToggleResult, Status> {
         sqlx::query_as!(
             ToggleResult,
             r#"
                 UPDATE
-                    tasks
+                    tasks t
                 SET
                     completed_at = CASE
-                        WHEN $2 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
                         ELSE NULL
                     END
                 WHERE
-                    id = $1
+                    t.id = $2 AND
+                    (
+                        t.responsible_user_id = $1 OR
+                        EXISTS (
+                            SELECT
+                            FROM
+                                tasks_groups tg
+                            INNER JOIN
+                                users_groups ug ON
+                                    ug.group_id = tg.group_id
+                            WHERE
+                                ug.user_id = $1
+                        )
+                    )
                 RETURNING
                     id as "id: TaskId",
                     completed_at
             "#,
-            id.0,
+            user_id.0,
+            task_id.0,
             is_completed,
         )
         .fetch_one(&self.pool)
@@ -219,18 +250,32 @@ impl Database {
         .map_err(|_| Status::internal("Failed to update task"))
     }
 
-    pub async fn delete_task(&self, id: TaskId) -> Result<TaskId, Status> {
+    pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId, Status> {
         sqlx::query_as!(
             DeleteResult,
             r#"
                 DELETE FROM
-                    tasks
+                    tasks t
                 WHERE
-                    id = $1
+                    t.id = $2 AND
+                    (
+                        t.responsible_user_id = $1 OR
+                        EXISTS (
+                            SELECT
+                            FROM
+                                tasks_groups tg
+                            INNER JOIN
+                                users_groups ug ON
+                                    ug.group_id = tg.group_id
+                            WHERE
+                                ug.user_id = $1
+                        )
+                    )
                 RETURNING
                     id as "id: TaskId"
             "#,
-            id.0,
+            user_id.0,
+            task_id.0,
         )
         .fetch_one(&self.pool)
         .await

@@ -53,10 +53,17 @@ impl Auth {
     }
 }
 
+pub struct AuthExtension {
+    pub uid: String,
+}
+
 impl Interceptor for Auth {
-    fn call(&mut self, request: Request<()>) -> Result<Request<()>, Status> {
+    fn call(&mut self, mut request: Request<()>) -> Result<Request<()>, Status> {
         if let Some(user) = self.get_authenticated_user(&request) {
             info!("Authenticated user {user:?}, uid({})", user.uid);
+            request
+                .extensions_mut()
+                .insert(AuthExtension { uid: user.uid });
             Ok(request)
         } else {
             info!("Token auth failed");
