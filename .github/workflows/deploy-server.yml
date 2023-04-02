@@ -45,65 +45,24 @@ jobs:
           input: "deploy-server/proto"
           against: "server-production/proto"
 
-  build-image:
+  fly-io-deploy:
     runs-on: ubuntu-latest
 
     needs: validate-protos
 
-    outputs:
-      image-digest: ${{ steps.build-and-deploy.outputs.digest }}
-
     steps:
       - uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: superfly/flyctl-actions/setup-flyctl@v2
 
-      - name: Setup buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        id: build-and-deploy
-        with:
-          context: server
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: true
-          tags: bjarkebjarke/survival-list-server:latest
-
-  cloudrun-deploy:
-    runs-on: ubuntu-latest
-
-    needs:
-      - validate-protos
-      - build-image
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Google Auth
-        uses: "google-github-actions/auth@v1"
-        with:
-          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}"
-          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}"
-
-      - name: Deploy to Cloud Run
-        uses: "google-github-actions/deploy-cloudrun@v1"
-        with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          image: "docker.io/bjarkebjarke/survival-list-server@${{ needs.build-image.outputs.image-digest }}"
+      - run: flyctl deploy server --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   update-server-production-tag:
     runs-on: ubuntu-latest
 
-    needs: cloudrun-deploy
+    needs: fly-io-deploy
 
     permissions:
       contents: write
