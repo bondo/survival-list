@@ -13,11 +13,6 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
-env:
-  PROJECT_ID: "survival-list-server"
-  SERVICE: "survival-list-server"
-  REGION: "europe-north1"
-
 jobs:
   validate-protos:
     runs-on: ubuntu-latest
