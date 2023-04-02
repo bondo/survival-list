@@ -50,12 +50,16 @@ jobs:
 
     needs: validate-protos
 
+    defaults:
+      run:
+        working-directory: server
+
     steps:
       - uses: actions/checkout@v3
 
       - uses: superfly/flyctl-actions/setup-flyctl@v2
 
-      - run: flyctl deploy server --remote-only
+      - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
