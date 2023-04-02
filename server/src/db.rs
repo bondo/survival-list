@@ -113,6 +113,9 @@ impl Database {
                     end_date
                 FROM
                     tasks
+                WHERE
+                    completed_at IS NULL OR
+                    completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
             "#
         )
         .fetch(&self.pool)
