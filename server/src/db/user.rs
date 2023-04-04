@@ -40,12 +40,17 @@ impl Database {
     pub async fn load_user_id(&self, uid: &str) -> Result<UserId, Status> {
         sqlx::query_scalar!(
             r#"
-                SELECT
-                    u.id as "id: UserId"
-                FROM
-                    users u
-                WHERE
-                    u.uid = $1
+                INSERT INTO users (
+                    uid,
+                    name
+                )
+                VALUES (
+                    $1,
+                    '?'
+                )
+                ON CONFLICT (uid) DO NOTHING
+                RETURNING
+                    id as "id: UserId"
             "#,
             uid,
         )
