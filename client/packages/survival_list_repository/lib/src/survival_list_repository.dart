@@ -127,6 +127,14 @@ class SurvivalListRepository {
     return DateTime(date.year, date.month, date.day);
   }
 
+  Future<void> updateUserInfo({
+    required String? name,
+    required String? pictureUrl,
+  }) async {
+    await _client
+        .login(LoginRequest(name: name ?? '?', pictureUrl: pictureUrl));
+  }
+
   Future<void> createItem({
     required String title,
     required DateTime? startDate,

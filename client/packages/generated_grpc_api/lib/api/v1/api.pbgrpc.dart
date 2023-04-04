@@ -14,6 +14,10 @@ import 'api.pb.dart' as $0;
 export 'api.pb.dart';
 
 class APIClient extends $grpc.Client {
+  static final _$login = $grpc.ClientMethod<$0.LoginRequest, $0.LoginResponse>(
+      '/api.v1.API/Login',
+      ($0.LoginRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.LoginResponse.fromBuffer(value));
   static final _$createTask =
       $grpc.ClientMethod<$0.CreateTaskRequest, $0.CreateTaskResponse>(
           '/api.v1.API/CreateTask',
@@ -44,11 +48,40 @@ class APIClient extends $grpc.Client {
           ($0.GetTasksRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.GetTasksResponse.fromBuffer(value));
+  static final _$createGroup =
+      $grpc.ClientMethod<$0.CreateGroupRequest, $0.CreateGroupResponse>(
+          '/api.v1.API/CreateGroup',
+          ($0.CreateGroupRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.CreateGroupResponse.fromBuffer(value));
+  static final _$updateGroup =
+      $grpc.ClientMethod<$0.UpdateGroupRequest, $0.UpdateGroupResponse>(
+          '/api.v1.API/UpdateGroup',
+          ($0.UpdateGroupRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.UpdateGroupResponse.fromBuffer(value));
+  static final _$leaveGroup =
+      $grpc.ClientMethod<$0.LeaveGroupRequest, $0.LeaveGroupResponse>(
+          '/api.v1.API/LeaveGroup',
+          ($0.LeaveGroupRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.LeaveGroupResponse.fromBuffer(value));
+  static final _$getGroups =
+      $grpc.ClientMethod<$0.GetGroupsRequest, $0.GetGroupsResponse>(
+          '/api.v1.API/GetGroups',
+          ($0.GetGroupsRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.GetGroupsResponse.fromBuffer(value));
 
   APIClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
+
+  $grpc.ResponseFuture<$0.LoginResponse> login($0.LoginRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$login, request, options: options);
+  }
 
   $grpc.ResponseFuture<$0.CreateTaskResponse> createTask(
       $0.CreateTaskRequest request,
@@ -80,12 +113,45 @@ class APIClient extends $grpc.Client {
         _$getTasks, $async.Stream.fromIterable([request]),
         options: options);
   }
+
+  $grpc.ResponseFuture<$0.CreateGroupResponse> createGroup(
+      $0.CreateGroupRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$createGroup, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.UpdateGroupResponse> updateGroup(
+      $0.UpdateGroupRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$updateGroup, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.LeaveGroupResponse> leaveGroup(
+      $0.LeaveGroupRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$leaveGroup, request, options: options);
+  }
+
+  $grpc.ResponseStream<$0.GetGroupsResponse> getGroups(
+      $0.GetGroupsRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$getGroups, $async.Stream.fromIterable([request]),
+        options: options);
+  }
 }
 
 abstract class APIServiceBase extends $grpc.Service {
   $core.String get $name => 'api.v1.API';
 
   APIServiceBase() {
+    $addMethod($grpc.ServiceMethod<$0.LoginRequest, $0.LoginResponse>(
+        'Login',
+        login_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.LoginRequest.fromBuffer(value),
+        ($0.LoginResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.CreateTaskRequest, $0.CreateTaskResponse>(
         'CreateTask',
         createTask_Pre,
@@ -123,6 +189,43 @@ abstract class APIServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.GetTasksRequest.fromBuffer(value),
         ($0.GetTasksResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.CreateGroupRequest, $0.CreateGroupResponse>(
+            'CreateGroup',
+            createGroup_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.CreateGroupRequest.fromBuffer(value),
+            ($0.CreateGroupResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.UpdateGroupRequest, $0.UpdateGroupResponse>(
+            'UpdateGroup',
+            updateGroup_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.UpdateGroupRequest.fromBuffer(value),
+            ($0.UpdateGroupResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.LeaveGroupRequest, $0.LeaveGroupResponse>(
+        'LeaveGroup',
+        leaveGroup_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.LeaveGroupRequest.fromBuffer(value),
+        ($0.LeaveGroupResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetGroupsRequest, $0.GetGroupsResponse>(
+        'GetGroups',
+        getGroups_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.GetGroupsRequest.fromBuffer(value),
+        ($0.GetGroupsResponse value) => value.writeToBuffer()));
+  }
+
+  $async.Future<$0.LoginResponse> login_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.LoginRequest> request) async {
+    return login(call, await request);
   }
 
   $async.Future<$0.CreateTaskResponse> createTask_Pre($grpc.ServiceCall call,
@@ -151,6 +254,28 @@ abstract class APIServiceBase extends $grpc.Service {
     yield* getTasks(call, await request);
   }
 
+  $async.Future<$0.CreateGroupResponse> createGroup_Pre($grpc.ServiceCall call,
+      $async.Future<$0.CreateGroupRequest> request) async {
+    return createGroup(call, await request);
+  }
+
+  $async.Future<$0.UpdateGroupResponse> updateGroup_Pre($grpc.ServiceCall call,
+      $async.Future<$0.UpdateGroupRequest> request) async {
+    return updateGroup(call, await request);
+  }
+
+  $async.Future<$0.LeaveGroupResponse> leaveGroup_Pre($grpc.ServiceCall call,
+      $async.Future<$0.LeaveGroupRequest> request) async {
+    return leaveGroup(call, await request);
+  }
+
+  $async.Stream<$0.GetGroupsResponse> getGroups_Pre($grpc.ServiceCall call,
+      $async.Future<$0.GetGroupsRequest> request) async* {
+    yield* getGroups(call, await request);
+  }
+
+  $async.Future<$0.LoginResponse> login(
+      $grpc.ServiceCall call, $0.LoginRequest request);
   $async.Future<$0.CreateTaskResponse> createTask(
       $grpc.ServiceCall call, $0.CreateTaskRequest request);
   $async.Future<$0.UpdateTaskResponse> updateTask(
@@ -161,4 +286,12 @@ abstract class APIServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.DeleteTaskRequest request);
   $async.Stream<$0.GetTasksResponse> getTasks(
       $grpc.ServiceCall call, $0.GetTasksRequest request);
+  $async.Future<$0.CreateGroupResponse> createGroup(
+      $grpc.ServiceCall call, $0.CreateGroupRequest request);
+  $async.Future<$0.UpdateGroupResponse> updateGroup(
+      $grpc.ServiceCall call, $0.UpdateGroupRequest request);
+  $async.Future<$0.LeaveGroupResponse> leaveGroup(
+      $grpc.ServiceCall call, $0.LeaveGroupRequest request);
+  $async.Stream<$0.GetGroupsResponse> getGroups(
+      $grpc.ServiceCall call, $0.GetGroupsRequest request);
 }

@@ -35,6 +35,7 @@ class App extends StatelessWidget {
       child: BlocProvider(
         create: (context) => AppBloc(
           authenticationRepository: context.read<AuthenticationRepository>(),
+          survivalListRepository: context.read<SurvivalListRepository>(),
         ),
         child: AnimatedBuilder(
           animation: _settingsController,
