@@ -1,25 +1,5 @@
 {
   "db": "PostgreSQL",
-  "1b57781ab048599c0618fa4387215aa421124c6a0b9b3ac1eee5fc27cc964e80": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: UserId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    u.id as \"id: UserId\"\n                FROM\n                    users u\n                WHERE\n                    u.uid = $1\n            "
-  },
   "4b09bcb1e2b22f9c77ff526e735da2db64184396d97de7f011c97c4df8915399": {
     "describe": {
       "columns": [
@@ -106,6 +86,26 @@
       }
     },
     "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
+  },
+  "84b669f122cc7d7ab59f4f784d1131e6a314f8c5d7f55f55290a29065c45eb9f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO NOTHING\n                RETURNING\n                    id as \"id: UserId\"\n            "
   },
   "875656f3926f66d07ef733001145c0e2c55a7b025aad98dc9a5c96df8544b286": {
     "describe": {
