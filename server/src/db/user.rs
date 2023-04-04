@@ -56,7 +56,7 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::not_found("user does not exist"))
+        .map_err(|_| Status::internal("Failed to load user id"))
     }
 
     pub async fn upsert_user(
