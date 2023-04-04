@@ -33,6 +33,46 @@
     },
     "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
   },
+  "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "uid",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "picture_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = EXCLUDED.name,\n                    picture_url = EXCLUDED.picture_url\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            "
+  },
   "750bfbbfcf1c2d3892e33262053754b11b89583d3c9f39cdf1b5bf4dcad9a3d8": {
     "describe": {
       "columns": [
@@ -86,26 +126,6 @@
       }
     },
     "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
-  },
-  "84b669f122cc7d7ab59f4f784d1131e6a314f8c5d7f55f55290a29065c45eb9f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: UserId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO NOTHING\n                RETURNING\n                    id as \"id: UserId\"\n            "
   },
   "875656f3926f66d07ef733001145c0e2c55a7b025aad98dc9a5c96df8544b286": {
     "describe": {
@@ -178,46 +198,6 @@
       }
     },
     "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date\n                FROM\n                    tasks t\n                WHERE\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id\n                            WHERE\n                                ug.user_id = $1\n                        )\n                    )\n            "
-  },
-  "9a9577d0e3bf001ea543b7dbb54e0e40c03796a424391bc92db90ce2c96aebc1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: UserId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "uid",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "picture_url",
-          "ordinal": 3,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = $2,\n                    picture_url = $3\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            "
   },
   "bb6f480e6ba0f41c183e174899512895064c8aad1ec47055c94dcbb8b6caeba7": {
     "describe": {
@@ -365,5 +345,25 @@
       }
     },
     "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                )\n                RETURNING\n                    id as \"id: TaskId\",\n                    title,\n                    completed_at,\n                    start_date,\n                    end_date\n            "
+  },
+  "fb96380621e3048061609e3559381bbd403769f8caa2b0afa4235ce2d791936d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    -- No-op to allow RETURNING\n                    uid = EXCLUDED.uid\n                RETURNING\n                    id as \"id: UserId\"\n            "
   }
 }

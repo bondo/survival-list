@@ -48,7 +48,9 @@ impl Database {
                     $1,
                     '?'
                 )
-                ON CONFLICT (uid) DO NOTHING
+                ON CONFLICT (uid) DO UPDATE SET
+                    -- No-op to allow RETURNING
+                    uid = EXCLUDED.uid
                 RETURNING
                     id as "id: UserId"
             "#,
@@ -79,8 +81,8 @@ impl Database {
                     $3
                 )
                 ON CONFLICT (uid) DO UPDATE SET
-                    name = $2,
-                    picture_url = $3
+                    name = EXCLUDED.name,
+                    picture_url = EXCLUDED.picture_url
                 RETURNING
                     id as "id: UserId",
                     uid,
