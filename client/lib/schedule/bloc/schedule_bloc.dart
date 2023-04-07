@@ -12,9 +12,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ScheduleBloc({
     required AuthenticationRepository authenticationRepository,
     required SurvivalListRepository survivalListRepository,
+    required ScheduleViewVariant variant,
   })  : _authenticationRepository = authenticationRepository,
         _survivalListRepository = survivalListRepository,
-        super(const ScheduleState()) {
+        super(ScheduleState(variant:variant)) {
     on<ScheduleFilterChanged>(_onFilterChanged);
     on<ScheduleItemCompletionToggled>(_onItemCompletionToggled);
     on<ScheduleItemDeleted>(_onItemDeleted);

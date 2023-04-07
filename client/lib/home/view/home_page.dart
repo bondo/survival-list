@@ -34,11 +34,17 @@ class HomeView extends StatelessWidget {
           (tab) {
             switch (tab) {
               case HomeTab.survival:
-                return const SchedulePage(); // SurvivalPage
+                return const SchedulePage(
+                  variant: ScheduleViewVariant.survival,
+                );
               case HomeTab.todo:
-                return const SchedulePage(); // TodoPage
-              case HomeTab.schedule:
-                return const SchedulePage();
+                return const SchedulePage(
+                  variant: ScheduleViewVariant.todo,
+                );
+              case HomeTab.overview:
+                return const SchedulePage(
+                  variant: ScheduleViewVariant.overview,
+                );
             }
           },
         ).toList(),

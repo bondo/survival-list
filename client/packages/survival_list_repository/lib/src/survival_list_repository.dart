@@ -123,8 +123,11 @@ class SurvivalListRepository {
         : Date(year: date.year, month: date.month, day: date.day);
   }
 
-  DateTime _parseDate(Date date) {
-    return DateTime(date.year, date.month, date.day);
+  DateTime? _parseDate(Date date) {
+    if (date.hasYear() && date.hasMonth() && date.hasDay()) {
+      return DateTime(date.year, date.month, date.day);
+    }
+    return null;
   }
 
   Future<void> updateUserInfo({

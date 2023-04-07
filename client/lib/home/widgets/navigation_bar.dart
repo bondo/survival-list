@@ -30,7 +30,7 @@ class HomeNavigationBar extends StatelessWidget {
                 icon: const Icon(Icons.list),
                 label: l10n.bottomNavigationIconLabelTodo,
               );
-            case HomeTab.schedule:
+            case HomeTab.overview:
               return BottomNavigationBarItem(
                 icon: const Icon(Icons.home),
                 label: l10n.bottomNavigationIconLabelSchedule,

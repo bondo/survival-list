@@ -3,7 +3,7 @@ import 'package:survival_list_repository/survival_list_repository.dart';
 enum ScheduleViewFilter { all, activeOnly, completedOnly }
 
 extension ScheduleViewFilterX on ScheduleViewFilter {
-  bool apply(Item item) {
+  bool _filter(Item item) {
     switch (this) {
       case ScheduleViewFilter.all:
         return true;
@@ -14,7 +14,7 @@ extension ScheduleViewFilterX on ScheduleViewFilter {
     }
   }
 
-  Iterable<Item> applyAll(Iterable<Item> todos) {
-    return todos.where(apply);
+  Iterable<Item> apply(Iterable<Item> todos) {
+    return todos.where(_filter);
   }
 }

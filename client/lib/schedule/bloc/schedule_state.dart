@@ -4,6 +4,7 @@ enum ScheduleStatus { initial, loading, success, failure }
 
 class ScheduleState extends Equatable {
   const ScheduleState({
+    required this.variant,
     this.status = ScheduleStatus.initial,
     this.todos = const [],
     this.filter = ScheduleViewFilter.all,
@@ -14,10 +15,11 @@ class ScheduleState extends Equatable {
   final ScheduleStatus status;
   final List<Item> todos;
   final ScheduleViewFilter filter;
+  final ScheduleViewVariant variant;
   final Item? lastDeletedItem;
   final String? userPhotoUrl;
 
-  Iterable<Item> get filteredItems => filter.applyAll(todos);
+  List<Item> get filteredItems => variant.apply(filter.apply(todos));
 
   ScheduleState copyWith({
     ScheduleStatus Function()? status,
@@ -27,6 +29,7 @@ class ScheduleState extends Equatable {
     String? Function()? userPhotoUrl,
   }) {
     return ScheduleState(
+      variant: variant,
       status: status != null ? status() : this.status,
       todos: todos != null ? todos() : this.todos,
       filter: filter != null ? filter() : this.filter,

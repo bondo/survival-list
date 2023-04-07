@@ -8,7 +8,9 @@ import 'package:survival_list/schedule/schedule.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
 class SchedulePage extends StatelessWidget {
-  const SchedulePage({super.key});
+  const SchedulePage({required this.variant, super.key});
+
+  final ScheduleViewVariant variant;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,7 @@ class SchedulePage extends StatelessWidget {
       create: (context) => ScheduleBloc(
         authenticationRepository: context.read<AuthenticationRepository>(),
         survivalListRepository: context.read<SurvivalListRepository>(),
+        variant: variant,
       )..add(const ScheduleSubscriptionRequested()),
       child: const ScheduleView(),
     );
