@@ -106,6 +106,7 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$1.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
     ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -114,6 +115,7 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     $core.String? title,
     $1.Date? startDate,
     $1.Date? endDate,
+    $core.int? responsibleId,
   }) {
     final _result = create();
     if (title != null) {
@@ -124,6 +126,9 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     }
     if (endDate != null) {
       _result.endDate = endDate;
+    }
+    if (responsibleId != null) {
+      _result.responsibleId = responsibleId;
     }
     return _result;
   }
@@ -178,6 +183,15 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   void clearEndDate() => clearField(3);
   @$pb.TagNumber(3)
   $1.Date ensureEndDate() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.int get responsibleId => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set responsibleId($core.int v) { $_setSignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasResponsibleId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearResponsibleId() => clearField(4);
 }
 
 class CreateTaskResponse extends $pb.GeneratedMessage {
@@ -186,6 +200,7 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
     ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<User>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..hasRequiredFields = false
   ;
 
@@ -195,6 +210,7 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     $core.String? title,
     $1.Date? startDate,
     $1.Date? endDate,
+    User? responsible,
   }) {
     final _result = create();
     if (id != null) {
@@ -208,6 +224,9 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     }
     if (endDate != null) {
       _result.endDate = endDate;
+    }
+    if (responsible != null) {
+      _result.responsible = responsible;
     }
     return _result;
   }
@@ -271,6 +290,17 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
   $1.Date ensureEndDate() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  User get responsible => $_getN(4);
+  @$pb.TagNumber(5)
+  set responsible(User v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasResponsible() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearResponsible() => clearField(5);
+  @$pb.TagNumber(5)
+  User ensureResponsible() => $_ensure(4);
 }
 
 class UpdateTaskRequest extends $pb.GeneratedMessage {
@@ -279,6 +309,7 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
     ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -288,6 +319,7 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     $core.String? title,
     $1.Date? startDate,
     $1.Date? endDate,
+    $core.int? responsibleId,
   }) {
     final _result = create();
     if (id != null) {
@@ -301,6 +333,9 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     }
     if (endDate != null) {
       _result.endDate = endDate;
+    }
+    if (responsibleId != null) {
+      _result.responsibleId = responsibleId;
     }
     return _result;
   }
@@ -364,6 +399,15 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
   $1.Date ensureEndDate() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.int get responsibleId => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set responsibleId($core.int v) { $_setSignedInt32(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasResponsibleId() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearResponsibleId() => clearField(5);
 }
 
 class UpdateTaskResponse extends $pb.GeneratedMessage {
@@ -373,6 +417,7 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
     ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
     ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..hasRequiredFields = false
   ;
 
@@ -383,6 +428,7 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.bool? isCompleted,
     $1.Date? startDate,
     $1.Date? endDate,
+    User? responsible,
   }) {
     final _result = create();
     if (id != null) {
@@ -399,6 +445,9 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     }
     if (endDate != null) {
       _result.endDate = endDate;
+    }
+    if (responsible != null) {
+      _result.responsible = responsible;
     }
     return _result;
   }
@@ -471,6 +520,17 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
   $1.Date ensureEndDate() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  User get responsible => $_getN(5);
+  @$pb.TagNumber(6)
+  set responsible(User v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasResponsible() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearResponsible() => clearField(6);
+  @$pb.TagNumber(6)
+  User ensureResponsible() => $_ensure(5);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -725,6 +785,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
     ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
     ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..hasRequiredFields = false
   ;
 
@@ -735,6 +796,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.bool? isCompleted,
     $1.Date? startDate,
     $1.Date? endDate,
+    User? responsible,
   }) {
     final _result = create();
     if (id != null) {
@@ -751,6 +813,9 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     }
     if (endDate != null) {
       _result.endDate = endDate;
+    }
+    if (responsible != null) {
+      _result.responsible = responsible;
     }
     return _result;
   }
@@ -823,6 +888,17 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
   $1.Date ensureEndDate() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  User get responsible => $_getN(5);
+  @$pb.TagNumber(6)
+  set responsible(User v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasResponsible() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearResponsible() => clearField(6);
+  @$pb.TagNumber(6)
+  User ensureResponsible() => $_ensure(5);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
@@ -1237,5 +1313,80 @@ class GetGroupsResponse extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+}
+
+class User extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'User', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pictureUrl')
+    ..hasRequiredFields = false
+  ;
+
+  User._() : super();
+  factory User({
+    $core.int? id,
+    $core.String? name,
+    $core.String? pictureUrl,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (pictureUrl != null) {
+      _result.pictureUrl = pictureUrl;
+    }
+    return _result;
+  }
+  factory User.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory User.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  User clone() => User()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  User copyWith(void Function(User) updates) => super.copyWith((message) => updates(message as User)) as User; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static User create() => User._();
+  User createEmptyInstance() => create();
+  static $pb.PbList<User> createRepeated() => $pb.PbList<User>();
+  @$core.pragma('dart2js:noInline')
+  static User getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<User>(create);
+  static User? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get name => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set name($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get pictureUrl => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set pictureUrl($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasPictureUrl() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPictureUrl() => clearField(3);
 }
 

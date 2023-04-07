@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:survival_list_repository/src/models/user.dart';
 
 @immutable
 class Item extends Equatable {
@@ -9,6 +10,7 @@ class Item extends Equatable {
     required this.isCompleted,
     required this.startDate,
     required this.endDate,
+    required this.responsible,
   });
 
   final int id;
@@ -16,6 +18,7 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
+  final User? responsible;
 
   Item copyWith({
     int Function()? id,
@@ -23,6 +26,7 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
+    User? Function()? responsible,
   }) {
     return Item(
       id: id != null ? id() : this.id,
@@ -30,9 +34,11 @@ class Item extends Equatable {
       isCompleted: isCompleted != null ? isCompleted() : this.isCompleted,
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
+      responsible: responsible != null ? responsible() : this.responsible,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, isCompleted, startDate, endDate];
+  List<Object?> get props =>
+      [id, title, isCompleted, startDate, endDate, responsible];
 }

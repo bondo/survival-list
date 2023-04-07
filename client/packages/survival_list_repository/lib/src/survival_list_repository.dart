@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:authentication_repository/authentication_repository.dart';
-import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart';
+import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart' as api;
 import 'package:generated_grpc_api/google/type/date.pb.dart';
 import 'package:grpc/grpc.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,7 +19,7 @@ class SurvivalListRepository {
     _init();
   }
 
-  late final APIClient _client;
+  late final api.APIClient _client;
 
   final AuthenticationRepository _authenticationRepository;
 
@@ -30,7 +30,7 @@ class SurvivalListRepository {
   StreamSubscription<bool>? _userNotEmptySubscription;
 
   void _init() {
-    _client = APIClient(
+    _client = api.APIClient(
       ClientChannel(
         // 'survival-list-server.bjarkebjarke.dk',
         'survival-list-server.fly.dev',
@@ -79,7 +79,7 @@ class SurvivalListRepository {
     }
   }
 
-  ResponseStream<GetTasksResponse>? _pendingItemsResponse;
+  ResponseStream<api.GetTasksResponse>? _pendingItemsResponse;
   Future<void> _fetchItems() async {
     if (_pendingItemsResponse != null) {
       unawaited(_pendingItemsResponse!.cancel());
@@ -88,7 +88,7 @@ class SurvivalListRepository {
       _isFetchingStreamController.add(true);
     }
 
-    _pendingItemsResponse = _client.getTasks(GetTasksRequest());
+    _pendingItemsResponse = _client.getTasks(api.GetTasksRequest());
     final result = HashMap<int, Item>();
     _pendingItemsResponse!
         .map(
@@ -98,6 +98,7 @@ class SurvivalListRepository {
         isCompleted: response.isCompleted,
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
+        responsible: _parseUser(response.responsible),
       ),
     )
         .listen(
@@ -130,12 +131,20 @@ class SurvivalListRepository {
     return null;
   }
 
+  User? _parseUser(api.User user) {
+    // if (user.hasYear() && user.hasMonth() && user.hasDay()) {
+    //   return DateTime(user.year, user.month, user.day);
+    // }
+    // if (user.)
+    return null;
+  }
+
   Future<void> updateUserInfo({
     required String? name,
     required String? pictureUrl,
   }) async {
     await _client
-        .login(LoginRequest(name: name ?? '?', pictureUrl: pictureUrl));
+        .login(api.LoginRequest(name: name ?? '?', pictureUrl: pictureUrl));
   }
 
   Future<void> createItem({
@@ -144,7 +153,7 @@ class SurvivalListRepository {
     required DateTime? endDate,
   }) async {
     final response = await _client.createTask(
-      CreateTaskRequest(
+      api.CreateTaskRequest(
         title: title,
         startDate: _buildDate(startDate),
         endDate: _buildDate(endDate),
@@ -157,6 +166,7 @@ class SurvivalListRepository {
         isCompleted: false,
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
+        responsible: _parseUser(response.responsible),
       ),
     );
   }
@@ -167,7 +177,7 @@ class SurvivalListRepository {
     _itemsStreamController.add(newValue);
 
     try {
-      await _client.deleteTask(DeleteTaskRequest(id: item.id));
+      await _client.deleteTask(api.DeleteTaskRequest(id: item.id));
     } catch (e) {
       _upsertItem(item);
       rethrow;
@@ -194,7 +204,7 @@ class SurvivalListRepository {
 
     try {
       await _client.updateTask(
-        UpdateTaskRequest(
+        api.UpdateTaskRequest(
           id: newItem.id,
           title: newItem.title,
           startDate: _buildDate(newItem.startDate),
@@ -216,7 +226,7 @@ class SurvivalListRepository {
 
     try {
       await _client.toggleTaskCompleted(
-        ToggleTaskCompletedRequest(
+        api.ToggleTaskCompletedRequest(
           id: newItem.id,
           isCompleted: newItem.isCompleted,
         ),
