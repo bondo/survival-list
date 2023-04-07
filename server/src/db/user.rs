@@ -6,7 +6,7 @@ use tonic::Status;
 
 use super::database::Database;
 
-#[derive(Clone, Copy, Debug, sqlx::Type)]
+#[derive(Clone, Copy, Debug, sqlx::Type, PartialEq, Eq)]
 #[sqlx(transparent)]
 pub struct UserId(pub(super) i32);
 

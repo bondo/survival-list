@@ -102,7 +102,12 @@ impl api_server::Api for Service {
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .create_task(user_id, &request.title, &period)
+            .create_task(
+                user_id,
+                UserId::new(request.responsible_id),
+                &request.title,
+                &period,
+            )
             .await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -112,6 +117,11 @@ impl api_server::Api for Service {
             }),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
+            responsible: Some(User {
+                id: task.responsible_id.into(),
+                name: task.responsible_name,
+                picture_url: task.responsible_picture_url.unwrap_or_default(),
+            }),
         }))
     }
 
@@ -124,7 +134,13 @@ impl api_server::Api for Service {
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .update_task(user_id, TaskId::new(request.id), &request.title, &period)
+            .update_task(
+                user_id,
+                UserId::new(request.responsible_id),
+                TaskId::new(request.id),
+                &request.title,
+                &period,
+            )
             .await?;
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),
@@ -135,6 +151,11 @@ impl api_server::Api for Service {
             is_completed: task.completed_at.is_some(),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
+            responsible: Some(User {
+                id: task.responsible_id.into(),
+                name: task.responsible_name,
+                picture_url: task.responsible_picture_url.unwrap_or_default(),
+            }),
         }))
     }
 
@@ -190,6 +211,11 @@ impl api_server::Api for Service {
                     is_completed: task.completed_at.is_some(),
                     start_date: task.start_date.map(Into::into),
                     end_date: task.end_date.map(Into::into),
+                    responsible: Some(User {
+                        id: task.responsible_id.into(),
+                        name: task.responsible_name,
+                        picture_url: task.responsible_picture_url.unwrap_or_default(),
+                    }),
                 }))
                 .await
                 .unwrap();

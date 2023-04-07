@@ -29,6 +29,7 @@ message CreateTaskRequest {
     string title = 1;
     google.type.Date start_date = 2;
     google.type.Date end_date = 3;
+    int32 responsible_id = 4;
 }
 
 message CreateTaskResponse {
@@ -36,6 +37,7 @@ message CreateTaskResponse {
     string title = 2;
     google.type.Date start_date = 3;
     google.type.Date end_date = 4;
+    User responsible = 5;
 }
 
 message UpdateTaskRequest {
@@ -43,6 +45,7 @@ message UpdateTaskRequest {
     string title = 2;
     google.type.Date start_date = 3;
     google.type.Date end_date = 4;
+    int32 responsible_id = 5;
 }
 
 message UpdateTaskResponse {
@@ -51,6 +54,7 @@ message UpdateTaskResponse {
     bool is_completed = 3;
     google.type.Date start_date = 4;
     google.type.Date end_date = 5;
+    User responsible = 6;
 }
 
 message ToggleTaskCompletedRequest {
@@ -80,6 +84,7 @@ message GetTasksResponse {
     bool is_completed = 3;
     google.type.Date start_date = 4;
     google.type.Date end_date = 5;
+    User responsible = 6;
 }
 
 message CreateGroupRequest {
@@ -115,4 +120,10 @@ message GetGroupsRequest {
 message GetGroupsResponse {
     int32 id = 1;
     string title = 2;
+}
+
+message User {
+    int32 id = 1;
+    string name = 2;
+    string picture_url = 3;
 }

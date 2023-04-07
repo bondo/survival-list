@@ -40,6 +40,9 @@ pub struct TaskResult {
     pub completed_at: Option<PrimitiveDateTime>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
+    pub responsible_id: UserId,
+    pub responsible_name: String,
+    pub responsible_picture_url: Option<String>,
 }
 
 #[derive(Debug)]
@@ -91,9 +94,15 @@ impl Database {
                     t.title,
                     t.completed_at,
                     t.start_date,
-                    t.end_date
+                    t.end_date,
+                    u.id as "responsible_id: UserId",
+                    u.name as responsible_name,
+                    u.picture_url as responsible_picture_url
                 FROM
                     tasks t
+                INNER JOIN
+                    users u ON
+                        u.id = t.responsible_user_id
                 WHERE
                     (
                         t.completed_at IS NULL OR
@@ -107,9 +116,10 @@ impl Database {
                                 tasks_groups tg
                             INNER JOIN
                                 users_groups ug ON
-                                    ug.group_id = tg.group_id
+                                    ug.group_id = tg.group_id AND
+                                    ug.user_id = $1
                             WHERE
-                                ug.user_id = $1
+                                tg.task_id = t.id
                         )
                     )
             "#,
@@ -119,14 +129,47 @@ impl Database {
         .map(|i| i.or(Err(Status::internal("unexpected error loading tasks"))))
     }
 
+    async fn get_task_unchecked(&self, task_id: TaskId) -> Result<TaskResult, Status> {
+        sqlx::query_as!(
+            TaskResult,
+            r#"
+                SELECT
+                    t.id as "id: TaskId",
+                    t.title,
+                    t.completed_at,
+                    t.start_date,
+                    t.end_date,
+                    u.id as "responsible_id: UserId",
+                    u.name as responsible_name,
+                    u.picture_url as responsible_picture_url
+                FROM
+                    tasks t
+                INNER JOIN
+                    users u ON
+                        u.id = t.responsible_user_id
+                WHERE
+                    t.id = $1
+            "#,
+            task_id.0,
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|_| Status::internal("Failed to fetch task"))
+    }
+
     pub async fn create_task(
         &self,
         user_id: UserId,
+        responsible_id: UserId,
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
-        sqlx::query_as!(
-            TaskResult,
+        // TODO: Check responsible in provided groups
+        if user_id != responsible_id {
+            return Err(Status::internal("Failed to create task"));
+        }
+
+        let task_id = sqlx::query_scalar!(
             r#"
                 INSERT INTO tasks (
                     responsible_user_id,
@@ -141,38 +184,37 @@ impl Database {
                     $4
                 )
                 RETURNING
-                    id as "id: TaskId",
-                    title,
-                    completed_at,
-                    start_date,
-                    end_date
+                    id as "id: TaskId"
             "#,
-            user_id.0,
+            responsible_id.0,
             title,
             period.start_date(),
             period.end_date()
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to create task"))
+        .map_err(|_| Status::internal("Failed to create task"))?;
+
+        self.get_task_unchecked(task_id).await
     }
 
     pub async fn update_task(
         &self,
         user_id: UserId,
+        responsible_id: UserId,
         task_id: TaskId,
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
-        sqlx::query_as!(
-            TaskResult,
+        let task_id = sqlx::query_scalar!(
             r#"
                 UPDATE
                     tasks t
                 SET
                     title = $3,
                     start_date = $4,
-                    end_date = $5
+                    end_date = $5,
+                    responsible_user_id = $6
                 WHERE
                     t.id = $2 AND
                     (
@@ -183,27 +225,41 @@ impl Database {
                                 tasks_groups tg
                             INNER JOIN
                                 users_groups ug ON
-                                    ug.group_id = tg.group_id
+                                    ug.group_id = tg.group_id AND
+                                    ug.user_id = $1
                             WHERE
-                                ug.user_id = $1
+                                tg.task_id = $2
+                        )
+                    ) AND
+                    (
+                        $6 = $1 OR
+                        EXISTS (
+                            SELECT
+                            FROM
+                                tasks_groups tg
+                            INNER JOIN
+                                users_groups ug ON
+                                    ug.group_id = tg.group_id AND
+                                    ug.user_id = $6
+                            WHERE
+                                tg.task_id = $2
                         )
                     )
                 RETURNING
-                    id as "id: TaskId",
-                    title,
-                    completed_at,
-                    start_date,
-                    end_date
+                    id as "id: TaskId"
             "#,
             user_id.0,
             task_id.0,
             title,
             period.start_date(),
-            period.end_date()
+            period.end_date(),
+            responsible_id.0
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to update task"))
+        .map_err(|_| Status::internal("Failed to update task"))?;
+
+        self.get_task_unchecked(task_id).await
     }
 
     pub async fn toggle_task_completed(
@@ -232,9 +288,10 @@ impl Database {
                                 tasks_groups tg
                             INNER JOIN
                                 users_groups ug ON
-                                    ug.group_id = tg.group_id
+                                    ug.group_id = tg.group_id AND
+                                    ug.user_id = $1
                             WHERE
-                                ug.user_id = $1
+                                tg.task_id = $2
                         )
                     )
                 RETURNING
@@ -266,9 +323,10 @@ impl Database {
                                 tasks_groups tg
                             INNER JOIN
                                 users_groups ug ON
-                                    ug.group_id = tg.group_id
+                                    ug.group_id = tg.group_id AND
+                                    ug.user_id = $1
                             WHERE
-                                ug.user_id = $1
+                                tg.task_id = $2
                         )
                     )
                 RETURNING
