@@ -67,15 +67,8 @@ impl Service {
     }
 
     async fn get_user_id<T>(&self, request: &Request<T>) -> Result<UserId, Status> {
-        let auth = {
-            if let Some(auth) = request.extensions().get::<AuthExtension>() {
-                Ok(auth)
-            } else {
-                Err(Status::internal("failed to read user uid"))
-            }
-        }?;
-
-        self.db.load_user_id(&auth.uid).await
+        let uid = self.get_user_uid(request)?;
+        self.db.upsert_user_id(&uid).await
     }
 }
 

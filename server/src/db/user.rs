@@ -37,7 +37,7 @@ pub struct UserResult {
 }
 
 impl Database {
-    pub async fn load_user_id(&self, uid: &str) -> Result<UserId, Status> {
+    pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId, Status> {
         sqlx::query_scalar!(
             r#"
                 INSERT INTO users (
@@ -58,7 +58,7 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to load user id"))
+        .map_err(|_| Status::internal("Failed to upsert user id"))
     }
 
     pub async fn upsert_user(
