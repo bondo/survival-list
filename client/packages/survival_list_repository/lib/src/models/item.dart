@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:survival_list_repository/src/models/user.dart';
+import 'package:survival_list_repository/survival_list_repository.dart';
 
 @immutable
 class Item extends Equatable {
@@ -18,7 +18,7 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
-  final User? responsible;
+  final Person? responsible;
 
   Item copyWith({
     int Function()? id,
@@ -26,7 +26,7 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    User? Function()? responsible,
+    Person? Function()? responsible,
   }) {
     return Item(
       id: id != null ? id() : this.id,

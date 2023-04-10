@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart' as api;
-import 'package:generated_grpc_api/google/type/date.pb.dart';
+import 'package:generated_grpc_api/google/type/date.pb.dart' as google;
 import 'package:grpc/grpc.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
@@ -118,24 +118,27 @@ class SurvivalListRepository {
     _itemsStreamController.add(newValue);
   }
 
-  Date? _buildDate(DateTime? date) {
+  google.Date? _buildDate(DateTime? date) {
     return date == null
         ? null
-        : Date(year: date.year, month: date.month, day: date.day);
+        : google.Date(year: date.year, month: date.month, day: date.day);
   }
 
-  DateTime? _parseDate(Date date) {
+  DateTime? _parseDate(google.Date date) {
     if (date.hasYear() && date.hasMonth() && date.hasDay()) {
       return DateTime(date.year, date.month, date.day);
     }
     return null;
   }
 
-  User? _parseUser(api.User user) {
-    // if (user.hasYear() && user.hasMonth() && user.hasDay()) {
-    //   return DateTime(user.year, user.month, user.day);
-    // }
-    // if (user.)
+  Person? _parseUser(api.User user) {
+    if (user.hasId()) {
+      return Person(
+        id: user.id,
+        name: user.name,
+        pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
+      );
+    }
     return null;
   }
 
