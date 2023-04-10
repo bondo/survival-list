@@ -131,15 +131,12 @@ class SurvivalListRepository {
     return null;
   }
 
-  Person? _parseUser(api.User user) {
-    if (user.hasId()) {
-      return Person(
-        id: user.id,
-        name: user.name,
-        pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
-      );
-    }
-    return null;
+  Person _parseUser(api.User user) {
+    return Person(
+      id: user.id,
+      name: user.name,
+      pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
+    );
   }
 
   Future<void> updateUserInfo({

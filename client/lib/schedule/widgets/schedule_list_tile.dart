@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:survival_list/home/home.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
 class ItemListTile extends StatelessWidget {
@@ -35,16 +36,22 @@ class ItemListTile extends StatelessWidget {
       ),
       child: ListTile(
         onTap: onTap,
-        title: Text(
-          item.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: !item.isCompleted
-              ? null
-              : TextStyle(
-                  color: captionColor,
-                  decoration: TextDecoration.lineThrough,
-                ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              item.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: !item.isCompleted
+                  ? null
+                  : TextStyle(
+                      color: captionColor,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+            ),
+            Avatar(photo: item.responsible.pictureUrl),
+          ],
         ),
         // subtitle: Text(
         //   item.description,
