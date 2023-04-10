@@ -99,15 +99,15 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+        let responsible_id = if request.responsible_id == 0 {
+            user_id
+        } else {
+            UserId::new(request.responsible_id)
+        };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .create_task(
-                user_id,
-                UserId::new(request.responsible_id),
-                &request.title,
-                &period,
-            )
+            .create_task(user_id, responsible_id, &request.title, &period)
             .await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -131,12 +131,17 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+        let responsible_id = if request.responsible_id == 0 {
+            user_id
+        } else {
+            UserId::new(request.responsible_id)
+        };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
             .update_task(
                 user_id,
-                UserId::new(request.responsible_id),
+                responsible_id,
                 TaskId::new(request.id),
                 &request.title,
                 &period,
