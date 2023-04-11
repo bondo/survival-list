@@ -47,6 +47,7 @@ class DisplayGroupView extends StatelessWidget {
         actions: const [
           DisplayGroupEditButton(),
           // TODO(bba): Add invite button (maybe as floating button instead? Or move both into PopupMenuButton?)
+          // TODO(bba): Add leave button (in a PopupMenuButton?) - implement confirmation or undo
         ],
       ),
       body: MultiBlocListener(
