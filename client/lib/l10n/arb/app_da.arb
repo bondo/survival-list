@@ -21,5 +21,6 @@
     }
   },
   "pageItemCreateTitle": "Opret ny todo",
-  "scheduleOptionsLogOut": "Log ud"
+  "scheduleOptionsLogOut": "Log ud",
+  "scheduleOptionsGroups": "Grupper"
 }

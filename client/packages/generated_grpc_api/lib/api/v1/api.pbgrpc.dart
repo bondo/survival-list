@@ -72,6 +72,12 @@ class APIClient extends $grpc.Client {
           ($0.GetGroupsRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.GetGroupsResponse.fromBuffer(value));
+  static final _$getGroupParticipants = $grpc.ClientMethod<
+          $0.GetGroupParticipantsRequest, $0.GetGroupParticipantsResponse>(
+      '/api.v1.API/GetGroupParticipants',
+      ($0.GetGroupParticipantsRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.GetGroupParticipantsResponse.fromBuffer(value));
 
   APIClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -137,6 +143,14 @@ class APIClient extends $grpc.Client {
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(
         _$getGroups, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseStream<$0.GetGroupParticipantsResponse> getGroupParticipants(
+      $0.GetGroupParticipantsRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$getGroupParticipants, $async.Stream.fromIterable([request]),
         options: options);
   }
 }
@@ -221,6 +235,15 @@ abstract class APIServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.GetGroupsRequest.fromBuffer(value),
         ($0.GetGroupsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetGroupParticipantsRequest,
+            $0.GetGroupParticipantsResponse>(
+        'GetGroupParticipants',
+        getGroupParticipants_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $0.GetGroupParticipantsRequest.fromBuffer(value),
+        ($0.GetGroupParticipantsResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.LoginResponse> login_Pre(
@@ -274,6 +297,12 @@ abstract class APIServiceBase extends $grpc.Service {
     yield* getGroups(call, await request);
   }
 
+  $async.Stream<$0.GetGroupParticipantsResponse> getGroupParticipants_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.GetGroupParticipantsRequest> request) async* {
+    yield* getGroupParticipants(call, await request);
+  }
+
   $async.Future<$0.LoginResponse> login(
       $grpc.ServiceCall call, $0.LoginRequest request);
   $async.Future<$0.CreateTaskResponse> createTask(
@@ -294,4 +323,6 @@ abstract class APIServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.LeaveGroupRequest request);
   $async.Stream<$0.GetGroupsResponse> getGroups(
       $grpc.ServiceCall call, $0.GetGroupsRequest request);
+  $async.Stream<$0.GetGroupParticipantsResponse> getGroupParticipants(
+      $grpc.ServiceCall call, $0.GetGroupParticipantsRequest request);
 }

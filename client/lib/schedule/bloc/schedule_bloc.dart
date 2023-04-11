@@ -37,7 +37,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       CombineLatestStream.combine3(
         _authenticationRepository.user.map((user) => user.photo).distinct(),
         _survivalListRepository.items,
-        _survivalListRepository.isFetching,
+        _survivalListRepository.isFetchingItems,
         (String? photo, List<Item> items, bool isFetching) => (photo: photo, items: items, isFetching:isFetching),
       ),
       onData: (data) => state.copyWith(

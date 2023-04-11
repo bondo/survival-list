@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/home/home.dart';
 import 'package:survival_list/schedule/schedule.dart';
-// import 'package:survival_list/survival/survival.dart';
-// import 'package:survival_list/todos/todos.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

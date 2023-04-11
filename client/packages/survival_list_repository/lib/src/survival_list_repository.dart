@@ -23,18 +23,9 @@ class SurvivalListRepository {
 
   final AuthenticationRepository _authenticationRepository;
 
-  final _isFetchingStreamController = BehaviorSubject<bool>.seeded(false);
-  final _itemsStreamController =
-      BehaviorSubject<Map<int, Item>>.seeded(HashMap());
-
-  StreamSubscription<bool>? _userNotEmptySubscription;
-
   void _init() {
     _client = api.APIClient(
-      ClientChannel(
-        // 'survival-list-server.bjarkebjarke.dk',
-        'survival-list-server.fly.dev',
-      ),
+      ClientChannel('survival-list-server.fly.dev'),
       options: CallOptions(
         timeout: const Duration(seconds: 30),
         providers: [_authProvider],
@@ -44,29 +35,10 @@ class SurvivalListRepository {
     _itemsStreamController
       ..onListen = _onItemsListen
       ..onCancel = _onItemsCancel;
-  }
 
-  void _onItemsListen() {
-    assert(_userNotEmptySubscription == null, 'Already listening for items');
-
-    if (_authenticationRepository.currentUser.isNotEmpty) {
-      unawaited(_fetchItems());
-    }
-    _userNotEmptySubscription = _authenticationRepository.user
-        .map((u) => u.isNotEmpty)
-        .distinct()
-        .listen((isNotEmpty) {
-      if (isNotEmpty) {
-        unawaited(_fetchItems());
-      } else {
-        _itemsStreamController.add(HashMap());
-      }
-    });
-  }
-
-  void _onItemsCancel() {
-    assert(_userNotEmptySubscription != null, 'Not listening for items');
-    _userNotEmptySubscription!.cancel();
+    _groupsStreamController
+      ..onListen = _onGroupsListen
+      ..onCancel = _onGroupsCancel;
   }
 
   Future<void> _authProvider(
@@ -79,13 +51,55 @@ class SurvivalListRepository {
     }
   }
 
+  /*+++++++*
+   + ITEMS +
+   *+++++++*/
+
+  final _isFetchingItemsStreamController = BehaviorSubject<bool>.seeded(false);
+  final _itemsStreamController =
+      BehaviorSubject<Map<int, Item>>.seeded(HashMap());
+  StreamSubscription<bool>? _itemsUserSubscription;
+
+  Stream<List<Item>> get items {
+    return _itemsStreamController
+        .asBroadcastStream()
+        .map((event) => event.values.toList());
+  }
+
+  Stream<bool> get isFetchingItems {
+    return _isFetchingItemsStreamController.asBroadcastStream();
+  }
+
+  void _onItemsListen() {
+    assert(_itemsUserSubscription == null, 'Already listening for items');
+
+    if (_authenticationRepository.currentUser.isNotEmpty) {
+      unawaited(_fetchItems());
+    }
+    _itemsUserSubscription = _authenticationRepository.user
+        .map((u) => u.isNotEmpty)
+        .distinct()
+        .listen((isNotEmpty) {
+      if (isNotEmpty) {
+        unawaited(_fetchItems());
+      } else {
+        _itemsStreamController.add(HashMap());
+      }
+    });
+  }
+
+  void _onItemsCancel() {
+    assert(_itemsUserSubscription != null, 'Not listening for items');
+    _itemsUserSubscription!.cancel();
+  }
+
   ResponseStream<api.GetTasksResponse>? _pendingItemsResponse;
   Future<void> _fetchItems() async {
     if (_pendingItemsResponse != null) {
       unawaited(_pendingItemsResponse!.cancel());
       _pendingItemsResponse = null;
     } else {
-      _isFetchingStreamController.add(true);
+      _isFetchingItemsStreamController.add(true);
     }
 
     _pendingItemsResponse = _client.getTasks(api.GetTasksRequest());
@@ -106,7 +120,7 @@ class SurvivalListRepository {
       onDone: () {
         _pendingItemsResponse = null;
         _itemsStreamController.add(result);
-        _isFetchingStreamController.add(false);
+        _isFetchingItemsStreamController.add(false);
       },
       cancelOnError: true,
     );
@@ -116,27 +130,6 @@ class SurvivalListRepository {
     final newValue = HashMap<int, Item>.from(_itemsStreamController.value);
     newValue[item.id] = item;
     _itemsStreamController.add(newValue);
-  }
-
-  google.Date? _buildDate(DateTime? date) {
-    return date == null
-        ? null
-        : google.Date(year: date.year, month: date.month, day: date.day);
-  }
-
-  DateTime? _parseDate(google.Date date) {
-    if (date.hasYear() && date.hasMonth() && date.hasDay()) {
-      return DateTime(date.year, date.month, date.day);
-    }
-    return null;
-  }
-
-  Person _parseUser(api.User user) {
-    return Person(
-      id: user.id,
-      name: user.name,
-      pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
-    );
   }
 
   Future<void> updateUserInfo({
@@ -184,16 +177,6 @@ class SurvivalListRepository {
     }
   }
 
-  Stream<List<Item>> get items {
-    return _itemsStreamController
-        .asBroadcastStream()
-        .map((event) => event.values.toList());
-  }
-
-  Stream<bool> get isFetching {
-    return _isFetchingStreamController.asBroadcastStream();
-  }
-
   Future<void> updateItem(Item newItem) async {
     final oldItem = _itemsStreamController.value[newItem.id];
     if (oldItem == null) {
@@ -235,5 +218,215 @@ class SurvivalListRepository {
       _upsertItem(item);
       rethrow;
     }
+  }
+
+  /*++++++++*
+   + GROUPS +
+   *++++++++*/
+
+  final _isFetchingGroupsStreamController = BehaviorSubject<bool>.seeded(false);
+  final _groupsStreamController =
+      BehaviorSubject<Map<int, Group>>.seeded(HashMap());
+  StreamSubscription<bool>? _groupsUserSubscription;
+
+  Stream<List<Group>> get groups {
+    return _groupsStreamController
+        .asBroadcastStream()
+        .map((event) => event.values.toList());
+  }
+
+  Stream<bool> get isFetchingGroups {
+    return _isFetchingGroupsStreamController.asBroadcastStream();
+  }
+
+  void _onGroupsListen() {
+    assert(_groupsUserSubscription == null, 'Already listening for groups');
+
+    if (_authenticationRepository.currentUser.isNotEmpty) {
+      unawaited(_fetchGroups());
+    }
+    _groupsUserSubscription = _authenticationRepository.user
+        .map((u) => u.isNotEmpty)
+        .distinct()
+        .listen((isNotEmpty) {
+      if (isNotEmpty) {
+        unawaited(_fetchGroups());
+      } else {
+        _groupsStreamController.add(HashMap());
+      }
+    });
+  }
+
+  void _onGroupsCancel() {
+    assert(_groupsUserSubscription != null, 'Not listening for groups');
+    _groupsUserSubscription!.cancel();
+  }
+
+  ResponseStream<api.GetGroupsResponse>? _pendingGroupsResponse;
+  Future<void> _fetchGroups() async {
+    if (_pendingGroupsResponse != null) {
+      unawaited(_pendingGroupsResponse!.cancel());
+      _pendingGroupsResponse = null;
+    } else {
+      _isFetchingGroupsStreamController.add(true);
+    }
+
+    _pendingGroupsResponse = _client.getGroups(api.GetGroupsRequest());
+    final result = HashMap<int, Group>();
+    _pendingGroupsResponse!
+        .map(
+      (response) => Group(
+        id: response.id,
+        title: response.title,
+      ),
+    )
+        .listen(
+      (group) => result[group.id] = group,
+      onDone: () {
+        _pendingGroupsResponse = null;
+        _groupsStreamController.add(result);
+        _isFetchingGroupsStreamController.add(false);
+      },
+      cancelOnError: true,
+    );
+  }
+
+  void _upsertGroup(Group group) {
+    final newValue = HashMap<int, Group>.from(_groupsStreamController.value);
+    newValue[group.id] = group;
+    _groupsStreamController.add(newValue);
+  }
+
+  Future<void> createGroup({
+    required String title,
+  }) async {
+    final response = await _client.createGroup(
+      api.CreateGroupRequest(
+        title: title,
+      ),
+    );
+    _upsertGroup(
+      Group(
+        id: response.id,
+        title: response.title,
+      ),
+    );
+  }
+
+  Future<void> updateGroup(Group newGroup) async {
+    final oldGroup = _groupsStreamController.value[newGroup.id];
+    if (oldGroup == null) {
+      throw Exception('Existing group not found');
+    }
+
+    _upsertGroup(newGroup);
+
+    try {
+      await _client.updateTask(
+        api.UpdateTaskRequest(
+          id: newGroup.id,
+          title: newGroup.title,
+        ),
+      );
+    } catch (e) {
+      _upsertGroup(oldGroup);
+      rethrow;
+    }
+  }
+
+  Future<void> leaveGroup(Group group) async {
+    final newValue = HashMap<int, Group>.from(_groupsStreamController.value)
+      ..remove(group.id);
+    _groupsStreamController.add(newValue);
+
+    try {
+      await _client.leaveGroup(api.LeaveGroupRequest(id: group.id));
+    } catch (e) {
+      _upsertGroup(group);
+      rethrow;
+    }
+  }
+
+  /*++++++++++++++++++++*
+   + GROUP PARTICIPANTS +
+   *++++++++++++++++++++*/
+
+  final _isFetchingGroupParticipantsStreamController =
+      BehaviorSubject<bool>.seeded(false);
+  final _groupParticipantsStreamController =
+      BehaviorSubject<Map<int, List<Person>>>.seeded(HashMap());
+  // StreamSubscription<bool>? _groupParticipantsUserSubscription;
+
+  Stream<List<Person>> groupParticipants(Group group) {
+    if (_groupParticipantsStreamController.value[group.id] == null) {
+      _fetchGroupParticipants(group);
+    }
+
+    return _groupParticipantsStreamController
+        .asBroadcastStream()
+        .map((event) => event[group.id]?.toList() ?? []);
+  }
+
+  Stream<bool> get isFetchingGroupParticipants {
+    return _isFetchingGroupParticipantsStreamController.asBroadcastStream();
+  }
+
+  ResponseStream<api.GetGroupParticipantsResponse>?
+      _pendingGroupParticipantsResponse;
+  Future<void> _fetchGroupParticipants(Group group) async {
+    if (_pendingGroupParticipantsResponse != null) {
+      unawaited(_pendingGroupParticipantsResponse!.cancel());
+      _pendingGroupParticipantsResponse = null;
+    } else {
+      _isFetchingGroupParticipantsStreamController.add(true);
+    }
+
+    _pendingGroupParticipantsResponse = _client.getGroupParticipants(
+      api.GetGroupParticipantsRequest(groupId: group.id),
+    );
+    final result = HashMap<int, List<Person>>();
+    _pendingGroupParticipantsResponse!
+        .map(
+      (response) => _parseUser(response.user),
+    )
+        .listen(
+      (groupParticipant) {
+        if (result[group.id] == null) {
+          result[group.id] = [];
+        }
+        result[group.id]!.add(groupParticipant);
+      },
+      onDone: () {
+        _pendingGroupParticipantsResponse = null;
+        _groupParticipantsStreamController.add(result);
+        _isFetchingGroupParticipantsStreamController.add(false);
+      },
+      cancelOnError: true,
+    );
+  }
+
+  /*+++++++*
+   + UTILS +
+   *+++++++*/
+
+  google.Date? _buildDate(DateTime? date) {
+    return date == null
+        ? null
+        : google.Date(year: date.year, month: date.month, day: date.day);
+  }
+
+  DateTime? _parseDate(google.Date date) {
+    if (date.hasYear() && date.hasMonth() && date.hasDay()) {
+      return DateTime(date.year, date.month, date.day);
+    }
+    return null;
+  }
+
+  Person _parseUser(api.User user) {
+    return Person(
+      id: user.id,
+      name: user.name,
+      pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
+    );
   }
 }

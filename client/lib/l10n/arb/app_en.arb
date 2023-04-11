@@ -44,11 +44,29 @@
   "createItemTitleLabel": "Title",
   "createItemStartDateLabel": "Start date",
   "createItemEndDateLabel": "Deadline",
-  "createItemSaveButtonTooltip": "Save changes",
+  "createItemSaveButtonTooltip": "Save item",
 
   "editItemAppBarTitle": "Edit Item",
   "editItemTitleLabel": "Title",
   "editItemSaveButtonTooltip": "Save changes",
 
-  "scheduleOptionsLogOut": "Log out"
+  "scheduleOptionsLogOut": "Log out",
+  "scheduleOptionsGroups": "Groups",
+
+  "createGroupAppBarTitle": "Create Group",
+  "createGroupSaveButtonTooltip": "Save group",
+  "createGroupTitleLabel": "Title",
+
+  "editGroupAppBarTitle": "Edit Group",
+  "editGroupSaveButtonTooltip": "Save changes",
+  "editGroupTitleLabel": "Title",
+
+  "displayGroupOptionsEditTooltip": "Edit group",
+  "displayGroupAppBarTitle": "Group \"{groupTitle}\"",
+  "displayGroupErrorSnackbarText": "An error occurred while loading participants.",
+  "displayGroupEmptyText": "There are no participants in this group",
+
+  "groupsAppBarTitle": "Groups",
+  "groupsErrorSnackbarText": "An error occurred while loading groups.",
+  "groupsEmptyText": "You are not in any groups"
 }

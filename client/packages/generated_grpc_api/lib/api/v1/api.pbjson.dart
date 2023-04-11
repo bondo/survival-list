@@ -227,6 +227,26 @@ const GetGroupsResponse$json = const {
 
 /// Descriptor for `GetGroupsResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getGroupsResponseDescriptor = $convert.base64Decode('ChFHZXRHcm91cHNSZXNwb25zZRIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxl');
+@$core.Deprecated('Use getGroupParticipantsRequestDescriptor instead')
+const GetGroupParticipantsRequest$json = const {
+  '1': 'GetGroupParticipantsRequest',
+  '2': const [
+    const {'1': 'group_id', '3': 1, '4': 1, '5': 5, '10': 'groupId'},
+  ],
+};
+
+/// Descriptor for `GetGroupParticipantsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getGroupParticipantsRequestDescriptor = $convert.base64Decode('ChtHZXRHcm91cFBhcnRpY2lwYW50c1JlcXVlc3QSGQoIZ3JvdXBfaWQYASABKAVSB2dyb3VwSWQ=');
+@$core.Deprecated('Use getGroupParticipantsResponseDescriptor instead')
+const GetGroupParticipantsResponse$json = const {
+  '1': 'GetGroupParticipantsResponse',
+  '2': const [
+    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.api.v1.User', '10': 'user'},
+  ],
+};
+
+/// Descriptor for `GetGroupParticipantsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getGroupParticipantsResponseDescriptor = $convert.base64Decode('ChxHZXRHcm91cFBhcnRpY2lwYW50c1Jlc3BvbnNlEiAKBHVzZXIYASABKAsyDC5hcGkudjEuVXNlclIEdXNlcg==');
 @$core.Deprecated('Use userDescriptor instead')
 const User$json = const {
   '1': 'User',
