@@ -125,6 +125,24 @@ pub struct CreateGroupResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub uid: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct JoinGroupRequest {
+    #[prost(string, tag = "1")]
+    pub uid: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct JoinGroupResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub uid: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -141,6 +159,8 @@ pub struct UpdateGroupResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub uid: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -164,6 +184,8 @@ pub struct GetGroupsResponse {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub uid: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -228,6 +250,10 @@ pub mod api_server {
             &self,
             request: tonic::Request<super::CreateGroupRequest>,
         ) -> Result<tonic::Response<super::CreateGroupResponse>, tonic::Status>;
+        async fn join_group(
+            &self,
+            request: tonic::Request<super::JoinGroupRequest>,
+        ) -> Result<tonic::Response<super::JoinGroupResponse>, tonic::Status>;
         async fn update_group(
             &self,
             request: tonic::Request<super::UpdateGroupRequest>,
@@ -566,6 +592,42 @@ pub mod api_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = CreateGroupSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/JoinGroup" => {
+                    #[allow(non_camel_case_types)]
+                    struct JoinGroupSvc<T: Api>(pub Arc<T>);
+                    impl<T: Api> tonic::server::UnaryService<super::JoinGroupRequest>
+                    for JoinGroupSvc<T> {
+                        type Response = super::JoinGroupResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::JoinGroupRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).join_group(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = JoinGroupSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

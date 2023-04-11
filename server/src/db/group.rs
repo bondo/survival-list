@@ -1,5 +1,6 @@
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
+use sqlx::types::Uuid;
 use std::fmt::Display;
 
 use anyhow::Result;
@@ -33,6 +34,7 @@ impl Display for GroupId {
 pub struct GroupResult {
     pub id: GroupId,
     pub title: String,
+    pub uid: Uuid,
 }
 
 #[derive(Debug)]
@@ -51,7 +53,8 @@ impl Database {
             r#"
                 SELECT
                     g.id as "id: GroupId",
-                    g.title
+                    g.title,
+                    g.uid
                 FROM
                     groups g
                 INNER JOIN
@@ -82,6 +85,18 @@ impl Database {
         Ok(group)
     }
 
+    pub async fn join_group_by_uid(
+        &self,
+        user_id: UserId,
+        uid: &Uuid,
+    ) -> Result<GroupResult, Status> {
+        let group = self.get_group_by_uid(uid).await?;
+
+        self.join_group(user_id, group.id).await?;
+
+        Ok(group)
+    }
+
     async fn create_group(&self, title: &str) -> Result<GroupResult, Status> {
         sqlx::query_as!(
             GroupResult,
@@ -94,7 +109,8 @@ impl Database {
                 )
                 RETURNING
                     id as "id: GroupId",
-                    title
+                    title,
+                    uid
             "#,
             title
         )
@@ -103,8 +119,27 @@ impl Database {
         .map_err(|_| Status::internal("Failed to create group"))
     }
 
-    pub async fn join_group(&self, user_id: UserId, group_id: GroupId) -> Result<(), Status> {
-        // TODO: Check for invite? Generate random invite string?
+    async fn get_group_by_uid(&self, uid: &Uuid) -> Result<GroupResult, Status> {
+        sqlx::query_as!(
+            GroupResult,
+            r#"
+                SELECT
+                    id as "id: GroupId",
+                    title,
+                    uid
+                FROM
+                    groups
+                WHERE
+                    uid = $1
+            "#,
+            uid
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|_| Status::not_found("Group not found"))
+    }
+
+    async fn join_group(&self, user_id: UserId, group_id: GroupId) -> Result<(), Status> {
         sqlx::query!(
             r#"
                 INSERT INTO users_groups (
@@ -151,7 +186,8 @@ impl Database {
                     )
                 RETURNING
                     id as "id: GroupId",
-                    title
+                    title,
+                    uid
             "#,
             user_id.0,
             group_id.0,

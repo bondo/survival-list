@@ -12,6 +12,7 @@ service API {
     rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse);
     rpc GetTasks (GetTasksRequest) returns (stream GetTasksResponse);
     rpc CreateGroup (CreateGroupRequest) returns (CreateGroupResponse);
+    rpc JoinGroup (JoinGroupRequest) returns (JoinGroupResponse);
     rpc UpdateGroup (UpdateGroupRequest) returns (UpdateGroupResponse);
     rpc LeaveGroup (LeaveGroupRequest) returns (LeaveGroupResponse);
     rpc GetGroups (GetGroupsRequest) returns (stream GetGroupsResponse);
@@ -95,6 +96,17 @@ message CreateGroupRequest {
 message CreateGroupResponse {
     int32 id = 1;
     string title = 2;
+    string uid = 3;
+}
+
+message JoinGroupRequest {
+    string uid = 1;
+}
+
+message JoinGroupResponse {
+    int32 id = 1;
+    string title = 2;
+    string uid = 3;
 }
 
 message UpdateGroupRequest {
@@ -105,6 +117,7 @@ message UpdateGroupRequest {
 message UpdateGroupResponse {
     int32 id = 1;
     string title = 2;
+    string uid = 3;
 }
 
 message LeaveGroupRequest {
@@ -121,6 +134,7 @@ message GetGroupsRequest {
 message GetGroupsResponse {
     int32 id = 1;
     string title = 2;
+    string uid = 3;
 }
 
 message GetGroupParticipantsRequest {

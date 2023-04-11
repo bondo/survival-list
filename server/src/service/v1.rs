@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
-use sqlx::types::time::Date;
+use sqlx::types::{time::Date, Uuid};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -243,6 +243,23 @@ impl api_server::Api for Service {
         Ok(Response::new(CreateGroupResponse {
             id: group.id.into(),
             title: group.title,
+            uid: group.uid.to_string(),
+        }))
+    }
+
+    async fn join_group(
+        &self,
+        request: Request<JoinGroupRequest>,
+    ) -> Result<Response<JoinGroupResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+        let uid =
+            Uuid::parse_str(&request.uid).map_err(|_| Status::invalid_argument("Invalid uid"))?;
+        let group = self.db.join_group_by_uid(user_id, &uid).await?;
+        Ok(Response::new(JoinGroupResponse {
+            id: group.id.into(),
+            title: group.title,
+            uid: group.uid.to_string(),
         }))
     }
 
@@ -259,6 +276,7 @@ impl api_server::Api for Service {
         Ok(Response::new(UpdateGroupResponse {
             id: group.id.into(),
             title: group.title,
+            uid: group.uid.to_string(),
         }))
     }
 
@@ -292,6 +310,7 @@ impl api_server::Api for Service {
                 tx.send(res.map(|group| GetGroupsResponse {
                     id: group.id.into(),
                     title: group.title,
+                    uid: group.uid.to_string(),
                 }))
                 .await
                 .unwrap();

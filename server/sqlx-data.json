@@ -21,6 +21,38 @@
     },
     "query": "\n                DELETE FROM\n                    tasks t\n                WHERE\n                    t.id = $2 AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id AND\n                                    ug.user_id = $1\n                            WHERE\n                                tg.task_id = $2\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
   },
+  "14fd4db15ffa6910b8d4f3a085902a2194222e8dbda540674c23542e2bfb9f7e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
+  },
   "28f34b70b7203e26f7237f272f78606db86aeb0864056c0591c1d852a6b28cad": {
     "describe": {
       "columns": [
@@ -183,32 +215,6 @@
     },
     "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = EXCLUDED.name,\n                    picture_url = EXCLUDED.picture_url\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            "
   },
-  "750bfbbfcf1c2d3892e33262053754b11b89583d3c9f39cdf1b5bf4dcad9a3d8": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: GroupId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
-  },
   "75b91b71d0393dffce807e6ccd0bd40de85b88ada9d9d496ed3b1a95ebc8b6a4": {
     "describe": {
       "columns": [
@@ -248,7 +254,7 @@
     },
     "query": "\n                SELECT\n                    u.id as \"id: UserId\",\n                    u.uid,\n                    u.name,\n                    u.picture_url\n                FROM\n                    users u\n                INNER JOIN\n                    users_groups ug ON\n                        ug.user_id = u.id\n                WHERE\n                    ug.group_id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups viewer_groups\n                        WHERE\n                            viewer_groups.user_id = $1 AND\n                            viewer_groups.group_id = $2\n                    )\n            "
   },
-  "8221e03847bc8f03d55fd449f3830f2a745c6d043bb31eba8c02bef6ace3386d": {
+  "959dd1255da06b62f8350e2c1735f617ab83305fc0a274fa8c25ea1229297df0": {
     "describe": {
       "columns": [
         {
@@ -260,21 +266,25 @@
           "name": "title",
           "ordinal": 1,
           "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
         }
       ],
       "nullable": [
+        false,
         false,
         false
       ],
       "parameters": {
         "Left": [
-          "Int4",
-          "Int4",
           "Text"
         ]
       }
     },
-    "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
+    "query": "\n                INSERT INTO groups (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
   },
   "9687225fe52e8bc5e02a6fe79037279549b81536c52c02c0b23ee8363cf00c2d": {
     "describe": {
@@ -366,7 +376,7 @@
     },
     "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    u.id as \"responsible_id: UserId\",\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                WHERE\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    (\n                        t.responsible_user_id = $1 OR\n                        EXISTS (\n                            SELECT\n                            FROM\n                                tasks_groups tg\n                            INNER JOIN\n                                users_groups ug ON\n                                    ug.group_id = tg.group_id AND\n                                    ug.user_id = $1\n                            WHERE\n                                tg.task_id = t.id\n                        )\n                    )\n            "
   },
-  "bb6f480e6ba0f41c183e174899512895064c8aad1ec47055c94dcbb8b6caeba7": {
+  "9f4f3758dc89a08a53045521025882b21400c4e8c28369c3778dbf35a43a6f47": {
     "describe": {
       "columns": [
         {
@@ -378,19 +388,59 @@
           "name": "title",
           "ordinal": 1,
           "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
         }
       ],
       "nullable": [
+        false,
         false,
         false
       ],
       "parameters": {
         "Left": [
+          "Int4",
+          "Int4",
           "Text"
         ]
       }
     },
-    "query": "\n                INSERT INTO groups (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title\n            "
+    "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
+  },
+  "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n                FROM\n                    groups\n                WHERE\n                    uid = $1\n            "
   },
   "c42b3fe3bb44ec88e797bcba34bd09e399ee1feb4f61f847a77b21f95cf0ab9e": {
     "describe": {
