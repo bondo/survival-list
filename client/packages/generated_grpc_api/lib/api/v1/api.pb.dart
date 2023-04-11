@@ -952,6 +952,7 @@ class CreateGroupResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateGroupResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
     ..hasRequiredFields = false
   ;
 
@@ -959,6 +960,7 @@ class CreateGroupResponse extends $pb.GeneratedMessage {
   factory CreateGroupResponse({
     $core.int? id,
     $core.String? title,
+    $core.String? uid,
   }) {
     final _result = create();
     if (id != null) {
@@ -966,6 +968,9 @@ class CreateGroupResponse extends $pb.GeneratedMessage {
     }
     if (title != null) {
       _result.title = title;
+    }
+    if (uid != null) {
+      _result.uid = uid;
     }
     return _result;
   }
@@ -1007,6 +1012,137 @@ class CreateGroupResponse extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get uid => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set uid($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUid() => clearField(3);
+}
+
+class JoinGroupRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinGroupRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
+    ..hasRequiredFields = false
+  ;
+
+  JoinGroupRequest._() : super();
+  factory JoinGroupRequest({
+    $core.String? uid,
+  }) {
+    final _result = create();
+    if (uid != null) {
+      _result.uid = uid;
+    }
+    return _result;
+  }
+  factory JoinGroupRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory JoinGroupRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  JoinGroupRequest clone() => JoinGroupRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  JoinGroupRequest copyWith(void Function(JoinGroupRequest) updates) => super.copyWith((message) => updates(message as JoinGroupRequest)) as JoinGroupRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static JoinGroupRequest create() => JoinGroupRequest._();
+  JoinGroupRequest createEmptyInstance() => create();
+  static $pb.PbList<JoinGroupRequest> createRepeated() => $pb.PbList<JoinGroupRequest>();
+  @$core.pragma('dart2js:noInline')
+  static JoinGroupRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinGroupRequest>(create);
+  static JoinGroupRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get uid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set uid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUid() => clearField(1);
+}
+
+class JoinGroupResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinGroupResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
+    ..hasRequiredFields = false
+  ;
+
+  JoinGroupResponse._() : super();
+  factory JoinGroupResponse({
+    $core.int? id,
+    $core.String? title,
+    $core.String? uid,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (uid != null) {
+      _result.uid = uid;
+    }
+    return _result;
+  }
+  factory JoinGroupResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory JoinGroupResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  JoinGroupResponse clone() => JoinGroupResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  JoinGroupResponse copyWith(void Function(JoinGroupResponse) updates) => super.copyWith((message) => updates(message as JoinGroupResponse)) as JoinGroupResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static JoinGroupResponse create() => JoinGroupResponse._();
+  JoinGroupResponse createEmptyInstance() => create();
+  static $pb.PbList<JoinGroupResponse> createRepeated() => $pb.PbList<JoinGroupResponse>();
+  @$core.pragma('dart2js:noInline')
+  static JoinGroupResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinGroupResponse>(create);
+  static JoinGroupResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get uid => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set uid($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUid() => clearField(3);
 }
 
 class UpdateGroupRequest extends $pb.GeneratedMessage {
@@ -1074,6 +1210,7 @@ class UpdateGroupResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateGroupResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
     ..hasRequiredFields = false
   ;
 
@@ -1081,6 +1218,7 @@ class UpdateGroupResponse extends $pb.GeneratedMessage {
   factory UpdateGroupResponse({
     $core.int? id,
     $core.String? title,
+    $core.String? uid,
   }) {
     final _result = create();
     if (id != null) {
@@ -1088,6 +1226,9 @@ class UpdateGroupResponse extends $pb.GeneratedMessage {
     }
     if (title != null) {
       _result.title = title;
+    }
+    if (uid != null) {
+      _result.uid = uid;
     }
     return _result;
   }
@@ -1129,6 +1270,15 @@ class UpdateGroupResponse extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get uid => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set uid($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUid() => clearField(3);
 }
 
 class LeaveGroupRequest extends $pb.GeneratedMessage {
@@ -1258,6 +1408,7 @@ class GetGroupsResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetGroupsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
     ..hasRequiredFields = false
   ;
 
@@ -1265,6 +1416,7 @@ class GetGroupsResponse extends $pb.GeneratedMessage {
   factory GetGroupsResponse({
     $core.int? id,
     $core.String? title,
+    $core.String? uid,
   }) {
     final _result = create();
     if (id != null) {
@@ -1272,6 +1424,9 @@ class GetGroupsResponse extends $pb.GeneratedMessage {
     }
     if (title != null) {
       _result.title = title;
+    }
+    if (uid != null) {
+      _result.uid = uid;
     }
     return _result;
   }
@@ -1313,6 +1468,15 @@ class GetGroupsResponse extends $pb.GeneratedMessage {
   $core.bool hasTitle() => $_has(1);
   @$pb.TagNumber(2)
   void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get uid => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set uid($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUid() => clearField(3);
 }
 
 class GetGroupParticipantsRequest extends $pb.GeneratedMessage {

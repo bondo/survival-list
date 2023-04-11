@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/display_group/display_group.dart';
+import 'package:survival_list/invite_group/invite_group.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -46,10 +47,15 @@ class DisplayGroupView extends StatelessWidget {
         title: Text(l10n.displayGroupAppBarTitle(state.group.title)),
         actions: const [
           DisplayGroupEditButton(),
-          // TODO(bba): Add invite button (maybe as floating button instead? Or move both into PopupMenuButton?)
           // TODO(bba): Add leave button (in a PopupMenuButton?) - implement confirmation or undo
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context)
+            .push(InviteGroupPage.route(group: state.group)),
+        child: const Icon(Icons.qr_code),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: MultiBlocListener(
         listeners: [
           BlocListener<DisplayGroupBloc, DisplayGroupState>(

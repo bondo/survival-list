@@ -162,11 +162,34 @@ const CreateGroupResponse$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
   ],
 };
 
 /// Descriptor for `CreateGroupResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createGroupResponseDescriptor = $convert.base64Decode('ChNDcmVhdGVHcm91cFJlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGU=');
+final $typed_data.Uint8List createGroupResponseDescriptor = $convert.base64Decode('ChNDcmVhdGVHcm91cFJlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSEAoDdWlkGAMgASgJUgN1aWQ=');
+@$core.Deprecated('Use joinGroupRequestDescriptor instead')
+const JoinGroupRequest$json = const {
+  '1': 'JoinGroupRequest',
+  '2': const [
+    const {'1': 'uid', '3': 1, '4': 1, '5': 9, '10': 'uid'},
+  ],
+};
+
+/// Descriptor for `JoinGroupRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List joinGroupRequestDescriptor = $convert.base64Decode('ChBKb2luR3JvdXBSZXF1ZXN0EhAKA3VpZBgBIAEoCVIDdWlk');
+@$core.Deprecated('Use joinGroupResponseDescriptor instead')
+const JoinGroupResponse$json = const {
+  '1': 'JoinGroupResponse',
+  '2': const [
+    const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
+    const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
+  ],
+};
+
+/// Descriptor for `JoinGroupResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List joinGroupResponseDescriptor = $convert.base64Decode('ChFKb2luR3JvdXBSZXNwb25zZRIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEhAKA3VpZBgDIAEoCVIDdWlk');
 @$core.Deprecated('Use updateGroupRequestDescriptor instead')
 const UpdateGroupRequest$json = const {
   '1': 'UpdateGroupRequest',
@@ -184,11 +207,12 @@ const UpdateGroupResponse$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
   ],
 };
 
 /// Descriptor for `UpdateGroupResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateGroupResponseDescriptor = $convert.base64Decode('ChNVcGRhdGVHcm91cFJlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGU=');
+final $typed_data.Uint8List updateGroupResponseDescriptor = $convert.base64Decode('ChNVcGRhdGVHcm91cFJlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSEAoDdWlkGAMgASgJUgN1aWQ=');
 @$core.Deprecated('Use leaveGroupRequestDescriptor instead')
 const LeaveGroupRequest$json = const {
   '1': 'LeaveGroupRequest',
@@ -222,11 +246,12 @@ const GetGroupsResponse$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
     const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
   ],
 };
 
 /// Descriptor for `GetGroupsResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getGroupsResponseDescriptor = $convert.base64Decode('ChFHZXRHcm91cHNSZXNwb25zZRIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxl');
+final $typed_data.Uint8List getGroupsResponseDescriptor = $convert.base64Decode('ChFHZXRHcm91cHNSZXNwb25zZRIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEhAKA3VpZBgDIAEoCVIDdWlk');
 @$core.Deprecated('Use getGroupParticipantsRequestDescriptor instead')
 const GetGroupParticipantsRequest$json = const {
   '1': 'GetGroupParticipantsRequest',

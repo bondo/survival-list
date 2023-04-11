@@ -277,6 +277,7 @@ class SurvivalListRepository {
         .map(
       (response) => Group(
         id: response.id,
+        uid: response.uid,
         title: response.title,
       ),
     )
@@ -308,6 +309,20 @@ class SurvivalListRepository {
     _upsertGroup(
       Group(
         id: response.id,
+        uid: response.uid,
+        title: response.title,
+      ),
+    );
+  }
+
+  Future<void> joinGroup({
+    required String uid,
+  }) async {
+    final response = await _client.joinGroup(api.JoinGroupRequest(uid: uid));
+    _upsertGroup(
+      Group(
+        id: response.id,
+        uid: response.uid,
         title: response.title,
       ),
     );

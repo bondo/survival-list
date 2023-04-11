@@ -44,8 +44,7 @@ class GroupsView extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.groupsAppBarTitle),
         actions: const [
-          GroupsCreateButton(),
-          // TODO(bba): Add join button (maybe as floating button instead?)
+          GroupsOptionsButton(),
         ],
       ),
       body: MultiBlocListener(

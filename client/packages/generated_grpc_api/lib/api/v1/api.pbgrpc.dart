@@ -54,6 +54,12 @@ class APIClient extends $grpc.Client {
           ($0.CreateGroupRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.CreateGroupResponse.fromBuffer(value));
+  static final _$joinGroup =
+      $grpc.ClientMethod<$0.JoinGroupRequest, $0.JoinGroupResponse>(
+          '/api.v1.API/JoinGroup',
+          ($0.JoinGroupRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.JoinGroupResponse.fromBuffer(value));
   static final _$updateGroup =
       $grpc.ClientMethod<$0.UpdateGroupRequest, $0.UpdateGroupResponse>(
           '/api.v1.API/UpdateGroup',
@@ -124,6 +130,12 @@ class APIClient extends $grpc.Client {
       $0.CreateGroupRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$createGroup, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.JoinGroupResponse> joinGroup(
+      $0.JoinGroupRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$joinGroup, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.UpdateGroupResponse> updateGroup(
@@ -212,6 +224,13 @@ abstract class APIServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.CreateGroupRequest.fromBuffer(value),
             ($0.CreateGroupResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.JoinGroupRequest, $0.JoinGroupResponse>(
+        'JoinGroup',
+        joinGroup_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.JoinGroupRequest.fromBuffer(value),
+        ($0.JoinGroupResponse value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$0.UpdateGroupRequest, $0.UpdateGroupResponse>(
             'UpdateGroup',
@@ -282,6 +301,11 @@ abstract class APIServiceBase extends $grpc.Service {
     return createGroup(call, await request);
   }
 
+  $async.Future<$0.JoinGroupResponse> joinGroup_Pre($grpc.ServiceCall call,
+      $async.Future<$0.JoinGroupRequest> request) async {
+    return joinGroup(call, await request);
+  }
+
   $async.Future<$0.UpdateGroupResponse> updateGroup_Pre($grpc.ServiceCall call,
       $async.Future<$0.UpdateGroupRequest> request) async {
     return updateGroup(call, await request);
@@ -317,6 +341,8 @@ abstract class APIServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.GetTasksRequest request);
   $async.Future<$0.CreateGroupResponse> createGroup(
       $grpc.ServiceCall call, $0.CreateGroupRequest request);
+  $async.Future<$0.JoinGroupResponse> joinGroup(
+      $grpc.ServiceCall call, $0.JoinGroupRequest request);
   $async.Future<$0.UpdateGroupResponse> updateGroup(
       $grpc.ServiceCall call, $0.UpdateGroupRequest request);
   $async.Future<$0.LeaveGroupResponse> leaveGroup(

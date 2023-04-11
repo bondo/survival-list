@@ -68,5 +68,13 @@
 
   "groupsAppBarTitle": "Groups",
   "groupsErrorSnackbarText": "An error occurred while loading groups.",
-  "groupsEmptyText": "You are not in any groups"
+  "groupsEmptyText": "You are not in any groups",
+
+  "inviteGroupAppBarTitle": "Invite others to join \"{groupTitle}\"",
+
+  "groupsOptionsTooltip": "Add group",
+  "groupsOptionsCreate": "Create new group",
+  "groupsOptionsJoin": "Join existing group",
+
+  "joinGroupAppBarTitle": "Join group"
 }
