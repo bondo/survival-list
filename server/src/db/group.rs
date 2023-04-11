@@ -9,7 +9,7 @@ use super::{database::Database, UserId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
-pub struct GroupId(i32);
+pub struct GroupId(pub(super) i32);
 
 impl GroupId {
     pub fn new(id: i32) -> Self {

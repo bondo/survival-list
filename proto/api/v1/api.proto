@@ -15,6 +15,7 @@ service API {
     rpc UpdateGroup (UpdateGroupRequest) returns (UpdateGroupResponse);
     rpc LeaveGroup (LeaveGroupRequest) returns (LeaveGroupResponse);
     rpc GetGroups (GetGroupsRequest) returns (stream GetGroupsResponse);
+    rpc GetGroupParticipants (GetGroupParticipantsRequest) returns (stream GetGroupParticipantsResponse);
 }
 
 message LoginRequest {
@@ -120,6 +121,14 @@ message GetGroupsRequest {
 message GetGroupsResponse {
     int32 id = 1;
     string title = 2;
+}
+
+message GetGroupParticipantsRequest {
+    int32 group_id = 1;
+}
+
+message GetGroupParticipantsResponse {
+    User user = 1;
 }
 
 message User {

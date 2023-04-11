@@ -300,4 +300,34 @@ impl api_server::Api for Service {
 
         Ok(Response::new(ReceiverStream::new(rx)))
     }
+
+    type GetGroupParticipantsStream = ReceiverStream<Result<GetGroupParticipantsResponse, Status>>;
+    async fn get_group_participants(
+        &self,
+        request: Request<GetGroupParticipantsRequest>,
+    ) -> Result<Response<Self::GetGroupParticipantsStream>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+        let (tx, rx) = mpsc::channel(10);
+
+        let db = self.db.clone();
+        tokio::spawn(async move {
+            let groups = db.get_group_participants(user_id, GroupId::new(request.group_id));
+            pin_mut!(groups);
+
+            while let Some(res) = groups.next().await {
+                tx.send(res.map(|user| GetGroupParticipantsResponse {
+                    user: Some(User {
+                        id: user.id.into(),
+                        name: user.name,
+                        picture_url: user.picture_url.unwrap_or_default(),
+                    }),
+                }))
+                .await
+                .unwrap();
+            }
+        });
+
+        Ok(Response::new(ReceiverStream::new(rx)))
+    }
 }

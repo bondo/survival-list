@@ -167,6 +167,18 @@ pub struct GetGroupsResponse {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetGroupParticipantsRequest {
+    #[prost(int32, tag = "1")]
+    pub group_id: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetGroupParticipantsResponse {
+    #[prost(message, optional, tag = "1")]
+    pub user: ::core::option::Option<User>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
     #[prost(int32, tag = "1")]
     pub id: i32,
@@ -234,6 +246,16 @@ pub mod api_server {
             &self,
             request: tonic::Request<super::GetGroupsRequest>,
         ) -> Result<tonic::Response<Self::GetGroupsStream>, tonic::Status>;
+        /// Server streaming response type for the GetGroupParticipants method.
+        type GetGroupParticipantsStream: futures_core::Stream<
+                Item = Result<super::GetGroupParticipantsResponse, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_group_participants(
+            &self,
+            request: tonic::Request<super::GetGroupParticipantsRequest>,
+        ) -> Result<tonic::Response<Self::GetGroupParticipantsStream>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct ApiServer<T: Api> {
@@ -657,6 +679,48 @@ pub mod api_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetGroupsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/GetGroupParticipants" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetGroupParticipantsSvc<T: Api>(pub Arc<T>);
+                    impl<
+                        T: Api,
+                    > tonic::server::ServerStreamingService<
+                        super::GetGroupParticipantsRequest,
+                    > for GetGroupParticipantsSvc<T> {
+                        type Response = super::GetGroupParticipantsResponse;
+                        type ResponseStream = T::GetGroupParticipantsStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetGroupParticipantsRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_group_participants(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetGroupParticipantsSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
