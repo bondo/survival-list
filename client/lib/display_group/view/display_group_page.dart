@@ -46,7 +46,7 @@ class DisplayGroupView extends StatelessWidget {
         title: Text(l10n.displayGroupAppBarTitle(state.group.title)),
         actions: const [
           DisplayGroupEditButton(),
-          // TODO(bba): Add invite button (maybe as floating button instead?)
+          // TODO(bba): Add invite button (maybe as floating button instead? Or move both into PopupMenuButton?)
         ],
       ),
       body: MultiBlocListener(
