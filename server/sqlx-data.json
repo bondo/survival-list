@@ -209,6 +209,45 @@
     },
     "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
   },
+  "75b91b71d0393dffce807e6ccd0bd40de85b88ada9d9d496ed3b1a95ebc8b6a4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "uid",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "picture_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    u.id as \"id: UserId\",\n                    u.uid,\n                    u.name,\n                    u.picture_url\n                FROM\n                    users u\n                INNER JOIN\n                    users_groups ug ON\n                        ug.user_id = u.id\n                WHERE\n                    ug.group_id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups viewer_groups\n                        WHERE\n                            viewer_groups.user_id = $1 AND\n                            viewer_groups.group_id = $2\n                    )\n            "
+  },
   "8221e03847bc8f03d55fd449f3830f2a745c6d043bb31eba8c02bef6ace3386d": {
     "describe": {
       "columns": [
