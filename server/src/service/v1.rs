@@ -80,12 +80,10 @@ impl api_server::Api for Service {
     ) -> Result<Response<LoginResponse>, Status> {
         let uid = self.get_user_uid(&request)?;
         let request = request.into_inner();
-        let picture_url: Option<&str> = {
-            if request.picture_url.is_empty() {
-                None
-            } else {
-                Some(&request.picture_url)
-            }
+        let picture_url: Option<&str> = if request.picture_url.is_empty() {
+            None
+        } else {
+            Some(&request.picture_url)
         };
         self.db
             .upsert_user(&uid, &request.name, picture_url)
