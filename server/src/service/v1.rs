@@ -329,10 +329,10 @@ impl api_server::Api for Service {
 
         let db = self.db.clone();
         tokio::spawn(async move {
-            let groups = db.get_group_participants(user_id, GroupId::new(request.group_id));
-            pin_mut!(groups);
+            let participants = db.get_group_participants(user_id, GroupId::new(request.group_id));
+            pin_mut!(participants);
 
-            while let Some(res) = groups.next().await {
+            while let Some(res) = participants.next().await {
                 tx.send(res.map(|user| GetGroupParticipantsResponse {
                     user: Some(User {
                         id: user.id.into(),
