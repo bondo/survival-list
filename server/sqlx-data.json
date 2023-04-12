@@ -145,6 +145,19 @@
     },
     "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
   },
+  "33fb99aa9fd2ae03664e2ab838df099e673912f61ae5eff025a3ea5e5507909b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    group_id = NULL\n                WHERE\n                    t.responsible_user_id = $1 AND\n                    t.group_id = $2\n            "
+  },
   "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b": {
     "describe": {
       "columns": [],

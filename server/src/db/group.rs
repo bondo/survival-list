@@ -223,6 +223,25 @@ impl Database {
     }
 
     pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Status> {
+        // Unset task group where viewer is responsible
+        sqlx::query!(
+            r#"
+                UPDATE
+                    tasks t
+                SET
+                    group_id = NULL
+                WHERE
+                    t.responsible_user_id = $1 AND
+                    t.group_id = $2
+            "#,
+            user_id.0,
+            group_id.0,
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(|_| Status::internal("Failed to leave group"))?;
+
+        // Remove viewer from group
         sqlx::query!(
             r#"
                 DELETE FROM

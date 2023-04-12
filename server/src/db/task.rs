@@ -165,7 +165,7 @@ impl Database {
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
-        // TODO: Check responsible in provided groups
+        // TODO: Check responsible in provided group
         if user_id != responsible_id {
             return Err(Status::internal("Failed to create task"));
         }
@@ -207,6 +207,7 @@ impl Database {
         title: &str,
         period: &TaskPeriodInput,
     ) -> Result<TaskResult, Status> {
+        // TODO: Check responsible in provided group
         let task_id = sqlx::query_scalar!(
             r#"
                 UPDATE
