@@ -104,22 +104,23 @@ impl Database {
                     users u ON
                         u.id = t.responsible_user_id
                 WHERE
+                    -- Hide old items
                     (
                         t.completed_at IS NULL OR
                         t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
                     ) AND
+                    -- Permission check
                     (
+                        -- Viewer is responsible
                         t.responsible_user_id = $1 OR
+                        -- Viewer is in task group
                         EXISTS (
                             SELECT
                             FROM
-                                tasks_groups tg
-                            INNER JOIN
-                                users_groups ug ON
-                                    ug.group_id = tg.group_id AND
-                                    ug.user_id = $1
+                                users_groups ug
                             WHERE
-                                tg.task_id = t.id
+                                ug.group_id = t.group_id AND
+                                ug.user_id = $1
                         )
                     )
             "#,
@@ -217,32 +218,32 @@ impl Database {
                     responsible_user_id = $6
                 WHERE
                     t.id = $2 AND
+                    -- Permission check
                     (
+                        -- Viewer is responsible
                         t.responsible_user_id = $1 OR
+                        -- Viewer is in task group
                         EXISTS (
                             SELECT
                             FROM
-                                tasks_groups tg
-                            INNER JOIN
-                                users_groups ug ON
-                                    ug.group_id = tg.group_id AND
-                                    ug.user_id = $1
+                                users_groups ug
                             WHERE
-                                tg.task_id = $2
+                                ug.group_id = t.group_id AND
+                                ug.user_id = $1
                         )
                     ) AND
+                    -- Check valid new responsible
                     (
+                        -- Responsible is viewer
                         $6 = $1 OR
+                        -- Responsible is in task group
                         EXISTS (
                             SELECT
                             FROM
-                                tasks_groups tg
-                            INNER JOIN
-                                users_groups ug ON
-                                    ug.group_id = tg.group_id AND
-                                    ug.user_id = $6
+                                users_groups ug
                             WHERE
-                                tg.task_id = $2
+                                ug.group_id = t.group_id AND
+                                ug.user_id = $6
                         )
                     )
                 RETURNING
@@ -280,18 +281,18 @@ impl Database {
                     END
                 WHERE
                     t.id = $2 AND
+                    -- Permission check
                     (
+                        -- Viewer is responsible
                         t.responsible_user_id = $1 OR
+                        -- Viewer is in task group
                         EXISTS (
                             SELECT
                             FROM
-                                tasks_groups tg
-                            INNER JOIN
-                                users_groups ug ON
-                                    ug.group_id = tg.group_id AND
-                                    ug.user_id = $1
+                                users_groups ug
                             WHERE
-                                tg.task_id = $2
+                                ug.group_id = t.group_id AND
+                                ug.user_id = $1
                         )
                     )
                 RETURNING
@@ -315,18 +316,18 @@ impl Database {
                     tasks t
                 WHERE
                     t.id = $2 AND
+                    -- Permission check
                     (
+                        -- Viewer is responsible
                         t.responsible_user_id = $1 OR
+                        -- Viewer is in task group
                         EXISTS (
                             SELECT
                             FROM
-                                tasks_groups tg
-                            INNER JOIN
-                                users_groups ug ON
-                                    ug.group_id = tg.group_id AND
-                                    ug.user_id = $1
+                                users_groups ug
                             WHERE
-                                tg.task_id = $2
+                                ug.group_id = t.group_id AND
+                                ug.user_id = $1
                         )
                     )
                 RETURNING
