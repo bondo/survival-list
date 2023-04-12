@@ -219,75 +219,107 @@ pub mod api_server {
         async fn login(
             &self,
             request: tonic::Request<super::LoginRequest>,
-        ) -> Result<tonic::Response<super::LoginResponse>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status>;
         async fn create_task(
             &self,
             request: tonic::Request<super::CreateTaskRequest>,
-        ) -> Result<tonic::Response<super::CreateTaskResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::CreateTaskResponse>,
+            tonic::Status,
+        >;
         async fn update_task(
             &self,
             request: tonic::Request<super::UpdateTaskRequest>,
-        ) -> Result<tonic::Response<super::UpdateTaskResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::UpdateTaskResponse>,
+            tonic::Status,
+        >;
         async fn toggle_task_completed(
             &self,
             request: tonic::Request<super::ToggleTaskCompletedRequest>,
-        ) -> Result<tonic::Response<super::ToggleTaskCompletedResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::ToggleTaskCompletedResponse>,
+            tonic::Status,
+        >;
         async fn delete_task(
             &self,
             request: tonic::Request<super::DeleteTaskRequest>,
-        ) -> Result<tonic::Response<super::DeleteTaskResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::DeleteTaskResponse>,
+            tonic::Status,
+        >;
         /// Server streaming response type for the GetTasks method.
         type GetTasksStream: futures_core::Stream<
-                Item = Result<super::GetTasksResponse, tonic::Status>,
+                Item = std::result::Result<super::GetTasksResponse, tonic::Status>,
             >
             + Send
             + 'static;
         async fn get_tasks(
             &self,
             request: tonic::Request<super::GetTasksRequest>,
-        ) -> Result<tonic::Response<Self::GetTasksStream>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<Self::GetTasksStream>, tonic::Status>;
         async fn create_group(
             &self,
             request: tonic::Request<super::CreateGroupRequest>,
-        ) -> Result<tonic::Response<super::CreateGroupResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::CreateGroupResponse>,
+            tonic::Status,
+        >;
         async fn join_group(
             &self,
             request: tonic::Request<super::JoinGroupRequest>,
-        ) -> Result<tonic::Response<super::JoinGroupResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::JoinGroupResponse>,
+            tonic::Status,
+        >;
         async fn update_group(
             &self,
             request: tonic::Request<super::UpdateGroupRequest>,
-        ) -> Result<tonic::Response<super::UpdateGroupResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::UpdateGroupResponse>,
+            tonic::Status,
+        >;
         async fn leave_group(
             &self,
             request: tonic::Request<super::LeaveGroupRequest>,
-        ) -> Result<tonic::Response<super::LeaveGroupResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::LeaveGroupResponse>,
+            tonic::Status,
+        >;
         /// Server streaming response type for the GetGroups method.
         type GetGroupsStream: futures_core::Stream<
-                Item = Result<super::GetGroupsResponse, tonic::Status>,
+                Item = std::result::Result<super::GetGroupsResponse, tonic::Status>,
             >
             + Send
             + 'static;
         async fn get_groups(
             &self,
             request: tonic::Request<super::GetGroupsRequest>,
-        ) -> Result<tonic::Response<Self::GetGroupsStream>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<Self::GetGroupsStream>, tonic::Status>;
         /// Server streaming response type for the GetGroupParticipants method.
         type GetGroupParticipantsStream: futures_core::Stream<
-                Item = Result<super::GetGroupParticipantsResponse, tonic::Status>,
+                Item = std::result::Result<
+                    super::GetGroupParticipantsResponse,
+                    tonic::Status,
+                >,
             >
             + Send
             + 'static;
         async fn get_group_participants(
             &self,
             request: tonic::Request<super::GetGroupParticipantsRequest>,
-        ) -> Result<tonic::Response<Self::GetGroupParticipantsStream>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<Self::GetGroupParticipantsStream>,
+            tonic::Status,
+        >;
     }
     #[derive(Debug)]
     pub struct ApiServer<T: Api> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
+        max_decoding_message_size: Option<usize>,
+        max_encoding_message_size: Option<usize>,
     }
     struct _Inner<T>(Arc<T>);
     impl<T: Api> ApiServer<T> {
@@ -300,6 +332,8 @@ pub mod api_server {
                 inner,
                 accept_compression_encodings: Default::default(),
                 send_compression_encodings: Default::default(),
+                max_decoding_message_size: None,
+                max_encoding_message_size: None,
             }
         }
         pub fn with_interceptor<F>(
@@ -323,6 +357,22 @@ pub mod api_server {
             self.send_compression_encodings.enable(encoding);
             self
         }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.max_decoding_message_size = Some(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.max_encoding_message_size = Some(limit);
+            self
+        }
     }
     impl<T, B> tonic::codegen::Service<http::Request<B>> for ApiServer<T>
     where
@@ -336,7 +386,7 @@ pub mod api_server {
         fn poll_ready(
             &mut self,
             _cx: &mut Context<'_>,
-        ) -> Poll<Result<(), Self::Error>> {
+        ) -> Poll<std::result::Result<(), Self::Error>> {
             Poll::Ready(Ok(()))
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
@@ -356,13 +406,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::LoginRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).login(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -372,6 +424,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -392,13 +448,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::CreateTaskRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).create_task(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -408,6 +466,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -428,13 +490,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::UpdateTaskRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).update_task(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -444,6 +508,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -466,7 +534,7 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::ToggleTaskCompletedRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move {
                                 (*inner).toggle_task_completed(request).await
                             };
@@ -475,6 +543,8 @@ pub mod api_server {
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -484,6 +554,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -504,13 +578,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::DeleteTaskRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).delete_task(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -520,6 +596,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -543,13 +623,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::GetTasksRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).get_tasks(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -559,6 +641,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.server_streaming(method, req).await;
                         Ok(res)
@@ -579,7 +665,7 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::CreateGroupRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move {
                                 (*inner).create_group(request).await
                             };
@@ -588,6 +674,8 @@ pub mod api_server {
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -597,6 +685,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -617,13 +709,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::JoinGroupRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).join_group(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -633,6 +727,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -653,7 +751,7 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::UpdateGroupRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move {
                                 (*inner).update_group(request).await
                             };
@@ -662,6 +760,8 @@ pub mod api_server {
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -671,6 +771,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -691,13 +795,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::LeaveGroupRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).leave_group(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -707,6 +813,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
@@ -730,13 +840,15 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::GetGroupsRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move { (*inner).get_groups(request).await };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -746,6 +858,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.server_streaming(method, req).await;
                         Ok(res)
@@ -770,7 +886,7 @@ pub mod api_server {
                             &mut self,
                             request: tonic::Request<super::GetGroupParticipantsRequest>,
                         ) -> Self::Future {
-                            let inner = self.0.clone();
+                            let inner = Arc::clone(&self.0);
                             let fut = async move {
                                 (*inner).get_group_participants(request).await
                             };
@@ -779,6 +895,8 @@ pub mod api_server {
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
@@ -788,6 +906,10 @@ pub mod api_server {
                             .apply_compression_config(
                                 accept_compression_encodings,
                                 send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
                             );
                         let res = grpc.server_streaming(method, req).await;
                         Ok(res)
@@ -816,12 +938,14 @@ pub mod api_server {
                 inner,
                 accept_compression_encodings: self.accept_compression_encodings,
                 send_compression_encodings: self.send_compression_encodings,
+                max_decoding_message_size: self.max_decoding_message_size,
+                max_encoding_message_size: self.max_encoding_message_size,
             }
         }
     }
     impl<T: Api> Clone for _Inner<T> {
         fn clone(&self) -> Self {
-            Self(self.0.clone())
+            Self(Arc::clone(&self.0))
         }
     }
     impl<T: std::fmt::Debug> std::fmt::Debug for _Inner<T> {

@@ -1,6 +1,6 @@
 # Use the official Rust image.
 # https://hub.docker.com/_/rust
-FROM rust:1.68.0-alpine3.17 as build
+FROM rust:1.68.2-alpine3.17 as build
 
 RUN apk add --no-cache musl-dev
 
