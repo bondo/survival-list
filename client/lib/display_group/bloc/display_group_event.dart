@@ -7,6 +7,10 @@ abstract class DisplayGroupEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class LeaveGroup extends DisplayGroupEvent {
+  const LeaveGroup();
+}
+
 class DisplayGroupSubscriptionRequested extends DisplayGroupEvent {
   const DisplayGroupSubscriptionRequested();
 }

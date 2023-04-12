@@ -44,10 +44,10 @@ class DisplayGroupView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.displayGroupAppBarTitle(state.group.title)),
+        title: Text(state.group.title),
         actions: const [
           DisplayGroupEditButton(),
-          // TODO(bba): Add leave button (in a PopupMenuButton?) - implement confirmation or undo
+          DisplayGroupLeaveButton(),
         ],
       ),
       floatingActionButton: FloatingActionButton(

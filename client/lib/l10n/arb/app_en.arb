@@ -62,7 +62,11 @@
   "editGroupTitleLabel": "Title",
 
   "displayGroupOptionsEditTooltip": "Edit group",
-  "displayGroupAppBarTitle": "Group \"{groupTitle}\"",
+  "displayGroupOptionsLeaveTooltip": "Leave group",
+  "displayGroupOptionsLeaveDialogTitle": "Leave group?",
+  "displayGroupOptionsLeaveDialogContent": "Are you sure you want to leave the group \"{groupTitle}\"?",
+  "displayGroupOptionsLeaveDialogCancel": "Cancel",
+  "displayGroupOptionsLeaveDialogConfirm": "I am sure",
   "displayGroupErrorSnackbarText": "An error occurred while loading participants.",
   "displayGroupEmptyText": "There are no participants in this group",
 

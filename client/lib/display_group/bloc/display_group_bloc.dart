@@ -13,6 +13,7 @@ class DisplayGroupBloc extends Bloc<DisplayGroupEvent, DisplayGroupState> {
   })  : _survivalListRepository = survivalListRepository,
         super(DisplayGroupState(group: group)) {
     on<DisplayGroupSubscriptionRequested>(_onSubscriptionRequested);
+    on<LeaveGroup>(_onLeaveGroup);
   }
 
   final SurvivalListRepository _survivalListRepository;
@@ -37,5 +38,9 @@ class DisplayGroupBloc extends Bloc<DisplayGroupEvent, DisplayGroupState> {
         status: () => DisplayGroupStatus.failure,
       ),
     );
+  }
+
+  Future<void> _onLeaveGroup(LeaveGroup event, Emitter<DisplayGroupState> emit) async {
+    await _survivalListRepository.leaveGroup(state.group);
   }
 }

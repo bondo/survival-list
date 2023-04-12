@@ -25,23 +25,23 @@ class ScheduleOptionsButton extends StatelessWidget {
       tooltip: l10n.scheduleOptionsTooltip,
       onSelected: (options) {
         switch (options) {
-          case ScheduleOption.logOut:
-            context.read<ScheduleBloc>().add(const ScheduleLogoutRequested());
-            break;
           case ScheduleOption.groups:
             Navigator.of(context).push(GroupsPage.route());
+            break;
+          case ScheduleOption.logOut:
+            context.read<ScheduleBloc>().add(const ScheduleLogoutRequested());
             break;
         }
       },
       itemBuilder: (context) {
         return [
           PopupMenuItem(
-            value: ScheduleOption.logOut,
-            child: Text(l10n.scheduleOptionsLogOut),
-          ),
-          PopupMenuItem(
             value: ScheduleOption.groups,
             child: Text(l10n.scheduleOptionsGroups),
+          ),
+          PopupMenuItem(
+            value: ScheduleOption.logOut,
+            child: Text(l10n.scheduleOptionsLogOut),
           ),
         ];
       },
