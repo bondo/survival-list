@@ -10,16 +10,3 @@ abstract class GroupsEvent extends Equatable {
 class GroupsSubscriptionRequested extends GroupsEvent {
   const GroupsSubscriptionRequested();
 }
-
-class GroupLeft extends GroupsEvent {
-  const GroupLeft(this.group);
-
-  final Group group;
-
-  @override
-  List<Object> get props => [group];
-}
-
-class GroupsUndoDeletionRequested extends GroupsEvent {
-  const GroupsUndoDeletionRequested();
-}

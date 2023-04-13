@@ -5,7 +5,7 @@ class DateFormField extends StatelessWidget {
   DateFormField({
     required DateTime? value,
     required String locale,
-    required this.onChange,
+    required this.onChanged,
     required this.label,
     super.key,
     this.firstDate,
@@ -20,7 +20,7 @@ class DateFormField extends StatelessWidget {
   final DateTime _value;
   final DateTime? firstDate;
   final DateTime? lastDate;
-  final void Function(DateTime?) onChange;
+  final void Function(DateTime?) onChanged;
   final String label;
 
   @override
@@ -39,7 +39,7 @@ class DateFormField extends StatelessWidget {
           firstDate: firstDate ?? DateTime.now(),
           lastDate: lastDate ?? DateTime(2101),
         );
-        onChange(pickedDate);
+        onChanged(pickedDate);
       },
     );
   }

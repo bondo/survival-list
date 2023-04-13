@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
+import 'package:survival_list/form_field_widgets/group.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -16,7 +17,7 @@ class CreateItemPage extends StatelessWidget {
       builder: (context) => BlocProvider(
         create: (context) => CreateItemBloc(
           survivalListRepository: context.read<SurvivalListRepository>(),
-        ),
+        )..add(const CreateItemGroupsSubscriptionRequested()),
         child: const CreateItemPage(),
       ),
     );
@@ -74,7 +75,8 @@ class CreateItemView extends StatelessWidget {
               children: const [
                 _TitleField(),
                 _StartDateField(),
-                _EndDateField()
+                _EndDateField(),
+                _GroupField()
               ],
             ),
           ),
@@ -124,7 +126,7 @@ class _StartDateField extends StatelessWidget {
       value: state.startDate,
       lastDate: state.endDate,
       locale: l10n.localeName,
-      onChange: (pickedDate) {
+      onChanged: (pickedDate) {
         context
             .read<CreateItemBloc>()
             .add(CreateItemStartDateChanged(pickedDate));
@@ -146,12 +148,32 @@ class _EndDateField extends StatelessWidget {
       firstDate: state.startDate,
       value: state.endDate,
       locale: l10n.localeName,
-      onChange: (pickedDate) {
+      onChanged: (pickedDate) {
         context
             .read<CreateItemBloc>()
             .add(CreateItemEndDateChanged(pickedDate));
       },
       label: l10n.createItemEndDateLabel,
+    );
+  }
+}
+
+class _GroupField extends StatelessWidget {
+  const _GroupField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<CreateItemBloc>().state;
+
+    return GroupFormField(
+      value: state.group,
+      options:
+          state.groupsStatus == CreateItemStatus.success ? state.groups : null,
+      onChanged: (pickedGroup) {
+        context.read<CreateItemBloc>().add(CreateItemGroupChanged(pickedGroup));
+      },
+      label: l10n.createItemGroupLabel,
     );
   }
 }

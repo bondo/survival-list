@@ -34,6 +34,19 @@ class CreateItemEndDateChanged extends CreateItemEvent {
   List<Object> get props => [endDate ?? 'null'];
 }
 
+class CreateItemGroupChanged extends CreateItemEvent {
+  const CreateItemGroupChanged(this.group);
+
+  final Group? group;
+
+  @override
+  List<Object> get props => [group ?? 'null'];
+}
+
 class CreateItemSubmitted extends CreateItemEvent {
   const CreateItemSubmitted();
+}
+
+class CreateItemGroupsSubscriptionRequested extends CreateItemEvent {
+  const CreateItemGroupsSubscriptionRequested();
 }

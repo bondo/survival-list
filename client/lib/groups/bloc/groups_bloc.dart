@@ -11,7 +11,6 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     required SurvivalListRepository survivalListRepository,
   })  : _survivalListRepository = survivalListRepository,
         super(const GroupsState()) {
-    on<GroupLeft>(_onGroupLeft);
     on<GroupsSubscriptionRequested>(_onSubscriptionRequested);
   }
 
@@ -37,12 +36,5 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
         status: () => GroupsStatus.failure,
       ),
     );
-  }
-
-  Future<void> _onGroupLeft(
-    GroupLeft event,
-    Emitter<GroupsState> emit,
-  ) {
-    return _survivalListRepository.leaveGroup(event.group);
   }
 }

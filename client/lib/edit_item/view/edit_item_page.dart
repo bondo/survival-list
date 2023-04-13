@@ -126,7 +126,7 @@ class _StartDateField extends StatelessWidget {
       value: state.startDate,
       lastDate: state.endDate,
       locale: l10n.localeName,
-      onChange: (pickedDate) {
+      onChanged: (pickedDate) {
         context.read<EditItemBloc>().add(EditItemStartDateChanged(pickedDate));
       },
       label: l10n.createItemStartDateLabel,
@@ -146,7 +146,7 @@ class _EndDateField extends StatelessWidget {
       firstDate: state.startDate,
       value: state.endDate,
       locale: l10n.localeName,
-      onChange: (pickedDate) {
+      onChanged: (pickedDate) {
         context.read<EditItemBloc>().add(EditItemEndDateChanged(pickedDate));
       },
       label: l10n.createItemEndDateLabel,

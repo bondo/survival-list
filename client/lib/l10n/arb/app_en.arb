@@ -44,6 +44,7 @@
   "createItemTitleLabel": "Title",
   "createItemStartDateLabel": "Start date",
   "createItemEndDateLabel": "Deadline",
+  "createItemGroupLabel": "Group",
   "createItemSaveButtonTooltip": "Save item",
 
   "editItemAppBarTitle": "Edit Item",
@@ -80,5 +81,7 @@
   "groupsOptionsCreate": "Create new group",
   "groupsOptionsJoin": "Join existing group",
 
-  "joinGroupAppBarTitle": "Join group"
+  "joinGroupAppBarTitle": "Join group",
+
+  "widgetGroupEmptyValueTitle": "None"
 }
