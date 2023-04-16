@@ -128,6 +128,7 @@ impl api_server::Api for Service {
             group: task.group_id.map(|id| Group {
                 id: id.into(),
                 title: task.group_title.unwrap_or_default(),
+                uid: task.group_uid.unwrap_or_default().to_string(),
             }),
         }))
     }
@@ -177,6 +178,7 @@ impl api_server::Api for Service {
             group: task.group_id.map(|id| Group {
                 id: id.into(),
                 title: task.group_title.unwrap_or_default(),
+                uid: task.group_uid.unwrap_or_default().to_string(),
             }),
         }))
     }
@@ -241,6 +243,7 @@ impl api_server::Api for Service {
                     group: task.group_id.map(|id| Group {
                         id: id.into(),
                         title: task.group_title.unwrap_or_default(),
+                        uid: task.group_uid.unwrap_or_default().to_string(),
                     }),
                 }))
                 .await

@@ -226,6 +226,8 @@ pub struct Group {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub uid: ::prost::alloc::string::String,
 }
 /// Generated server implementations.
 pub mod api_server {

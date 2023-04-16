@@ -5,7 +5,10 @@ use std::fmt::Display;
 use anyhow::Result;
 use sqlx::{
     self,
-    types::time::{Date, PrimitiveDateTime},
+    types::{
+        time::{Date, PrimitiveDateTime},
+        Uuid,
+    },
 };
 use tonic::Status;
 
@@ -45,6 +48,7 @@ pub struct TaskResult {
     pub responsible_picture_url: Option<String>,
     pub group_id: Option<GroupId>,
     pub group_title: Option<String>,
+    pub group_uid: Option<Uuid>,
 }
 
 #[derive(Debug)]
@@ -101,7 +105,8 @@ impl Database {
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,
                     g.id as "group_id: Option<GroupId>",
-                    g.title as "group_title: Option<String>"
+                    g.title as "group_title: Option<String>",
+                    g.uid as "group_uid: Option<Uuid>"
                 FROM
                     tasks t
                 INNER JOIN
@@ -151,7 +156,8 @@ impl Database {
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,
                     g.id as "group_id: Option<GroupId>",
-                    g.title as "group_title: Option<String>"
+                    g.title as "group_title: Option<String>",
+                    g.uid as "group_uid: Option<Uuid>"
                 FROM
                     tasks t
                 INNER JOIN
