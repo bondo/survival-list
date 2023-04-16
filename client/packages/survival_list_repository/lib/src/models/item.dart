@@ -11,6 +11,7 @@ class Item extends Equatable {
     required this.startDate,
     required this.endDate,
     required this.responsible,
+    required this.group,
   });
 
   final int id;
@@ -19,6 +20,7 @@ class Item extends Equatable {
   final DateTime? startDate;
   final DateTime? endDate;
   final Person responsible;
+  final Group? group;
 
   Item copyWith({
     int Function()? id,
@@ -27,6 +29,7 @@ class Item extends Equatable {
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
     Person Function()? responsible,
+    Group? Function()? group,
   }) {
     return Item(
       id: id != null ? id() : this.id,
@@ -35,10 +38,11 @@ class Item extends Equatable {
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       responsible: responsible != null ? responsible() : this.responsible,
+      group: group != null ? group() : this.group,
     );
   }
 
   @override
   List<Object?> get props =>
-      [id, title, isCompleted, startDate, endDate, responsible];
+      [id, title, isCompleted, startDate, endDate, responsible, group];
 }

@@ -49,6 +49,9 @@
 
   "editItemAppBarTitle": "Edit Item",
   "editItemTitleLabel": "Title",
+  "editItemStartDateLabel": "Start date",
+  "editItemEndDateLabel": "Deadline",
+  "editItemGroupLabel": "Group",
   "editItemSaveButtonTooltip": "Save changes",
 
   "scheduleOptionsLogOut": "Log out",

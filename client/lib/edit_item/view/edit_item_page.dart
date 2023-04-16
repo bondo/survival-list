@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/edit_item/edit_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
+import 'package:survival_list/form_field_widgets/group.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -17,7 +18,7 @@ class EditItemPage extends StatelessWidget {
         create: (context) => EditItemBloc(
           survivalListRepository: context.read<SurvivalListRepository>(),
           item: item,
-        ),
+        )..add(const EditItemGroupsSubscriptionRequested()),
         child: const EditItemPage(),
       ),
     );
@@ -74,7 +75,8 @@ class EditItemView extends StatelessWidget {
               children: const [
                 _TitleField(),
                 _StartDateField(),
-                _EndDateField()
+                _EndDateField(),
+                _GroupField()
               ],
             ),
           ),
@@ -129,7 +131,7 @@ class _StartDateField extends StatelessWidget {
       onChanged: (pickedDate) {
         context.read<EditItemBloc>().add(EditItemStartDateChanged(pickedDate));
       },
-      label: l10n.createItemStartDateLabel,
+      label: l10n.editItemStartDateLabel,
     );
   }
 }
@@ -149,7 +151,27 @@ class _EndDateField extends StatelessWidget {
       onChanged: (pickedDate) {
         context.read<EditItemBloc>().add(EditItemEndDateChanged(pickedDate));
       },
-      label: l10n.createItemEndDateLabel,
+      label: l10n.editItemEndDateLabel,
+    );
+  }
+}
+
+class _GroupField extends StatelessWidget {
+  const _GroupField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<EditItemBloc>().state;
+
+    return GroupFormField(
+      value: state.group,
+      options:
+          state.groupsStatus == EditItemStatus.success ? state.groups : null,
+      onChanged: (pickedGroup) {
+        context.read<EditItemBloc>().add(EditItemGroupChanged(pickedGroup));
+      },
+      label: l10n.editItemGroupLabel,
     );
   }
 }

@@ -113,6 +113,7 @@ class SurvivalListRepository {
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
         responsible: _parseUser(response.responsible),
+        group: _parseGroup(response.group),
       ),
     )
         .listen(
@@ -144,12 +145,14 @@ class SurvivalListRepository {
     required String title,
     required DateTime? startDate,
     required DateTime? endDate,
+    required Group? group,
   }) async {
     final response = await _client.createTask(
       api.CreateTaskRequest(
         title: title,
         startDate: _buildDate(startDate),
         endDate: _buildDate(endDate),
+        groupId: group?.id,
       ),
     );
     _upsertItem(
@@ -160,6 +163,7 @@ class SurvivalListRepository {
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
         responsible: _parseUser(response.responsible),
+        group: _parseGroup(response.group),
       ),
     );
   }
@@ -192,6 +196,7 @@ class SurvivalListRepository {
           title: newItem.title,
           startDate: _buildDate(newItem.startDate),
           endDate: _buildDate(newItem.endDate),
+          groupId: newItem.group?.id,
         ),
       );
     } catch (e) {
@@ -443,5 +448,17 @@ class SurvivalListRepository {
       name: user.name,
       pictureUrl: user.hasPictureUrl() ? user.pictureUrl : null,
     );
+  }
+
+  Group? _parseGroup(api.Group group) {
+    if (group.hasId()) {
+      return Group(
+        id: group.id,
+        title: group.title,
+        uid: group.uid,
+      );
+    } else {
+      return null;
+    }
   }
 }

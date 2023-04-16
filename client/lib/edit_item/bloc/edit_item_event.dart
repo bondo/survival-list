@@ -34,6 +34,19 @@ class EditItemEndDateChanged extends EditItemEvent {
   List<Object> get props => [endDate ?? 'null'];
 }
 
+class EditItemGroupChanged extends EditItemEvent {
+  const EditItemGroupChanged(this.group);
+
+  final Group? group;
+
+  @override
+  List<Object> get props => [group ?? 'null'];
+}
+
 class EditItemSubmitted extends EditItemEvent {
   const EditItemSubmitted();
+}
+
+class EditItemGroupsSubscriptionRequested extends EditItemEvent {
+  const EditItemGroupsSubscriptionRequested();
 }

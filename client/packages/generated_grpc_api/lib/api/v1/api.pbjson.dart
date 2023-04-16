@@ -34,11 +34,12 @@ const CreateTaskRequest$json = const {
     const {'1': 'start_date', '3': 2, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
     const {'1': 'end_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
     const {'1': 'responsible_id', '3': 4, '4': 1, '5': 5, '10': 'responsibleId'},
+    const {'1': 'group_id', '3': 5, '4': 1, '5': 5, '10': 'groupId'},
   ],
 };
 
 /// Descriptor for `CreateTaskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGUSMAoKc3RhcnRfZGF0ZRgCIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSCXN0YXJ0RGF0ZRIsCghlbmRfZGF0ZRgDIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSB2VuZERhdGUSJQoOcmVzcG9uc2libGVfaWQYBCABKAVSDXJlc3BvbnNpYmxlSWQ=');
+final $typed_data.Uint8List createTaskRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVUYXNrUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGUSMAoKc3RhcnRfZGF0ZRgCIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSCXN0YXJ0RGF0ZRIsCghlbmRfZGF0ZRgDIAEoCzIRLmdvb2dsZS50eXBlLkRhdGVSB2VuZERhdGUSJQoOcmVzcG9uc2libGVfaWQYBCABKAVSDXJlc3BvbnNpYmxlSWQSGQoIZ3JvdXBfaWQYBSABKAVSB2dyb3VwSWQ=');
 @$core.Deprecated('Use createTaskResponseDescriptor instead')
 const CreateTaskResponse$json = const {
   '1': 'CreateTaskResponse',
@@ -48,11 +49,12 @@ const CreateTaskResponse$json = const {
     const {'1': 'start_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
     const {'1': 'end_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
     const {'1': 'responsible', '3': 5, '4': 1, '5': 11, '6': '.api.v1.User', '10': 'responsible'},
+    const {'1': 'group', '3': 6, '4': 1, '5': 11, '6': '.api.v1.Group', '10': 'group'},
   ],
 };
 
 /// Descriptor for `CreateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIwCgpzdGFydF9kYXRlGAMgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgFIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZQ==');
+final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIwCgpzdGFydF9kYXRlGAMgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgFIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgGIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXA=');
 @$core.Deprecated('Use updateTaskRequestDescriptor instead')
 const UpdateTaskRequest$json = const {
   '1': 'UpdateTaskRequest',
@@ -62,11 +64,12 @@ const UpdateTaskRequest$json = const {
     const {'1': 'start_date', '3': 3, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
     const {'1': 'end_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
     const {'1': 'responsible_id', '3': 5, '4': 1, '5': 5, '10': 'responsibleId'},
+    const {'1': 'group_id', '3': 6, '4': 1, '5': 5, '10': 'groupId'},
   ],
 };
 
 /// Descriptor for `UpdateTaskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateTaskRequestDescriptor = $convert.base64Decode('ChFVcGRhdGVUYXNrUmVxdWVzdBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEjAKCnN0YXJ0X2RhdGUYAyABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEiUKDnJlc3BvbnNpYmxlX2lkGAUgASgFUg1yZXNwb25zaWJsZUlk');
+final $typed_data.Uint8List updateTaskRequestDescriptor = $convert.base64Decode('ChFVcGRhdGVUYXNrUmVxdWVzdBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEjAKCnN0YXJ0X2RhdGUYAyABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEiUKDnJlc3BvbnNpYmxlX2lkGAUgASgFUg1yZXNwb25zaWJsZUlkEhkKCGdyb3VwX2lkGAYgASgFUgdncm91cElk');
 @$core.Deprecated('Use updateTaskResponseDescriptor instead')
 const UpdateTaskResponse$json = const {
   '1': 'UpdateTaskResponse',
@@ -77,11 +80,12 @@ const UpdateTaskResponse$json = const {
     const {'1': 'start_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
     const {'1': 'end_date', '3': 5, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
     const {'1': 'responsible', '3': 6, '4': 1, '5': 11, '6': '.api.v1.User', '10': 'responsible'},
+    const {'1': 'group', '3': 7, '4': 1, '5': 11, '6': '.api.v1.Group', '10': 'group'},
   ],
 };
 
 /// Descriptor for `UpdateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVkEjAKCnN0YXJ0X2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBSABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEi4KC3Jlc3BvbnNpYmxlGAYgASgLMgwuYXBpLnYxLlVzZXJSC3Jlc3BvbnNpYmxl');
+final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVkEjAKCnN0YXJ0X2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBSABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEi4KC3Jlc3BvbnNpYmxlGAYgASgLMgwuYXBpLnYxLlVzZXJSC3Jlc3BvbnNpYmxlEiMKBWdyb3VwGAcgASgLMg0uYXBpLnYxLkdyb3VwUgVncm91cA==');
 @$core.Deprecated('Use toggleTaskCompletedRequestDescriptor instead')
 const ToggleTaskCompletedRequest$json = const {
   '1': 'ToggleTaskCompletedRequest',
@@ -141,11 +145,12 @@ const GetTasksResponse$json = const {
     const {'1': 'start_date', '3': 4, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'startDate'},
     const {'1': 'end_date', '3': 5, '4': 1, '5': 11, '6': '.google.type.Date', '10': 'endDate'},
     const {'1': 'responsible', '3': 6, '4': 1, '5': 11, '6': '.api.v1.User', '10': 'responsible'},
+    const {'1': 'group', '3': 7, '4': 1, '5': 11, '6': '.api.v1.Group', '10': 'group'},
   ],
 };
 
 /// Descriptor for `GetTasksResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZQ==');
+final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgHIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXA=');
 @$core.Deprecated('Use createGroupRequestDescriptor instead')
 const CreateGroupRequest$json = const {
   '1': 'CreateGroupRequest',
@@ -284,3 +289,15 @@ const User$json = const {
 
 /// Descriptor for `User`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEg4KAmlkGAEgASgFUgJpZBISCgRuYW1lGAIgASgJUgRuYW1lEh8KC3BpY3R1cmVfdXJsGAMgASgJUgpwaWN0dXJlVXJs');
+@$core.Deprecated('Use groupDescriptor instead')
+const Group$json = const {
+  '1': 'Group',
+  '2': const [
+    const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
+    const {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
+  ],
+};
+
+/// Descriptor for `Group`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List groupDescriptor = $convert.base64Decode('CgVHcm91cBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEhAKA3VpZBgDIAEoCVIDdWlk');

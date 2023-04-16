@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
 part 'edit_item_event.dart';
@@ -16,12 +17,15 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
             title: item.title,
             startDate: item.startDate,
             endDate: item.endDate,
+            group: item.group,
           ),
         ) {
     on<EditItemTitleChanged>(_onTitleChanged);
     on<EditItemStartDateChanged>(_onStartDateChanged);
     on<EditItemEndDateChanged>(_onEndDateChanged);
+    on<EditItemGroupChanged>(_onGroupChanged);
     on<EditItemSubmitted>(_onSubmitted);
+    on<EditItemGroupsSubscriptionRequested>(_onSubscriptionRequested);
   }
 
   final SurvivalListRepository _survivalListRepository;
@@ -47,6 +51,13 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     emit(state.copyWith(endDate: () => event.endDate));
   }
 
+  void _onGroupChanged(
+    EditItemGroupChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(group: () => event.group));
+  }
+
   Future<void> _onSubmitted(
     EditItemSubmitted event,
     Emitter<EditItemState> emit,
@@ -56,6 +67,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
       title: () => state.title,
       startDate: () => state.startDate,
       endDate: () => state.endDate,
+      group: () => state.group,
     );
 
     try {
@@ -64,5 +76,27 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     } catch (e) {
       emit(state.copyWith(status: () => EditItemStatus.failure));
     }
+  }
+
+  Future<void> _onSubscriptionRequested(
+    EditItemGroupsSubscriptionRequested event,
+    Emitter<EditItemState> emit,
+  ) async {
+    emit(state.copyWith(groupsStatus: () => EditItemStatus.loading));
+
+    await emit.forEach(
+      CombineLatestStream.combine2(
+        _survivalListRepository.groups,
+        _survivalListRepository.isFetchingGroups,
+        (List<Group> groups, bool isFetching) => (groups: groups, isFetching: isFetching),
+      ),
+      onData: (data) => state.copyWith(
+        groupsStatus: () => data.isFetching ? EditItemStatus.loading : EditItemStatus.success,
+        groups: () => data.groups,
+      ),
+      onError: (_, __) => state.copyWith(
+        groupsStatus: () => EditItemStatus.failure,
+      ),
+    );
   }
 }

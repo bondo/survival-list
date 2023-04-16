@@ -62,6 +62,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
         title: state.title,
         startDate: state.startDate,
         endDate: state.endDate,
+        group: state.group,
       );
       emit(state.copyWith(status: () => CreateItemStatus.success));
     } catch (e) {
