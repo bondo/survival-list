@@ -247,13 +247,15 @@ impl Database {
                     responsible_user_id,
                     title,
                     start_date,
-                    end_date
+                    end_date,
+                    group_id
                 )
                 VALUES (
                     $1,
                     $2,
                     $3,
-                    $4
+                    $4,
+                    $5
                 )
                 RETURNING
                     id as "id: TaskId"
@@ -261,7 +263,8 @@ impl Database {
             responsible_id.0,
             title,
             period.start_date(),
-            period.end_date()
+            period.end_date(),
+            group_id.map(|id| id.0)
         )
         .fetch_one(&self.pool)
         .await
@@ -290,7 +293,8 @@ impl Database {
                     title = $3,
                     start_date = $4,
                     end_date = $5,
-                    responsible_user_id = $6
+                    responsible_user_id = $6,
+                    group_id = $7
                 WHERE
                     t.id = $2 AND
                     -- Permission check
@@ -306,20 +310,6 @@ impl Database {
                                 ug.group_id = t.group_id AND
                                 ug.user_id = $1
                         )
-                    ) AND
-                    -- Check valid new responsible
-                    (
-                        -- Responsible is viewer
-                        $6 = $1 OR
-                        -- Responsible is in task group
-                        EXISTS (
-                            SELECT
-                            FROM
-                                users_groups ug
-                            WHERE
-                                ug.group_id = t.group_id AND
-                                ug.user_id = $6
-                        )
                     )
                 RETURNING
                     id as "id: TaskId"
@@ -329,7 +319,8 @@ impl Database {
             title,
             period.start_date(),
             period.end_date(),
-            responsible_id.0
+            responsible_id.0,
+            group_id.map(|id| id.0)
         )
         .fetch_one(&self.pool)
         .await
