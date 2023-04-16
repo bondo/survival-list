@@ -28,6 +28,28 @@
     },
     "query": "\n                UPDATE\n                    tasks t\n                SET\n                    completed_at = CASE\n                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
   },
+  "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "?column?",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                    SELECT\n                        -- Viewer in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $1 AND\n                                group_id = $3\n                        ) AND\n                        -- Responsible in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $2 AND\n                                group_id = $3\n                        )\n                "
+  },
   "14fd4db15ffa6910b8d4f3a085902a2194222e8dbda540674c23542e2bfb9f7e": {
     "describe": {
       "columns": [
@@ -59,68 +81,6 @@
       }
     },
     "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
-  },
-  "28f34b70b7203e26f7237f272f78606db86aeb0864056c0591c1d852a6b28cad": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 3,
-          "type_info": "Date"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 4,
-          "type_info": "Date"
-        },
-        {
-          "name": "responsible_id: UserId",
-          "ordinal": 5,
-          "type_info": "Int4"
-        },
-        {
-          "name": "responsible_name",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "responsible_picture_url",
-          "ordinal": 7,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    u.id as \"responsible_id: UserId\",\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                WHERE\n                    t.id = $1\n            "
   },
   "2e076dc7d82692217beb0dab13f1ca7246b3b4d0589100f484f2bc77d6081881": {
     "describe": {
@@ -169,6 +129,80 @@
       }
     },
     "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
+  },
+  "61506e0e838118fec17c14623d930a67f8c04701bc88d960c7fe559772eb0aac": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 3,
+          "type_info": "Date"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "responsible_id: UserId",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "responsible_name",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "responsible_picture_url",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_id: Option<GroupId>",
+          "ordinal": 8,
+          "type_info": "Int4"
+        },
+        {
+          "name": "group_title: Option<String>",
+          "ordinal": 9,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    u.id as \"responsible_id: UserId\",\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<GroupId>\",\n                    g.title as \"group_title: Option<String>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    t.id = $1\n            "
   },
   "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
     "describe": {
@@ -419,7 +453,7 @@
     },
     "query": "\n                INSERT INTO users_groups (\n                    user_id,\n                    group_id\n                )\n                VALUES (\n                    $1,\n                    $2\n                )\n            "
   },
-  "f3a815350dee1d505c0d591e0af28e0901bd161ff898c1eb8ec7d80a756adcf4": {
+  "e0cc79d2e4febc1600a41d4f213aa404c5490019aeb44af3456b14a99ed6647c": {
     "describe": {
       "columns": [
         {
@@ -461,6 +495,16 @@
           "name": "responsible_picture_url",
           "ordinal": 7,
           "type_info": "Text"
+        },
+        {
+          "name": "group_id: Option<GroupId>",
+          "ordinal": 8,
+          "type_info": "Int4"
+        },
+        {
+          "name": "group_title: Option<String>",
+          "ordinal": 9,
+          "type_info": "Text"
         }
       ],
       "nullable": [
@@ -471,7 +515,9 @@
         true,
         false,
         false,
-        true
+        true,
+        false,
+        false
       ],
       "parameters": {
         "Left": [
@@ -479,7 +525,7 @@
         ]
       }
     },
-    "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    u.id as \"responsible_id: UserId\",\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                WHERE\n                    -- Hide old items\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n            "
+    "query": "\n                SELECT\n                    t.id as \"id: TaskId\",\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    u.id as \"responsible_id: UserId\",\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<GroupId>\",\n                    g.title as \"group_title: Option<String>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    -- Hide old items\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n            "
   },
   "fb96380621e3048061609e3559381bbd403769f8caa2b0afa4235ce2d791936d": {
     "describe": {

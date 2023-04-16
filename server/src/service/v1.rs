@@ -97,15 +97,20 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == 0 {
+        let responsible_id = if request.responsible_id == i32::default() {
             user_id
         } else {
             UserId::new(request.responsible_id)
         };
+        let group_id = if request.group_id == i32::default() {
+            None
+        } else {
+            Some(GroupId::new(request.group_id))
+        };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .create_task(user_id, responsible_id, &request.title, &period)
+            .create_task(user_id, responsible_id, &request.title, &period, group_id)
             .await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -120,6 +125,10 @@ impl api_server::Api for Service {
                 name: task.responsible_name,
                 picture_url: task.responsible_picture_url.unwrap_or_default(),
             }),
+            group: task.group_id.map(|id| Group {
+                id: id.into(),
+                title: task.group_title.unwrap_or_default(),
+            }),
         }))
     }
 
@@ -129,10 +138,15 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == 0 {
+        let responsible_id = if request.responsible_id == i32::default() {
             user_id
         } else {
             UserId::new(request.responsible_id)
+        };
+        let group_id = if request.group_id == i32::default() {
+            None
+        } else {
+            Some(GroupId::new(request.group_id))
         };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
@@ -143,6 +157,7 @@ impl api_server::Api for Service {
                 TaskId::new(request.id),
                 &request.title,
                 &period,
+                group_id,
             )
             .await?;
         Ok(Response::new(UpdateTaskResponse {
@@ -158,6 +173,10 @@ impl api_server::Api for Service {
                 id: task.responsible_id.into(),
                 name: task.responsible_name,
                 picture_url: task.responsible_picture_url.unwrap_or_default(),
+            }),
+            group: task.group_id.map(|id| Group {
+                id: id.into(),
+                title: task.group_title.unwrap_or_default(),
             }),
         }))
     }
@@ -218,6 +237,10 @@ impl api_server::Api for Service {
                         id: task.responsible_id.into(),
                         name: task.responsible_name,
                         picture_url: task.responsible_picture_url.unwrap_or_default(),
+                    }),
+                    group: task.group_id.map(|id| Group {
+                        id: id.into(),
+                        title: task.group_title.unwrap_or_default(),
                     }),
                 }))
                 .await

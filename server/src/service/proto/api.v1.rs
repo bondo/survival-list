@@ -20,6 +20,8 @@ pub struct CreateTaskRequest {
     pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
     #[prost(int32, tag = "4")]
     pub responsible_id: i32,
+    #[prost(int32, tag = "5")]
+    pub group_id: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -34,6 +36,8 @@ pub struct CreateTaskResponse {
     pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
     #[prost(message, optional, tag = "5")]
     pub responsible: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "6")]
+    pub group: ::core::option::Option<Group>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -48,6 +52,8 @@ pub struct UpdateTaskRequest {
     pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
     #[prost(int32, tag = "5")]
     pub responsible_id: i32,
+    #[prost(int32, tag = "6")]
+    pub group_id: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -64,6 +70,8 @@ pub struct UpdateTaskResponse {
     pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
     #[prost(message, optional, tag = "6")]
     pub responsible: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "7")]
+    pub group: ::core::option::Option<Group>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -111,6 +119,8 @@ pub struct GetTasksResponse {
     pub end_date: ::core::option::Option<super::super::google::r#type::Date>,
     #[prost(message, optional, tag = "6")]
     pub responsible: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "7")]
+    pub group: ::core::option::Option<Group>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -208,6 +218,14 @@ pub struct User {
     pub name: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub picture_url: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Group {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
 }
 /// Generated server implementations.
 pub mod api_server {

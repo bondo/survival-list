@@ -9,7 +9,7 @@ use sqlx::{
 };
 use tonic::Status;
 
-use super::{database::Database, UserId};
+use super::{database::Database, GroupId, UserId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -43,6 +43,8 @@ pub struct TaskResult {
     pub responsible_id: UserId,
     pub responsible_name: String,
     pub responsible_picture_url: Option<String>,
+    pub group_id: Option<GroupId>,
+    pub group_title: Option<String>,
 }
 
 #[derive(Debug)]
@@ -97,12 +99,17 @@ impl Database {
                     t.end_date,
                     u.id as "responsible_id: UserId",
                     u.name as responsible_name,
-                    u.picture_url as responsible_picture_url
+                    u.picture_url as responsible_picture_url,
+                    g.id as "group_id: Option<GroupId>",
+                    g.title as "group_title: Option<String>"
                 FROM
                     tasks t
                 INNER JOIN
                     users u ON
                         u.id = t.responsible_user_id
+                LEFT JOIN
+                    groups g ON
+                        g.id = t.group_id
                 WHERE
                     -- Hide old items
                     (
@@ -142,12 +149,17 @@ impl Database {
                     t.end_date,
                     u.id as "responsible_id: UserId",
                     u.name as responsible_name,
-                    u.picture_url as responsible_picture_url
+                    u.picture_url as responsible_picture_url,
+                    g.id as "group_id: Option<GroupId>",
+                    g.title as "group_title: Option<String>"
                 FROM
                     tasks t
                 INNER JOIN
                     users u ON
                         u.id = t.responsible_user_id
+                LEFT JOIN
+                    groups g ON
+                        g.id = t.group_id
                 WHERE
                     t.id = $1
             "#,
@@ -158,17 +170,70 @@ impl Database {
         .map_err(|_| Status::internal("Failed to fetch task"))
     }
 
+    async fn validate_responsible_and_group(
+        &self,
+        user_id: UserId,
+        responsible_id: UserId,
+        group_id: Option<GroupId>,
+    ) -> Result<(), Status> {
+        if let Some(group_id) = group_id {
+            let is_valid = sqlx::query_scalar!(
+                r#"
+                    SELECT
+                        -- Viewer in group
+                        EXISTS (
+                            SELECT
+                            FROM
+                                users_groups
+                            WHERE
+                                user_id = $1 AND
+                                group_id = $3
+                        ) AND
+                        -- Responsible in group
+                        EXISTS (
+                            SELECT
+                            FROM
+                                users_groups
+                            WHERE
+                                user_id = $2 AND
+                                group_id = $3
+                        )
+                "#,
+                user_id.0,
+                responsible_id.0,
+                group_id.0
+            )
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|_| Status::internal("Failed to validate responsible and group"))?;
+
+            if let Some(is_valid) = is_valid {
+                if !is_valid {
+                    return Err(Status::invalid_argument("Invalid responsible and/or group"));
+                }
+            } else {
+                return Err(Status::internal(
+                    "Failed to fetch responsible and group validation",
+                ));
+            }
+        } else if user_id != responsible_id {
+            return Err(Status::invalid_argument(
+                "Responsible must be self when no group",
+            ));
+        }
+        Ok(())
+    }
+
     pub async fn create_task(
         &self,
         user_id: UserId,
         responsible_id: UserId,
         title: &str,
         period: &TaskPeriodInput,
+        group_id: Option<GroupId>,
     ) -> Result<TaskResult, Status> {
-        // TODO: Check responsible in provided group
-        if user_id != responsible_id {
-            return Err(Status::internal("Failed to create task"));
-        }
+        self.validate_responsible_and_group(user_id, responsible_id, group_id)
+            .await?;
 
         let task_id = sqlx::query_scalar!(
             r#"
@@ -206,8 +271,11 @@ impl Database {
         task_id: TaskId,
         title: &str,
         period: &TaskPeriodInput,
+        group_id: Option<GroupId>,
     ) -> Result<TaskResult, Status> {
-        // TODO: Check responsible in provided group
+        self.validate_responsible_and_group(user_id, responsible_id, group_id)
+            .await?;
+
         let task_id = sqlx::query_scalar!(
             r#"
                 UPDATE
