@@ -17,8 +17,10 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     on<CreateItemStartDateChanged>(_onStartDateChanged);
     on<CreateItemEndDateChanged>(_onEndDateChanged);
     on<CreateItemGroupChanged>(_onGroupChanged);
+    on<CreateItemResponsibleChanged>(_onResponsibleChanged);
     on<CreateItemSubmitted>(_onSubmitted);
-    on<CreateItemGroupsSubscriptionRequested>(_onSubscriptionRequested);
+    on<CreateItemGroupsSubscriptionRequested>(_onGroupsSubscriptionRequested);
+    on<CreateItemGroupParticipantsSubscriptionRequested>(_onGroupParticipantsSubscriptionRequested);
   }
 
   final SurvivalListRepository _survivalListRepository;
@@ -48,7 +50,26 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     CreateItemGroupChanged event,
     Emitter<CreateItemState> emit,
   ) {
-    emit(state.copyWith(group: () => event.group));
+    if (event.group != null) {
+      emit(state.copyWith(group: () => event.group));
+      add(CreateItemGroupParticipantsSubscriptionRequested(event.group!));
+    } else {
+      emit(
+        state.copyWith(
+          group: () => event.group,
+          groupParticipantsStatus: () => CreateItemStatus.success,
+          groupParticipants: () => [],
+        ),
+      );
+    }
+    add(const CreateItemResponsibleChanged(null));
+  }
+
+  void _onResponsibleChanged(
+    CreateItemResponsibleChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(responsible: () => event.responsible));
   }
 
   Future<void> _onSubmitted(
@@ -63,6 +84,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
         startDate: state.startDate,
         endDate: state.endDate,
         group: state.group,
+        responsible: state.responsible,
       );
       emit(state.copyWith(status: () => CreateItemStatus.success));
     } catch (e) {
@@ -70,7 +92,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     }
   }
 
-  Future<void> _onSubscriptionRequested(
+  Future<void> _onGroupsSubscriptionRequested(
     CreateItemGroupsSubscriptionRequested event,
     Emitter<CreateItemState> emit,
   ) async {
@@ -88,6 +110,28 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
       ),
       onError: (_, __) => state.copyWith(
         groupsStatus: () => CreateItemStatus.failure,
+      ),
+    );
+  }
+
+  Future<void> _onGroupParticipantsSubscriptionRequested(
+    CreateItemGroupParticipantsSubscriptionRequested event,
+    Emitter<CreateItemState> emit,
+  ) async {
+    emit(state.copyWith(groupParticipantsStatus: () => CreateItemStatus.loading));
+
+    await emit.forEach(
+      CombineLatestStream.combine2(
+        _survivalListRepository.groupParticipants(event.group),
+        _survivalListRepository.isFetchingGroupParticipants,
+        (List<Person> groupParticipants, bool isFetching) => (groupParticipants: groupParticipants, isFetching: isFetching),
+      ),
+      onData: (data) => state.copyWith(
+        groupParticipantsStatus: () => data.isFetching ? CreateItemStatus.loading : CreateItemStatus.success,
+        groupParticipants: () => data.groupParticipants,
+      ),
+      onError: (_, __) => state.copyWith(
+        groupParticipantsStatus: () => CreateItemStatus.failure,
       ),
     );
   }

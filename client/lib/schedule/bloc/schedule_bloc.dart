@@ -15,7 +15,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required ScheduleViewVariant variant,
   })  : _authenticationRepository = authenticationRepository,
         _survivalListRepository = survivalListRepository,
-        super(ScheduleState(variant:variant)) {
+        super(ScheduleState(variant: variant)) {
     on<ScheduleFilterChanged>(_onFilterChanged);
     on<ScheduleItemCompletionToggled>(_onItemCompletionToggled);
     on<ScheduleItemDeleted>(_onItemDeleted);
@@ -41,7 +41,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         (String? photo, List<Item> items, bool isFetching) => (photo: photo, items: items, isFetching:isFetching),
       ),
       onData: (data) => state.copyWith(
-        status: () => data.isFetching ? ScheduleStatus.loading : ScheduleStatus.success,
+        status: () =>
+            data.isFetching ? ScheduleStatus.loading : ScheduleStatus.success,
         userPhotoUrl: () => data.photo,
         todos: () => data.items,
       ),
@@ -55,7 +56,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     ScheduleItemCompletionToggled event,
     Emitter<ScheduleState> emit,
   ) async {
-    await _survivalListRepository.toggleItem(item: event.item, isCompleted: event.isCompleted);
+    await _survivalListRepository.toggleItem(
+      item: event.item,
+      isCompleted: event.isCompleted,
+    );
   }
 
   Future<void> _onItemDeleted(
@@ -84,7 +88,13 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
     final item = state.lastDeletedItem!;
     emit(state.copyWith(lastDeletedItem: () => null));
-    await _survivalListRepository.createItem(title: item.title,  startDate: item.startDate, endDate: item.endDate, group: item.group);
+    await _survivalListRepository.createItem(
+      title: item.title,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      group: item.group,
+      responsible: item.responsible,
+    );
   }
 
   void _onFilterChanged(

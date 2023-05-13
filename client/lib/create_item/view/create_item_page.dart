@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
 import 'package:survival_list/form_field_widgets/group.dart';
+import 'package:survival_list/form_field_widgets/person.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -76,7 +77,8 @@ class CreateItemView extends StatelessWidget {
                 _TitleField(),
                 _StartDateField(),
                 _EndDateField(),
-                _GroupField()
+                _GroupField(),
+                _ResponsibleField()
               ],
             ),
           ),
@@ -174,6 +176,29 @@ class _GroupField extends StatelessWidget {
         context.read<CreateItemBloc>().add(CreateItemGroupChanged(pickedGroup));
       },
       label: l10n.createItemGroupLabel,
+    );
+  }
+}
+
+class _ResponsibleField extends StatelessWidget {
+  const _ResponsibleField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<CreateItemBloc>().state;
+
+    return PersonFormField(
+      value: state.responsible,
+      options: state.groupParticipantsStatus == CreateItemStatus.success
+          ? state.groupParticipants
+          : null,
+      onChanged: (pickedResponsible) {
+        context
+            .read<CreateItemBloc>()
+            .add(CreateItemResponsibleChanged(pickedResponsible));
+      },
+      label: l10n.createItemResponsibleLabel,
     );
   }
 }

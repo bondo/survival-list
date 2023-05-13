@@ -146,6 +146,7 @@ class SurvivalListRepository {
     required DateTime? startDate,
     required DateTime? endDate,
     required Group? group,
+    required Person? responsible,
   }) async {
     final response = await _client.createTask(
       api.CreateTaskRequest(
@@ -153,6 +154,7 @@ class SurvivalListRepository {
         startDate: _buildDate(startDate),
         endDate: _buildDate(endDate),
         groupId: group?.id,
+        responsibleId: responsible?.id,
       ),
     );
     _upsertItem(
@@ -197,6 +199,7 @@ class SurvivalListRepository {
           startDate: _buildDate(newItem.startDate),
           endDate: _buildDate(newItem.endDate),
           groupId: newItem.group?.id,
+          responsibleId: newItem.responsible.id,
         ),
       );
     } catch (e) {

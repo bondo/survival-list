@@ -43,10 +43,28 @@ class CreateItemGroupChanged extends CreateItemEvent {
   List<Object> get props => [group ?? 'null'];
 }
 
+class CreateItemResponsibleChanged extends CreateItemEvent {
+  const CreateItemResponsibleChanged(this.responsible);
+
+  final Person? responsible;
+
+  @override
+  List<Object> get props => [responsible ?? 'null'];
+}
+
 class CreateItemSubmitted extends CreateItemEvent {
   const CreateItemSubmitted();
 }
 
 class CreateItemGroupsSubscriptionRequested extends CreateItemEvent {
   const CreateItemGroupsSubscriptionRequested();
+}
+
+class CreateItemGroupParticipantsSubscriptionRequested extends CreateItemEvent {
+  const CreateItemGroupParticipantsSubscriptionRequested(this.group);
+
+  final Group group;
+
+  @override
+  List<Object> get props => [group];
 }
