@@ -50,7 +50,7 @@ See [packages/generated_grpc_api/README.md](./packages/generated_grpc_api/README
 - Connect phone with usb
 - Run `adb tcpip 5555`
 - Disconnect usb
-- Run `adb connect 10.244.34.201`
+- Run `adb connect 192.168.1.86`
 
 ## Manual client build
 
