@@ -18,7 +18,7 @@ class CreateItemPage extends StatelessWidget {
       builder: (context) => BlocProvider(
         create: (context) => CreateItemBloc(
           survivalListRepository: context.read<SurvivalListRepository>(),
-        )..add(const CreateItemGroupsSubscriptionRequested()),
+        )..add(const CreateItemSubscriptionRequested()),
         child: const CreateItemPage(),
       ),
     );
@@ -189,7 +189,7 @@ class _ResponsibleField extends StatelessWidget {
     final state = context.watch<CreateItemBloc>().state;
 
     return PersonFormField(
-      value: state.responsible,
+      value: state.responsible ?? state.viewerPerson,
       options: state.groupParticipantsStatus == CreateItemStatus.success
           ? state.groupParticipants
           : null,

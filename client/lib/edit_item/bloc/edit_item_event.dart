@@ -43,10 +43,28 @@ class EditItemGroupChanged extends EditItemEvent {
   List<Object> get props => [group ?? 'null'];
 }
 
+class EditItemResponsibleChanged extends EditItemEvent {
+  const EditItemResponsibleChanged(this.responsible);
+
+  final Person? responsible;
+
+  @override
+  List<Object> get props => [responsible ?? 'null'];
+}
+
 class EditItemSubmitted extends EditItemEvent {
   const EditItemSubmitted();
 }
 
-class EditItemGroupsSubscriptionRequested extends EditItemEvent {
-  const EditItemGroupsSubscriptionRequested();
+class EditItemSubscriptionRequested extends EditItemEvent {
+  const EditItemSubscriptionRequested();
+}
+
+class EditItemGroupParticipantsSubscriptionRequested extends EditItemEvent {
+  const EditItemGroupParticipantsSubscriptionRequested(this.group);
+
+  final Group? group;
+
+  @override
+  List<Object> get props => [group ?? 'null'];
 }

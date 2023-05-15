@@ -26,13 +26,15 @@ class GroupFormField extends StatelessWidget {
         style: const TextStyle(fontStyle: FontStyle.italic),
       ),
     );
-    final items = options
+    final items = ((options?.isEmpty ?? true) && value != null
+            ? [value!]
+            : options)
         ?.map(
           (group) =>
               DropdownMenuItem<Group?>(value: group, child: Text(group.title)),
         )
         .toList();
-    if (items != null && value != null) {
+    if (items != null && options != null && value != null) {
       items.insert(0, empty);
     }
 

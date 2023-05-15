@@ -5,11 +5,12 @@
 // @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
+import 'dart:async' as $async;
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/type/date.pb.dart' as $1;
+import '../../google/type/date.pb.dart' as $0;
 
 class LoginRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LoginRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
@@ -74,11 +75,20 @@ class LoginRequest extends $pb.GeneratedMessage {
 
 class LoginResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LoginResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..aOM<User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: User.create)
     ..hasRequiredFields = false
   ;
 
   LoginResponse._() : super();
-  factory LoginResponse() => create();
+  factory LoginResponse({
+    User? user,
+  }) {
+    final _result = create();
+    if (user != null) {
+      _result.user = user;
+    }
+    return _result;
+  }
   factory LoginResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory LoginResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -99,13 +109,24 @@ class LoginResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static LoginResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LoginResponse>(create);
   static LoginResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  User get user => $_getN(0);
+  @$pb.TagNumber(1)
+  set user(User v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUser() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUser() => clearField(1);
+  @$pb.TagNumber(1)
+  User ensureUser() => $_ensure(0);
 }
 
 class CreateTaskRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$1.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
-    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<$0.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
+    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
@@ -114,8 +135,8 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   CreateTaskRequest._() : super();
   factory CreateTaskRequest({
     $core.String? title,
-    $1.Date? startDate,
-    $1.Date? endDate,
+    $0.Date? startDate,
+    $0.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
   }) {
@@ -168,26 +189,26 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   void clearTitle() => clearField(1);
 
   @$pb.TagNumber(2)
-  $1.Date get startDate => $_getN(1);
+  $0.Date get startDate => $_getN(1);
   @$pb.TagNumber(2)
-  set startDate($1.Date v) { setField(2, v); }
+  set startDate($0.Date v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasStartDate() => $_has(1);
   @$pb.TagNumber(2)
   void clearStartDate() => clearField(2);
   @$pb.TagNumber(2)
-  $1.Date ensureStartDate() => $_ensure(1);
+  $0.Date ensureStartDate() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $1.Date get endDate => $_getN(2);
+  $0.Date get endDate => $_getN(2);
   @$pb.TagNumber(3)
-  set endDate($1.Date v) { setField(3, v); }
+  set endDate($0.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasEndDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearEndDate() => clearField(3);
   @$pb.TagNumber(3)
-  $1.Date ensureEndDate() => $_ensure(2);
+  $0.Date ensureEndDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.int get responsibleId => $_getIZ(3);
@@ -212,8 +233,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
-    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
+    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..hasRequiredFields = false
@@ -223,8 +244,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   factory CreateTaskResponse({
     $core.int? id,
     $core.String? title,
-    $1.Date? startDate,
-    $1.Date? endDate,
+    $0.Date? startDate,
+    $0.Date? endDate,
     User? responsible,
     Group? group,
   }) {
@@ -289,26 +310,26 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $1.Date get startDate => $_getN(2);
+  $0.Date get startDate => $_getN(2);
   @$pb.TagNumber(3)
-  set startDate($1.Date v) { setField(3, v); }
+  set startDate($0.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasStartDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearStartDate() => clearField(3);
   @$pb.TagNumber(3)
-  $1.Date ensureStartDate() => $_ensure(2);
+  $0.Date ensureStartDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $1.Date get endDate => $_getN(3);
+  $0.Date get endDate => $_getN(3);
   @$pb.TagNumber(4)
-  set endDate($1.Date v) { setField(4, v); }
+  set endDate($0.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasEndDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Date ensureEndDate() => $_ensure(3);
+  $0.Date ensureEndDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
   User get responsible => $_getN(4);
@@ -337,8 +358,8 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
-    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
+    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
@@ -348,8 +369,8 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   factory UpdateTaskRequest({
     $core.int? id,
     $core.String? title,
-    $1.Date? startDate,
-    $1.Date? endDate,
+    $0.Date? startDate,
+    $0.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
   }) {
@@ -414,26 +435,26 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $1.Date get startDate => $_getN(2);
+  $0.Date get startDate => $_getN(2);
   @$pb.TagNumber(3)
-  set startDate($1.Date v) { setField(3, v); }
+  set startDate($0.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasStartDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearStartDate() => clearField(3);
   @$pb.TagNumber(3)
-  $1.Date ensureStartDate() => $_ensure(2);
+  $0.Date ensureStartDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $1.Date get endDate => $_getN(3);
+  $0.Date get endDate => $_getN(3);
   @$pb.TagNumber(4)
-  set endDate($1.Date v) { setField(4, v); }
+  set endDate($0.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasEndDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Date ensureEndDate() => $_ensure(3);
+  $0.Date ensureEndDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
   $core.int get responsibleId => $_getIZ(4);
@@ -459,8 +480,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
-    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
-    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
+    ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..hasRequiredFields = false
@@ -471,8 +492,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
-    $1.Date? startDate,
-    $1.Date? endDate,
+    $0.Date? startDate,
+    $0.Date? endDate,
     User? responsible,
     Group? group,
   }) {
@@ -549,26 +570,26 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearIsCompleted() => clearField(3);
 
   @$pb.TagNumber(4)
-  $1.Date get startDate => $_getN(3);
+  $0.Date get startDate => $_getN(3);
   @$pb.TagNumber(4)
-  set startDate($1.Date v) { setField(4, v); }
+  set startDate($0.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasStartDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearStartDate() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Date ensureStartDate() => $_ensure(3);
+  $0.Date ensureStartDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $1.Date get endDate => $_getN(4);
+  $0.Date get endDate => $_getN(4);
   @$pb.TagNumber(5)
-  set endDate($1.Date v) { setField(5, v); }
+  set endDate($0.Date v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasEndDate() => $_has(4);
   @$pb.TagNumber(5)
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
-  $1.Date ensureEndDate() => $_ensure(4);
+  $0.Date ensureEndDate() => $_ensure(4);
 
   @$pb.TagNumber(6)
   User get responsible => $_getN(5);
@@ -843,8 +864,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
-    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
-    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
+    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
+    ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..hasRequiredFields = false
@@ -855,8 +876,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
-    $1.Date? startDate,
-    $1.Date? endDate,
+    $0.Date? startDate,
+    $0.Date? endDate,
     User? responsible,
     Group? group,
   }) {
@@ -933,26 +954,26 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearIsCompleted() => clearField(3);
 
   @$pb.TagNumber(4)
-  $1.Date get startDate => $_getN(3);
+  $0.Date get startDate => $_getN(3);
   @$pb.TagNumber(4)
-  set startDate($1.Date v) { setField(4, v); }
+  set startDate($0.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasStartDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearStartDate() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Date ensureStartDate() => $_ensure(3);
+  $0.Date ensureStartDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $1.Date get endDate => $_getN(4);
+  $0.Date get endDate => $_getN(4);
   @$pb.TagNumber(5)
-  set endDate($1.Date v) { setField(5, v); }
+  set endDate($0.Date v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasEndDate() => $_has(4);
   @$pb.TagNumber(5)
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
-  $1.Date ensureEndDate() => $_ensure(4);
+  $0.Date ensureEndDate() => $_ensure(4);
 
   @$pb.TagNumber(6)
   User get responsible => $_getN(5);
@@ -1799,5 +1820,59 @@ class Group extends $pb.GeneratedMessage {
   $core.bool hasUid() => $_has(2);
   @$pb.TagNumber(3)
   void clearUid() => clearField(3);
+}
+
+class APIApi {
+  $pb.RpcClient _client;
+  APIApi(this._client);
+
+  $async.Future<LoginResponse> login($pb.ClientContext? ctx, LoginRequest request) {
+    var emptyResponse = LoginResponse();
+    return _client.invoke<LoginResponse>(ctx, 'API', 'Login', request, emptyResponse);
+  }
+  $async.Future<CreateTaskResponse> createTask($pb.ClientContext? ctx, CreateTaskRequest request) {
+    var emptyResponse = CreateTaskResponse();
+    return _client.invoke<CreateTaskResponse>(ctx, 'API', 'CreateTask', request, emptyResponse);
+  }
+  $async.Future<UpdateTaskResponse> updateTask($pb.ClientContext? ctx, UpdateTaskRequest request) {
+    var emptyResponse = UpdateTaskResponse();
+    return _client.invoke<UpdateTaskResponse>(ctx, 'API', 'UpdateTask', request, emptyResponse);
+  }
+  $async.Future<ToggleTaskCompletedResponse> toggleTaskCompleted($pb.ClientContext? ctx, ToggleTaskCompletedRequest request) {
+    var emptyResponse = ToggleTaskCompletedResponse();
+    return _client.invoke<ToggleTaskCompletedResponse>(ctx, 'API', 'ToggleTaskCompleted', request, emptyResponse);
+  }
+  $async.Future<DeleteTaskResponse> deleteTask($pb.ClientContext? ctx, DeleteTaskRequest request) {
+    var emptyResponse = DeleteTaskResponse();
+    return _client.invoke<DeleteTaskResponse>(ctx, 'API', 'DeleteTask', request, emptyResponse);
+  }
+  $async.Future<GetTasksResponse> getTasks($pb.ClientContext? ctx, GetTasksRequest request) {
+    var emptyResponse = GetTasksResponse();
+    return _client.invoke<GetTasksResponse>(ctx, 'API', 'GetTasks', request, emptyResponse);
+  }
+  $async.Future<CreateGroupResponse> createGroup($pb.ClientContext? ctx, CreateGroupRequest request) {
+    var emptyResponse = CreateGroupResponse();
+    return _client.invoke<CreateGroupResponse>(ctx, 'API', 'CreateGroup', request, emptyResponse);
+  }
+  $async.Future<JoinGroupResponse> joinGroup($pb.ClientContext? ctx, JoinGroupRequest request) {
+    var emptyResponse = JoinGroupResponse();
+    return _client.invoke<JoinGroupResponse>(ctx, 'API', 'JoinGroup', request, emptyResponse);
+  }
+  $async.Future<UpdateGroupResponse> updateGroup($pb.ClientContext? ctx, UpdateGroupRequest request) {
+    var emptyResponse = UpdateGroupResponse();
+    return _client.invoke<UpdateGroupResponse>(ctx, 'API', 'UpdateGroup', request, emptyResponse);
+  }
+  $async.Future<LeaveGroupResponse> leaveGroup($pb.ClientContext? ctx, LeaveGroupRequest request) {
+    var emptyResponse = LeaveGroupResponse();
+    return _client.invoke<LeaveGroupResponse>(ctx, 'API', 'LeaveGroup', request, emptyResponse);
+  }
+  $async.Future<GetGroupsResponse> getGroups($pb.ClientContext? ctx, GetGroupsRequest request) {
+    var emptyResponse = GetGroupsResponse();
+    return _client.invoke<GetGroupsResponse>(ctx, 'API', 'GetGroups', request, emptyResponse);
+  }
+  $async.Future<GetGroupParticipantsResponse> getGroupParticipants($pb.ClientContext? ctx, GetGroupParticipantsRequest request) {
+    var emptyResponse = GetGroupParticipantsResponse();
+    return _client.invoke<GetGroupParticipantsResponse>(ctx, 'API', 'GetGroupParticipants', request, emptyResponse);
+  }
 }
 

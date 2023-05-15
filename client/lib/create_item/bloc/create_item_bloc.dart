@@ -10,17 +10,17 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
   CreateItemBloc({
     required SurvivalListRepository survivalListRepository,
   })  : _survivalListRepository = survivalListRepository,
-        super(
-          const CreateItemState(),
-        ) {
+        super(const CreateItemState()) {
     on<CreateItemTitleChanged>(_onTitleChanged);
     on<CreateItemStartDateChanged>(_onStartDateChanged);
     on<CreateItemEndDateChanged>(_onEndDateChanged);
     on<CreateItemGroupChanged>(_onGroupChanged);
     on<CreateItemResponsibleChanged>(_onResponsibleChanged);
     on<CreateItemSubmitted>(_onSubmitted);
-    on<CreateItemGroupsSubscriptionRequested>(_onGroupsSubscriptionRequested);
-    on<CreateItemGroupParticipantsSubscriptionRequested>(_onGroupParticipantsSubscriptionRequested);
+    on<CreateItemSubscriptionRequested>(_onSubscriptionRequested);
+    on<CreateItemGroupParticipantsSubscriptionRequested>(
+      _onGroupParticipantsSubscriptionRequested,
+    );
   }
 
   final SurvivalListRepository _survivalListRepository;
@@ -50,13 +50,14 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     CreateItemGroupChanged event,
     Emitter<CreateItemState> emit,
   ) {
-    if (event.group != null) {
-      emit(state.copyWith(group: () => event.group));
-      add(CreateItemGroupParticipantsSubscriptionRequested(event.group!));
+    final group = event.group;
+    if (group != null) {
+      emit(state.copyWith(group: () => group));
+      add(CreateItemGroupParticipantsSubscriptionRequested(group));
     } else {
       emit(
         state.copyWith(
-          group: () => event.group,
+          group: () => group,
           groupParticipantsStatus: () => CreateItemStatus.success,
           groupParticipants: () => [],
         ),
@@ -92,21 +93,29 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     }
   }
 
-  Future<void> _onGroupsSubscriptionRequested(
-    CreateItemGroupsSubscriptionRequested event,
+  Future<void> _onSubscriptionRequested(
+    CreateItemSubscriptionRequested event,
     Emitter<CreateItemState> emit,
   ) async {
     emit(state.copyWith(groupsStatus: () => CreateItemStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine2(
+      CombineLatestStream.combine3(
         _survivalListRepository.groups,
         _survivalListRepository.isFetchingGroups,
-        (List<Group> groups, bool isFetching) => (groups: groups, isFetching: isFetching),
+        _survivalListRepository.viewerPerson,
+        (List<Group> groups, bool isFetching, Person? viewerPerson) => (
+          groups: groups,
+          isFetching: isFetching,
+          viewerPerson: viewerPerson
+        ),
       ),
       onData: (data) => state.copyWith(
-        groupsStatus: () => data.isFetching ? CreateItemStatus.loading : CreateItemStatus.success,
+        groupsStatus: () => data.isFetching
+            ? CreateItemStatus.loading
+            : CreateItemStatus.success,
         groups: () => data.groups,
+        viewerPerson: () => data.viewerPerson,
       ),
       onError: (_, __) => state.copyWith(
         groupsStatus: () => CreateItemStatus.failure,
@@ -118,16 +127,21 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     CreateItemGroupParticipantsSubscriptionRequested event,
     Emitter<CreateItemState> emit,
   ) async {
-    emit(state.copyWith(groupParticipantsStatus: () => CreateItemStatus.loading));
+    emit(
+      state.copyWith(groupParticipantsStatus: () => CreateItemStatus.loading),
+    );
 
     await emit.forEach(
       CombineLatestStream.combine2(
         _survivalListRepository.groupParticipants(event.group),
         _survivalListRepository.isFetchingGroupParticipants,
-        (List<Person> groupParticipants, bool isFetching) => (groupParticipants: groupParticipants, isFetching: isFetching),
+        (List<Person> groupParticipants, bool isFetching) =>
+            (groupParticipants: groupParticipants, isFetching: isFetching),
       ),
       onData: (data) => state.copyWith(
-        groupParticipantsStatus: () => data.isFetching ? CreateItemStatus.loading : CreateItemStatus.success,
+        groupParticipantsStatus: () => data.isFetching
+            ? CreateItemStatus.loading
+            : CreateItemStatus.success,
         groupParticipants: () => data.groupParticipants,
       ),
       onError: (_, __) => state.copyWith(

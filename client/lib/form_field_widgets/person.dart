@@ -17,14 +17,15 @@ class PersonFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = options
-        ?.map(
-          (person) => DropdownMenuItem<Person>(
-            value: person,
-            child: Text(person.name), // '${person.name} ${person.id}'
-          ),
-        )
-        .toList();
+    final items =
+        ((options?.isEmpty ?? true) && value != null ? [value!] : options)
+            ?.map(
+              (person) => DropdownMenuItem<Person>(
+                value: person,
+                child: Text(person.name),
+              ),
+            )
+            .toList();
 
     return DropdownButtonFormField<Person>(
       value: value,

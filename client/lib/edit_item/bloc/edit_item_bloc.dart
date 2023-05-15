@@ -18,14 +18,19 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
             startDate: item.startDate,
             endDate: item.endDate,
             group: item.group,
+            responsible: item.responsible,
           ),
         ) {
     on<EditItemTitleChanged>(_onTitleChanged);
     on<EditItemStartDateChanged>(_onStartDateChanged);
     on<EditItemEndDateChanged>(_onEndDateChanged);
     on<EditItemGroupChanged>(_onGroupChanged);
+    on<EditItemResponsibleChanged>(_onResponsibleChanged);
     on<EditItemSubmitted>(_onSubmitted);
-    on<EditItemGroupsSubscriptionRequested>(_onSubscriptionRequested);
+    on<EditItemSubscriptionRequested>(_onSubscriptionRequested);
+    on<EditItemGroupParticipantsSubscriptionRequested>(
+      _onGroupParticipantsSubscriptionRequested,
+    );
   }
 
   final SurvivalListRepository _survivalListRepository;
@@ -55,7 +60,27 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     EditItemGroupChanged event,
     Emitter<EditItemState> emit,
   ) {
-    emit(state.copyWith(group: () => event.group));
+    final group = event.group;
+    if (group != null) {
+      emit(state.copyWith(group: () => group));
+      add(EditItemGroupParticipantsSubscriptionRequested(group));
+    } else {
+      emit(
+        state.copyWith(
+          group: () => group,
+          groupParticipantsStatus: () => EditItemStatus.success,
+          groupParticipants: () => [],
+        ),
+      );
+    }
+    add(const EditItemResponsibleChanged(null));
+  }
+
+  void _onResponsibleChanged(
+    EditItemResponsibleChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(responsible: () => event.responsible));
   }
 
   Future<void> _onSubmitted(
@@ -68,6 +93,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
       startDate: () => state.startDate,
       endDate: () => state.endDate,
       group: () => state.group,
+      responsible: () => state.responsible,
     );
 
     try {
@@ -79,23 +105,59 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
   }
 
   Future<void> _onSubscriptionRequested(
-    EditItemGroupsSubscriptionRequested event,
+    EditItemSubscriptionRequested event,
     Emitter<EditItemState> emit,
   ) async {
     emit(state.copyWith(groupsStatus: () => EditItemStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine2(
+      CombineLatestStream.combine3(
         _survivalListRepository.groups,
         _survivalListRepository.isFetchingGroups,
-        (List<Group> groups, bool isFetching) => (groups: groups, isFetching: isFetching),
+        _survivalListRepository.viewerPerson,
+        (List<Group> groups, bool isFetching, Person? viewerPerson) => (
+          groups: groups,
+          isFetching: isFetching,
+          viewerPerson: viewerPerson
+        ),
       ),
       onData: (data) => state.copyWith(
-        groupsStatus: () => data.isFetching ? EditItemStatus.loading : EditItemStatus.success,
+        groupsStatus: () =>
+            data.isFetching ? EditItemStatus.loading : EditItemStatus.success,
         groups: () => data.groups,
+        viewerPerson: () => data.viewerPerson,
       ),
       onError: (_, __) => state.copyWith(
         groupsStatus: () => EditItemStatus.failure,
+      ),
+    );
+  }
+
+  Future<void> _onGroupParticipantsSubscriptionRequested(
+    EditItemGroupParticipantsSubscriptionRequested event,
+    Emitter<EditItemState> emit,
+  ) async {
+    final group = event.group;
+    if (group == null) {
+      return;
+    }
+
+    emit(state.copyWith(groupParticipantsStatus: () => EditItemStatus.loading));
+
+    await emit.forEach(
+      CombineLatestStream.combine2(
+        _survivalListRepository.groupParticipants(group),
+        _survivalListRepository.isFetchingGroupParticipants,
+        (List<Person> groupParticipants, bool isFetching) =>
+            (groupParticipants: groupParticipants, isFetching: isFetching),
+      ),
+      onData: (data) => state.copyWith(
+        groupParticipantsStatus: () =>
+            data.isFetching ? EditItemStatus.loading : EditItemStatus.success,
+        groupParticipants: () => data.groupParticipants,
+      ),
+      onError: (_, __) => state.copyWith(
+        groupParticipantsStatus: () => EditItemStatus.failure,
       ),
     );
   }

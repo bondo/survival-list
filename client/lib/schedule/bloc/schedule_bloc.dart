@@ -34,17 +34,30 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     emit(state.copyWith(status: () => ScheduleStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine3(
+      CombineLatestStream.combine4(
         _authenticationRepository.user.map((user) => user.photo).distinct(),
         _survivalListRepository.items,
         _survivalListRepository.isFetchingItems,
-        (String? photo, List<Item> items, bool isFetching) => (photo: photo, items: items, isFetching:isFetching),
+        _survivalListRepository.viewerPerson,
+        (
+          String? photo,
+          List<Item> items,
+          bool isFetching,
+          Person? viewerPerson,
+        ) =>
+            (
+          photo: photo,
+          items: items,
+          isFetching: isFetching,
+          viewerPerson: viewerPerson
+        ),
       ),
       onData: (data) => state.copyWith(
         status: () =>
             data.isFetching ? ScheduleStatus.loading : ScheduleStatus.success,
         userPhotoUrl: () => data.photo,
         todos: () => data.items,
+        viewerPerson: () => data.viewerPerson,
       ),
       onError: (_, __) => state.copyWith(
         status: () => ScheduleStatus.failure,

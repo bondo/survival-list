@@ -19,7 +19,7 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
-  final Person responsible;
+  final Person? responsible;
   final Group? group;
 
   Item copyWith({
@@ -28,7 +28,7 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    Person Function()? responsible,
+    Person? Function()? responsible,
     Group? Function()? group,
   }) {
     return Item(

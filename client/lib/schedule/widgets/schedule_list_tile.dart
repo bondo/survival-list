@@ -5,6 +5,7 @@ import 'package:survival_list_repository/survival_list_repository.dart';
 class ItemListTile extends StatelessWidget {
   const ItemListTile({
     required this.item,
+    required this.viewerPerson,
     super.key,
     this.onToggleCompleted,
     this.onDismissed,
@@ -15,6 +16,7 @@ class ItemListTile extends StatelessWidget {
   final ValueChanged<bool>? onToggleCompleted;
   final DismissDirectionCallback? onDismissed;
   final VoidCallback? onTap;
+  final Person? viewerPerson;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,9 @@ class ItemListTile extends StatelessWidget {
                       decoration: TextDecoration.lineThrough,
                     ),
             ),
-            Avatar(photo: item.responsible.pictureUrl),
+            Avatar(
+              photo: (item.responsible ?? viewerPerson)?.pictureUrl,
+            ),
           ],
         ),
         // subtitle: Text(

@@ -56,8 +56,8 @@ class CreateItemSubmitted extends CreateItemEvent {
   const CreateItemSubmitted();
 }
 
-class CreateItemGroupsSubscriptionRequested extends CreateItemEvent {
-  const CreateItemGroupsSubscriptionRequested();
+class CreateItemSubscriptionRequested extends CreateItemEvent {
+  const CreateItemSubscriptionRequested();
 }
 
 class CreateItemGroupParticipantsSubscriptionRequested extends CreateItemEvent {

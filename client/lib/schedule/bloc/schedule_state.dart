@@ -10,6 +10,7 @@ class ScheduleState extends Equatable {
     this.filter = ScheduleViewFilter.all,
     this.lastDeletedItem,
     this.userPhotoUrl,
+    this.viewerPerson,
   });
 
   final ScheduleStatus status;
@@ -18,6 +19,7 @@ class ScheduleState extends Equatable {
   final ScheduleViewVariant variant;
   final Item? lastDeletedItem;
   final String? userPhotoUrl;
+  final Person? viewerPerson;
 
   List<Item> get filteredItems => variant.apply(filter.apply(todos));
 
@@ -27,6 +29,7 @@ class ScheduleState extends Equatable {
     ScheduleViewFilter Function()? filter,
     Item? Function()? lastDeletedItem,
     String? Function()? userPhotoUrl,
+    Person? Function()? viewerPerson,
   }) {
     return ScheduleState(
       variant: variant,
@@ -36,6 +39,7 @@ class ScheduleState extends Equatable {
       lastDeletedItem:
           lastDeletedItem != null ? lastDeletedItem() : this.lastDeletedItem,
       userPhotoUrl: userPhotoUrl != null ? userPhotoUrl() : this.userPhotoUrl,
+      viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
   }
 
@@ -46,5 +50,6 @@ class ScheduleState extends Equatable {
         filter,
         lastDeletedItem,
         userPhotoUrl,
+        viewerPerson,
       ];
 }

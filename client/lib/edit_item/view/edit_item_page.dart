@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/edit_item/edit_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
 import 'package:survival_list/form_field_widgets/group.dart';
+import 'package:survival_list/form_field_widgets/person.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -18,7 +19,9 @@ class EditItemPage extends StatelessWidget {
         create: (context) => EditItemBloc(
           survivalListRepository: context.read<SurvivalListRepository>(),
           item: item,
-        )..add(const EditItemGroupsSubscriptionRequested()),
+        )
+          ..add(const EditItemSubscriptionRequested())
+          ..add(EditItemGroupParticipantsSubscriptionRequested(item.group)),
         child: const EditItemPage(),
       ),
     );
@@ -76,7 +79,8 @@ class EditItemView extends StatelessWidget {
                 _TitleField(),
                 _StartDateField(),
                 _EndDateField(),
-                _GroupField()
+                _GroupField(),
+                _ResponsibleField()
               ],
             ),
           ),
@@ -172,6 +176,29 @@ class _GroupField extends StatelessWidget {
         context.read<EditItemBloc>().add(EditItemGroupChanged(pickedGroup));
       },
       label: l10n.editItemGroupLabel,
+    );
+  }
+}
+
+class _ResponsibleField extends StatelessWidget {
+  const _ResponsibleField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<EditItemBloc>().state;
+
+    return PersonFormField(
+      value: state.responsible ?? state.viewerPerson,
+      options: state.groupParticipantsStatus == EditItemStatus.success
+          ? state.groupParticipants
+          : null,
+      onChanged: (pickedResponsible) {
+        context
+            .read<EditItemBloc>()
+            .add(EditItemResponsibleChanged(pickedResponsible));
+      },
+      label: l10n.createItemResponsibleLabel,
     );
   }
 }

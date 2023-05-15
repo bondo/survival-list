@@ -51,6 +51,16 @@ class SurvivalListRepository {
     }
   }
 
+  /*+++++++++++++++*
+   + VIEWER PERSON +
+   *+++++++++++++++*/
+
+  final _viewerPersonStreamController = BehaviorSubject<Person?>.seeded(null);
+
+  Stream<Person?> get viewerPerson {
+    return _viewerPersonStreamController.asBroadcastStream();
+  }
+
   /*+++++++*
    + ITEMS +
    *+++++++*/
@@ -137,8 +147,9 @@ class SurvivalListRepository {
     required String? name,
     required String? pictureUrl,
   }) async {
-    await _client
+    final response = await _client
         .login(api.LoginRequest(name: name ?? '?', pictureUrl: pictureUrl));
+    _viewerPersonStreamController.add(_parseUser(response.user));
   }
 
   Future<void> createItem({
@@ -199,7 +210,7 @@ class SurvivalListRepository {
           startDate: _buildDate(newItem.startDate),
           endDate: _buildDate(newItem.endDate),
           groupId: newItem.group?.id,
-          responsibleId: newItem.responsible.id,
+          responsibleId: newItem.responsible?.id,
         ),
       );
     } catch (e) {

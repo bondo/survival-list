@@ -109,6 +109,7 @@ class ScheduleView extends StatelessWidget {
                 for (final item in state.filteredItems)
                   ItemListTile(
                     item: item,
+                    viewerPerson: state.viewerPerson,
                     onToggleCompleted: (isCompleted) {
                       context.read<ScheduleBloc>().add(
                             ScheduleItemCompletionToggled(

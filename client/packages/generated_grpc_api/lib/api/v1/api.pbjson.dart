@@ -8,6 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+import '../../google/type/date.pbjson.dart' as $0;
+
 @$core.Deprecated('Use loginRequestDescriptor instead')
 const LoginRequest$json = const {
   '1': 'LoginRequest',
@@ -22,10 +24,13 @@ final $typed_data.Uint8List loginRequestDescriptor = $convert.base64Decode('CgxM
 @$core.Deprecated('Use loginResponseDescriptor instead')
 const LoginResponse$json = const {
   '1': 'LoginResponse',
+  '2': const [
+    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.api.v1.User', '10': 'user'},
+  ],
 };
 
 /// Descriptor for `LoginResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List loginResponseDescriptor = $convert.base64Decode('Cg1Mb2dpblJlc3BvbnNl');
+final $typed_data.Uint8List loginResponseDescriptor = $convert.base64Decode('Cg1Mb2dpblJlc3BvbnNlEiAKBHVzZXIYASABKAsyDC5hcGkudjEuVXNlclIEdXNlcg==');
 @$core.Deprecated('Use createTaskRequestDescriptor instead')
 const CreateTaskRequest$json = const {
   '1': 'CreateTaskRequest',
@@ -301,3 +306,54 @@ const Group$json = const {
 
 /// Descriptor for `Group`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List groupDescriptor = $convert.base64Decode('CgVHcm91cBIOCgJpZBgBIAEoBVICaWQSFAoFdGl0bGUYAiABKAlSBXRpdGxlEhAKA3VpZBgDIAEoCVIDdWlk');
+const $core.Map<$core.String, $core.dynamic> APIServiceBase$json = const {
+  '1': 'API',
+  '2': const [
+    const {'1': 'Login', '2': '.api.v1.LoginRequest', '3': '.api.v1.LoginResponse'},
+    const {'1': 'CreateTask', '2': '.api.v1.CreateTaskRequest', '3': '.api.v1.CreateTaskResponse'},
+    const {'1': 'UpdateTask', '2': '.api.v1.UpdateTaskRequest', '3': '.api.v1.UpdateTaskResponse'},
+    const {'1': 'ToggleTaskCompleted', '2': '.api.v1.ToggleTaskCompletedRequest', '3': '.api.v1.ToggleTaskCompletedResponse'},
+    const {'1': 'DeleteTask', '2': '.api.v1.DeleteTaskRequest', '3': '.api.v1.DeleteTaskResponse'},
+    const {'1': 'GetTasks', '2': '.api.v1.GetTasksRequest', '3': '.api.v1.GetTasksResponse', '6': true},
+    const {'1': 'CreateGroup', '2': '.api.v1.CreateGroupRequest', '3': '.api.v1.CreateGroupResponse'},
+    const {'1': 'JoinGroup', '2': '.api.v1.JoinGroupRequest', '3': '.api.v1.JoinGroupResponse'},
+    const {'1': 'UpdateGroup', '2': '.api.v1.UpdateGroupRequest', '3': '.api.v1.UpdateGroupResponse'},
+    const {'1': 'LeaveGroup', '2': '.api.v1.LeaveGroupRequest', '3': '.api.v1.LeaveGroupResponse'},
+    const {'1': 'GetGroups', '2': '.api.v1.GetGroupsRequest', '3': '.api.v1.GetGroupsResponse', '6': true},
+    const {'1': 'GetGroupParticipants', '2': '.api.v1.GetGroupParticipantsRequest', '3': '.api.v1.GetGroupParticipantsResponse', '6': true},
+  ],
+};
+
+@$core.Deprecated('Use aPIServiceDescriptor instead')
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> APIServiceBase$messageJson = const {
+  '.api.v1.LoginRequest': LoginRequest$json,
+  '.api.v1.LoginResponse': LoginResponse$json,
+  '.api.v1.User': User$json,
+  '.api.v1.CreateTaskRequest': CreateTaskRequest$json,
+  '.google.type.Date': $0.Date$json,
+  '.api.v1.CreateTaskResponse': CreateTaskResponse$json,
+  '.api.v1.Group': Group$json,
+  '.api.v1.UpdateTaskRequest': UpdateTaskRequest$json,
+  '.api.v1.UpdateTaskResponse': UpdateTaskResponse$json,
+  '.api.v1.ToggleTaskCompletedRequest': ToggleTaskCompletedRequest$json,
+  '.api.v1.ToggleTaskCompletedResponse': ToggleTaskCompletedResponse$json,
+  '.api.v1.DeleteTaskRequest': DeleteTaskRequest$json,
+  '.api.v1.DeleteTaskResponse': DeleteTaskResponse$json,
+  '.api.v1.GetTasksRequest': GetTasksRequest$json,
+  '.api.v1.GetTasksResponse': GetTasksResponse$json,
+  '.api.v1.CreateGroupRequest': CreateGroupRequest$json,
+  '.api.v1.CreateGroupResponse': CreateGroupResponse$json,
+  '.api.v1.JoinGroupRequest': JoinGroupRequest$json,
+  '.api.v1.JoinGroupResponse': JoinGroupResponse$json,
+  '.api.v1.UpdateGroupRequest': UpdateGroupRequest$json,
+  '.api.v1.UpdateGroupResponse': UpdateGroupResponse$json,
+  '.api.v1.LeaveGroupRequest': LeaveGroupRequest$json,
+  '.api.v1.LeaveGroupResponse': LeaveGroupResponse$json,
+  '.api.v1.GetGroupsRequest': GetGroupsRequest$json,
+  '.api.v1.GetGroupsResponse': GetGroupsResponse$json,
+  '.api.v1.GetGroupParticipantsRequest': GetGroupParticipantsRequest$json,
+  '.api.v1.GetGroupParticipantsResponse': GetGroupParticipantsResponse$json,
+};
+
+/// Descriptor for `API`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List aPIServiceDescriptor = $convert.base64Decode('CgNBUEkSNAoFTG9naW4SFC5hcGkudjEuTG9naW5SZXF1ZXN0GhUuYXBpLnYxLkxvZ2luUmVzcG9uc2USQwoKQ3JlYXRlVGFzaxIZLmFwaS52MS5DcmVhdGVUYXNrUmVxdWVzdBoaLmFwaS52MS5DcmVhdGVUYXNrUmVzcG9uc2USQwoKVXBkYXRlVGFzaxIZLmFwaS52MS5VcGRhdGVUYXNrUmVxdWVzdBoaLmFwaS52MS5VcGRhdGVUYXNrUmVzcG9uc2USXgoTVG9nZ2xlVGFza0NvbXBsZXRlZBIiLmFwaS52MS5Ub2dnbGVUYXNrQ29tcGxldGVkUmVxdWVzdBojLmFwaS52MS5Ub2dnbGVUYXNrQ29tcGxldGVkUmVzcG9uc2USQwoKRGVsZXRlVGFzaxIZLmFwaS52MS5EZWxldGVUYXNrUmVxdWVzdBoaLmFwaS52MS5EZWxldGVUYXNrUmVzcG9uc2USPwoIR2V0VGFza3MSFy5hcGkudjEuR2V0VGFza3NSZXF1ZXN0GhguYXBpLnYxLkdldFRhc2tzUmVzcG9uc2UwARJGCgtDcmVhdGVHcm91cBIaLmFwaS52MS5DcmVhdGVHcm91cFJlcXVlc3QaGy5hcGkudjEuQ3JlYXRlR3JvdXBSZXNwb25zZRJACglKb2luR3JvdXASGC5hcGkudjEuSm9pbkdyb3VwUmVxdWVzdBoZLmFwaS52MS5Kb2luR3JvdXBSZXNwb25zZRJGCgtVcGRhdGVHcm91cBIaLmFwaS52MS5VcGRhdGVHcm91cFJlcXVlc3QaGy5hcGkudjEuVXBkYXRlR3JvdXBSZXNwb25zZRJDCgpMZWF2ZUdyb3VwEhkuYXBpLnYxLkxlYXZlR3JvdXBSZXF1ZXN0GhouYXBpLnYxLkxlYXZlR3JvdXBSZXNwb25zZRJCCglHZXRHcm91cHMSGC5hcGkudjEuR2V0R3JvdXBzUmVxdWVzdBoZLmFwaS52MS5HZXRHcm91cHNSZXNwb25zZTABEmMKFEdldEdyb3VwUGFydGljaXBhbnRzEiMuYXBpLnYxLkdldEdyb3VwUGFydGljaXBhbnRzUmVxdWVzdBokLmFwaS52MS5HZXRHcm91cFBhcnRpY2lwYW50c1Jlc3BvbnNlMAE=');
