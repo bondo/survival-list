@@ -25,6 +25,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
+    User user = 1;
 }
 
 message CreateTaskRequest {

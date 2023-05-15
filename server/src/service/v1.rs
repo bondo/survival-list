@@ -85,10 +85,17 @@ impl api_server::Api for Service {
         } else {
             Some(&request.picture_url)
         };
-        self.db
+        let user = self
+            .db
             .upsert_user(&uid, &request.name, picture_url)
             .await?;
-        Ok(Response::new(LoginResponse {}))
+        Ok(Response::new(LoginResponse {
+            user: Some(User {
+                id: user.id.into(),
+                name: user.name,
+                picture_url: user.picture_url.unwrap_or_default(),
+            }),
+        }))
     }
 
     async fn create_task(
