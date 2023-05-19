@@ -120,7 +120,18 @@ impl api_server::Api for Service {
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .create_task(user_id, responsible_id, &request.title, &period, group_id)
+            .create_task(
+                user_id,
+                responsible_id,
+                &request.title,
+                &period,
+                group_id,
+                request.estimate.map(|e| PgInterval {
+                    months: 0,
+                    days: e.days,
+                    microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
+                }),
+            )
             .await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -170,6 +181,11 @@ impl api_server::Api for Service {
                 &request.title,
                 &period,
                 group_id,
+                request.estimate.map(|e| PgInterval {
+                    months: 0,
+                    days: e.days,
+                    microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
+                }),
             )
             .await?;
         Ok(Response::new(UpdateTaskResponse {

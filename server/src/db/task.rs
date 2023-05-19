@@ -241,6 +241,7 @@ impl Database {
         title: &str,
         period: &TaskPeriodInput,
         group_id: Option<GroupId>,
+        estimate: Option<PgInterval>,
     ) -> Result<TaskResult, Status> {
         self.validate_responsible_and_group(user_id, responsible_id, group_id)
             .await?;
@@ -252,14 +253,16 @@ impl Database {
                     title,
                     start_date,
                     end_date,
-                    group_id
+                    group_id,
+                    estimate
                 )
                 VALUES (
                     $1,
                     $2,
                     $3,
                     $4,
-                    $5
+                    $5,
+                    $6
                 )
                 RETURNING
                     id as "id: TaskId"
@@ -268,7 +271,8 @@ impl Database {
             title,
             period.start_date(),
             period.end_date(),
-            group_id.map(|id| id.0)
+            group_id.map(|id| id.0),
+            estimate,
         )
         .fetch_one(&self.pool)
         .await
@@ -285,6 +289,7 @@ impl Database {
         title: &str,
         period: &TaskPeriodInput,
         group_id: Option<GroupId>,
+        estimate: Option<PgInterval>,
     ) -> Result<TaskResult, Status> {
         self.validate_responsible_and_group(user_id, responsible_id, group_id)
             .await?;
@@ -298,7 +303,8 @@ impl Database {
                     start_date = $4,
                     end_date = $5,
                     responsible_user_id = $6,
-                    group_id = $7
+                    group_id = $7,
+                    estimate = $8
                 WHERE
                     t.id = $2 AND
                     -- Permission check
@@ -324,7 +330,8 @@ impl Database {
             period.start_date(),
             period.end_date(),
             responsible_id.0,
-            group_id.map(|id| id.0)
+            group_id.map(|id| id.0),
+            estimate,
         )
         .fetch_one(&self.pool)
         .await
