@@ -9,7 +9,8 @@ Server for the Survival List project.
 
 ## Add migration
 
-`cargo sqlx migrate add <name>`
+- `cargo install sqlx-cli --no-default-features --features rustls,postgres`
+- `cargo sqlx migrate add <name>`
 
 ## Deploy
 

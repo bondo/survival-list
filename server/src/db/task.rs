@@ -5,6 +5,7 @@ use std::fmt::Display;
 use anyhow::Result;
 use sqlx::{
     self,
+    postgres::types::PgInterval,
     types::{
         time::{Date, PrimitiveDateTime},
         Uuid,
@@ -43,6 +44,7 @@ pub struct TaskResult {
     pub completed_at: Option<PrimitiveDateTime>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
+    pub estimate: Option<PgInterval>,
     pub responsible_id: UserId,
     pub responsible_name: String,
     pub responsible_picture_url: Option<String>,
@@ -101,6 +103,7 @@ impl Database {
                     t.completed_at,
                     t.start_date,
                     t.end_date,
+                    t.estimate,
                     u.id as "responsible_id: UserId",
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,
@@ -152,6 +155,7 @@ impl Database {
                     t.completed_at,
                     t.start_date,
                     t.end_date,
+                    t.estimate,
                     u.id as "responsible_id: UserId",
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,

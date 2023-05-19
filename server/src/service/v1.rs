@@ -3,7 +3,10 @@ use std::cmp::Ordering;
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
-use sqlx::types::{time::Date, Uuid};
+use sqlx::{
+    postgres::types::PgInterval,
+    types::{time::Date, Uuid},
+};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
@@ -127,6 +130,7 @@ impl api_server::Api for Service {
             }),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
+            estimate: parse_interval(task.estimate)?,
             responsible: Some(User {
                 id: task.responsible_id.into(),
                 name: task.responsible_name,
@@ -177,6 +181,7 @@ impl api_server::Api for Service {
             is_completed: task.completed_at.is_some(),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
+            estimate: parse_interval(task.estimate)?,
             responsible: Some(User {
                 id: task.responsible_id.into(),
                 name: task.responsible_name,
@@ -242,6 +247,13 @@ impl api_server::Api for Service {
                     is_completed: task.completed_at.is_some(),
                     start_date: task.start_date.map(Into::into),
                     end_date: task.end_date.map(Into::into),
+                    estimate: parse_interval(task.estimate).unwrap_or_else(|_| {
+                        error!(
+                            "v1:get_tasks: Failed to parse task estimate (id {})",
+                            task.id
+                        );
+                        None
+                    }),
                     responsible: Some(User {
                         id: task.responsible_id.into(),
                         name: task.responsible_name,
@@ -380,4 +392,25 @@ impl api_server::Api for Service {
 
         Ok(Response::new(ReceiverStream::new(rx)))
     }
+}
+
+fn parse_interval(d: Option<PgInterval>) -> Result<Option<Duration>, Status> {
+    let Some(e) = d else {
+        return Ok(None);
+    };
+    if e.months != 0 {
+        return Err(Status::internal("Unexpected month value in interval"));
+    }
+    let total_minutes = e.microseconds / (60_000_000);
+    let hours: i32 = (total_minutes / 60)
+        .try_into()
+        .map_err(|_| Status::internal("Failed to parse interval hours"))?;
+    let minutes: i32 = (total_minutes % 60)
+        .try_into()
+        .map_err(|_| Status::internal("Failed to parse interval minutes"))?;
+    Ok(Some(Duration {
+        days: e.days,
+        hours,
+        minutes,
+    }))
 }

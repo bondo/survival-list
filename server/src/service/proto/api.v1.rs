@@ -25,6 +25,8 @@ pub struct CreateTaskRequest {
     pub responsible_id: i32,
     #[prost(int32, tag = "5")]
     pub group_id: i32,
+    #[prost(message, optional, tag = "6")]
+    pub estimate: ::core::option::Option<Duration>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -41,6 +43,8 @@ pub struct CreateTaskResponse {
     pub responsible: ::core::option::Option<User>,
     #[prost(message, optional, tag = "6")]
     pub group: ::core::option::Option<Group>,
+    #[prost(message, optional, tag = "7")]
+    pub estimate: ::core::option::Option<Duration>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -57,6 +61,8 @@ pub struct UpdateTaskRequest {
     pub responsible_id: i32,
     #[prost(int32, tag = "6")]
     pub group_id: i32,
+    #[prost(message, optional, tag = "7")]
+    pub estimate: ::core::option::Option<Duration>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -75,6 +81,8 @@ pub struct UpdateTaskResponse {
     pub responsible: ::core::option::Option<User>,
     #[prost(message, optional, tag = "7")]
     pub group: ::core::option::Option<Group>,
+    #[prost(message, optional, tag = "8")]
+    pub estimate: ::core::option::Option<Duration>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -124,6 +132,8 @@ pub struct GetTasksResponse {
     pub responsible: ::core::option::Option<User>,
     #[prost(message, optional, tag = "7")]
     pub group: ::core::option::Option<Group>,
+    #[prost(message, optional, tag = "8")]
+    pub estimate: ::core::option::Option<Duration>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -231,6 +241,16 @@ pub struct Group {
     pub title: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub uid: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Duration {
+    #[prost(int32, tag = "1")]
+    pub days: i32,
+    #[prost(int32, tag = "2")]
+    pub hours: i32,
+    #[prost(int32, tag = "3")]
+    pub minutes: i32,
 }
 /// Generated server implementations.
 pub mod api_server {
