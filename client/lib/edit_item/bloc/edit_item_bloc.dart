@@ -17,6 +17,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
             title: item.title,
             startDate: item.startDate,
             endDate: item.endDate,
+            estimate: item.estimate,
             group: item.group,
             responsible: item.responsible,
           ),
@@ -24,6 +25,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     on<EditItemTitleChanged>(_onTitleChanged);
     on<EditItemStartDateChanged>(_onStartDateChanged);
     on<EditItemEndDateChanged>(_onEndDateChanged);
+    on<EditItemEstimateChanged>(_onEstimateChanged);
     on<EditItemGroupChanged>(_onGroupChanged);
     on<EditItemResponsibleChanged>(_onResponsibleChanged);
     on<EditItemSubmitted>(_onSubmitted);
@@ -54,6 +56,13 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     Emitter<EditItemState> emit,
   ) {
     emit(state.copyWith(endDate: () => event.endDate));
+  }
+
+  void _onEstimateChanged(
+    EditItemEstimateChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(estimate: () => event.estimate));
   }
 
   void _onGroupChanged(
@@ -92,6 +101,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
       title: () => state.title,
       startDate: () => state.startDate,
       endDate: () => state.endDate,
+      estimate: () => state.estimate,
       group: () => state.group,
       responsible: () => state.responsible,
     );

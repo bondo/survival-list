@@ -16,6 +16,7 @@ class EditItemState extends Equatable {
     required this.title,
     required this.startDate,
     required this.endDate,
+    required this.estimate,
     required this.responsible,
     this.status = EditItemStatus.initial,
     this.groups = const [],
@@ -36,6 +37,7 @@ class EditItemState extends Equatable {
   final String title;
   final DateTime? startDate;
   final DateTime? endDate;
+  final SimpleDuration estimate;
   final Person? viewerPerson;
 
   EditItemState copyWith({
@@ -50,6 +52,7 @@ class EditItemState extends Equatable {
     String Function()? title,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
+    SimpleDuration Function()? estimate,
     Person? Function()? viewerPerson,
   }) {
     return EditItemState(
@@ -68,6 +71,7 @@ class EditItemState extends Equatable {
       title: title != null ? title() : this.title,
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
+      estimate: estimate != null ? estimate() : this.estimate,
       viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
   }
@@ -85,6 +89,7 @@ class EditItemState extends Equatable {
         title,
         startDate,
         endDate,
+        estimate,
         viewerPerson,
       ];
 }

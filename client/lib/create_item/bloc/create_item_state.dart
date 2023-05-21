@@ -21,7 +21,7 @@ class CreateItemState extends Equatable {
     this.title = '',
     this.startDate,
     this.endDate,
-    this.estimate,
+    this.estimate = const SimpleDuration(days: 0, hours: 0, minutes: 0),
     this.viewerPerson,
   });
 
@@ -35,7 +35,7 @@ class CreateItemState extends Equatable {
   final String title;
   final DateTime? startDate;
   final DateTime? endDate;
-  final Duration? estimate;
+  final SimpleDuration estimate;
   final Person? viewerPerson;
 
   CreateItemState copyWith({
@@ -49,7 +49,7 @@ class CreateItemState extends Equatable {
     String Function()? title,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    Duration? Function()? estimate,
+    SimpleDuration Function()? estimate,
     Person? Function()? viewerPerson,
   }) {
     return CreateItemState(

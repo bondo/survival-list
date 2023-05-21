@@ -34,6 +34,15 @@ class EditItemEndDateChanged extends EditItemEvent {
   List<Object> get props => [endDate ?? 'null'];
 }
 
+class EditItemEstimateChanged extends EditItemEvent {
+  const EditItemEstimateChanged(this.estimate);
+
+  final SimpleDuration estimate;
+
+  @override
+  List<Object> get props => [estimate];
+}
+
 class EditItemGroupChanged extends EditItemEvent {
   const EditItemGroupChanged(this.group);
 

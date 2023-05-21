@@ -14,6 +14,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     on<CreateItemTitleChanged>(_onTitleChanged);
     on<CreateItemStartDateChanged>(_onStartDateChanged);
     on<CreateItemEndDateChanged>(_onEndDateChanged);
+    on<CreateItemEstimateChanged>(_onEstimateChanged);
     on<CreateItemGroupChanged>(_onGroupChanged);
     on<CreateItemResponsibleChanged>(_onResponsibleChanged);
     on<CreateItemSubmitted>(_onSubmitted);
@@ -44,6 +45,13 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     Emitter<CreateItemState> emit,
   ) {
     emit(state.copyWith(endDate: () => event.endDate));
+  }
+
+  void _onEstimateChanged(
+    CreateItemEstimateChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(estimate: () => event.estimate));
   }
 
   void _onGroupChanged(

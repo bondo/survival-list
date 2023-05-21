@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/edit_item/edit_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
+import 'package:survival_list/form_field_widgets/duration.dart';
 import 'package:survival_list/form_field_widgets/group.dart';
 import 'package:survival_list/form_field_widgets/person.dart';
 import 'package:survival_list/l10n/l10n.dart';
@@ -79,6 +80,7 @@ class EditItemView extends StatelessWidget {
                 _TitleField(),
                 _StartDateField(),
                 _EndDateField(),
+                _EstimateField(),
                 _GroupField(),
                 _ResponsibleField()
               ],
@@ -198,7 +200,27 @@ class _ResponsibleField extends StatelessWidget {
             .read<EditItemBloc>()
             .add(EditItemResponsibleChanged(pickedResponsible));
       },
-      label: l10n.createItemResponsibleLabel,
+      label: l10n.editItemResponsibleLabel,
+    );
+  }
+}
+
+class _EstimateField extends StatelessWidget {
+  const _EstimateField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<EditItemBloc>().state;
+
+    return DurationFormField(
+      value: state.estimate,
+      onChanged: (pickedEstimate) {
+        context
+            .read<EditItemBloc>()
+            .add(EditItemEstimateChanged(pickedEstimate));
+      },
+      label: l10n.editItemEstimateLabel,
     );
   }
 }

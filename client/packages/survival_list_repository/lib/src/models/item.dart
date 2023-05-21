@@ -20,7 +20,7 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
-  final Duration? estimate;
+  final SimpleDuration estimate;
   final Person? responsible;
   final Group? group;
 
@@ -30,7 +30,7 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    Duration? Function()? estimate,
+    SimpleDuration Function()? estimate,
     Person? Function()? responsible,
     Group? Function()? group,
   }) {

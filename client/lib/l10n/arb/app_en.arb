@@ -88,5 +88,9 @@
 
   "widgetGroupEmptyValueTitle": "None",
 
-  "createItemResponsibleLabel": "Responsible"
+  "createItemResponsibleLabel": "Responsible",
+  "editItemResponsibleLabel": "Responsible",
+
+  "createItemEstimateLabel": "Estimate",
+  "editItemEstimateLabel": "Estimate"
 }

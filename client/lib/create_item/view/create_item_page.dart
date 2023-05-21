@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
+import 'package:survival_list/form_field_widgets/duration.dart';
 import 'package:survival_list/form_field_widgets/group.dart';
 import 'package:survival_list/form_field_widgets/person.dart';
 import 'package:survival_list/l10n/l10n.dart';
@@ -77,6 +78,7 @@ class CreateItemView extends StatelessWidget {
                 _TitleField(),
                 _StartDateField(),
                 _EndDateField(),
+                _EstimateField(),
                 _GroupField(),
                 _ResponsibleField()
               ],
@@ -199,6 +201,26 @@ class _ResponsibleField extends StatelessWidget {
             .add(CreateItemResponsibleChanged(pickedResponsible));
       },
       label: l10n.createItemResponsibleLabel,
+    );
+  }
+}
+
+class _EstimateField extends StatelessWidget {
+  const _EstimateField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<CreateItemBloc>().state;
+
+    return DurationFormField(
+      value: state.estimate,
+      onChanged: (pickedEstimate) {
+        context
+            .read<CreateItemBloc>()
+            .add(CreateItemEstimateChanged(pickedEstimate));
+      },
+      label: l10n.createItemEstimateLabel,
     );
   }
 }
