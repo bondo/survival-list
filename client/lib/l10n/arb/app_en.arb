@@ -87,10 +87,10 @@
   "joinGroupAppBarTitle": "Join group",
 
   "widgetGroupEmptyValueTitle": "None",
+  "widgetDurationDaysLabel": "Days",
+  "widgetDurationHoursLabel": "Hours",
+  "widgetDurationMinutesLabel": "Minutes",
 
   "createItemResponsibleLabel": "Responsible",
-  "editItemResponsibleLabel": "Responsible",
-
-  "createItemEstimateLabel": "Estimate",
-  "editItemEstimateLabel": "Estimate"
+  "editItemResponsibleLabel": "Responsible"
 }

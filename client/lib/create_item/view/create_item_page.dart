@@ -210,17 +210,13 @@ class _EstimateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final state = context.watch<CreateItemBloc>().state;
-
     return DurationFormField(
-      value: state.estimate,
+      initialValue: context.read<CreateItemBloc>().state.estimate,
       onChanged: (pickedEstimate) {
         context
             .read<CreateItemBloc>()
             .add(CreateItemEstimateChanged(pickedEstimate));
       },
-      label: l10n.createItemEstimateLabel,
     );
   }
 }
