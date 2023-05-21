@@ -122,6 +122,7 @@ class SurvivalListRepository {
         isCompleted: response.isCompleted,
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
+        estimate: _parseDuration(response.estimate),
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
       ),
@@ -158,12 +159,14 @@ class SurvivalListRepository {
     required DateTime? endDate,
     required Group? group,
     required Person? responsible,
+    required Duration? estimate,
   }) async {
     final response = await _client.createTask(
       api.CreateTaskRequest(
         title: title,
         startDate: _buildDate(startDate),
         endDate: _buildDate(endDate),
+        estimate: _buildDuration(estimate),
         groupId: group?.id,
         responsibleId: responsible?.id,
       ),
@@ -175,6 +178,7 @@ class SurvivalListRepository {
         isCompleted: false,
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
+        estimate: _parseDuration(response.estimate),
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
       ),
@@ -209,6 +213,7 @@ class SurvivalListRepository {
           title: newItem.title,
           startDate: _buildDate(newItem.startDate),
           endDate: _buildDate(newItem.endDate),
+          estimate: _buildDuration(newItem.estimate),
           groupId: newItem.group?.id,
           responsibleId: newItem.responsible?.id,
         ),
@@ -449,9 +454,40 @@ class SurvivalListRepository {
         : google.Date(year: date.year, month: date.month, day: date.day);
   }
 
+  api.Duration? _buildDuration(Duration? duration) {
+    if (duration == null) {
+      return null;
+    }
+
+    var minutes = duration.inMinutes;
+
+    final days = minutes ~/ 1440;
+    minutes = minutes.remainder(1440);
+
+    final hours = minutes ~/ 60;
+    minutes = minutes.remainder(60);
+
+    return api.Duration(
+      days: days,
+      hours: hours,
+      minutes: minutes,
+    );
+  }
+
   DateTime? _parseDate(google.Date date) {
     if (date.hasYear() && date.hasMonth() && date.hasDay()) {
       return DateTime(date.year, date.month, date.day);
+    }
+    return null;
+  }
+
+  Duration? _parseDuration(api.Duration duration) {
+    if (duration.hasDays() || duration.hasHours() || duration.hasMinutes()) {
+      return Duration(
+        days: duration.days,
+        hours: duration.hours,
+        minutes: duration.minutes,
+      );
     }
     return null;
   }

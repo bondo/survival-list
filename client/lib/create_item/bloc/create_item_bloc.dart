@@ -84,6 +84,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
         title: state.title,
         startDate: state.startDate,
         endDate: state.endDate,
+        estimate: state.estimate,
         group: state.group,
         responsible: state.responsible,
       );

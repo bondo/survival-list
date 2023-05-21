@@ -10,6 +10,7 @@ class Item extends Equatable {
     required this.isCompleted,
     required this.startDate,
     required this.endDate,
+    required this.estimate,
     required this.responsible,
     required this.group,
   });
@@ -19,6 +20,7 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
+  final Duration? estimate;
   final Person? responsible;
   final Group? group;
 
@@ -28,6 +30,7 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
+    Duration? Function()? estimate,
     Person? Function()? responsible,
     Group? Function()? group,
   }) {
@@ -37,12 +40,21 @@ class Item extends Equatable {
       isCompleted: isCompleted != null ? isCompleted() : this.isCompleted,
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
+      estimate: estimate != null ? estimate() : this.estimate,
       responsible: responsible != null ? responsible() : this.responsible,
       group: group != null ? group() : this.group,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [id, title, isCompleted, startDate, endDate, responsible, group];
+  List<Object?> get props => [
+        id,
+        title,
+        isCompleted,
+        startDate,
+        endDate,
+        estimate,
+        responsible,
+        group
+      ];
 }

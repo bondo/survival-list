@@ -129,6 +129,7 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
+    ..aOM<Duration>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..hasRequiredFields = false
   ;
 
@@ -139,6 +140,7 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     $0.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
+    Duration? estimate,
   }) {
     final _result = create();
     if (title != null) {
@@ -155,6 +157,9 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     }
     if (groupId != null) {
       _result.groupId = groupId;
+    }
+    if (estimate != null) {
+      _result.estimate = estimate;
     }
     return _result;
   }
@@ -227,6 +232,17 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   $core.bool hasGroupId() => $_has(4);
   @$pb.TagNumber(5)
   void clearGroupId() => clearField(5);
+
+  @$pb.TagNumber(6)
+  Duration get estimate => $_getN(5);
+  @$pb.TagNumber(6)
+  set estimate(Duration v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasEstimate() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearEstimate() => clearField(6);
+  @$pb.TagNumber(6)
+  Duration ensureEstimate() => $_ensure(5);
 }
 
 class CreateTaskResponse extends $pb.GeneratedMessage {
@@ -237,6 +253,7 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
+    ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..hasRequiredFields = false
   ;
 
@@ -248,6 +265,7 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     $0.Date? endDate,
     User? responsible,
     Group? group,
+    Duration? estimate,
   }) {
     final _result = create();
     if (id != null) {
@@ -267,6 +285,9 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     }
     if (group != null) {
       _result.group = group;
+    }
+    if (estimate != null) {
+      _result.estimate = estimate;
     }
     return _result;
   }
@@ -352,6 +373,17 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearGroup() => clearField(6);
   @$pb.TagNumber(6)
   Group ensureGroup() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  Duration get estimate => $_getN(6);
+  @$pb.TagNumber(7)
+  set estimate(Duration v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasEstimate() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearEstimate() => clearField(7);
+  @$pb.TagNumber(7)
+  Duration ensureEstimate() => $_ensure(6);
 }
 
 class UpdateTaskRequest extends $pb.GeneratedMessage {
@@ -362,6 +394,7 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
+    ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..hasRequiredFields = false
   ;
 
@@ -373,6 +406,7 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     $0.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
+    Duration? estimate,
   }) {
     final _result = create();
     if (id != null) {
@@ -392,6 +426,9 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     }
     if (groupId != null) {
       _result.groupId = groupId;
+    }
+    if (estimate != null) {
+      _result.estimate = estimate;
     }
     return _result;
   }
@@ -473,6 +510,17 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   $core.bool hasGroupId() => $_has(5);
   @$pb.TagNumber(6)
   void clearGroupId() => clearField(6);
+
+  @$pb.TagNumber(7)
+  Duration get estimate => $_getN(6);
+  @$pb.TagNumber(7)
+  set estimate(Duration v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasEstimate() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearEstimate() => clearField(7);
+  @$pb.TagNumber(7)
+  Duration ensureEstimate() => $_ensure(6);
 }
 
 class UpdateTaskResponse extends $pb.GeneratedMessage {
@@ -484,6 +532,7 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
+    ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..hasRequiredFields = false
   ;
 
@@ -496,6 +545,7 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $0.Date? endDate,
     User? responsible,
     Group? group,
+    Duration? estimate,
   }) {
     final _result = create();
     if (id != null) {
@@ -518,6 +568,9 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     }
     if (group != null) {
       _result.group = group;
+    }
+    if (estimate != null) {
+      _result.estimate = estimate;
     }
     return _result;
   }
@@ -612,6 +665,17 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearGroup() => clearField(7);
   @$pb.TagNumber(7)
   Group ensureGroup() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  Duration get estimate => $_getN(7);
+  @$pb.TagNumber(8)
+  set estimate(Duration v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasEstimate() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearEstimate() => clearField(8);
+  @$pb.TagNumber(8)
+  Duration ensureEstimate() => $_ensure(7);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -868,6 +932,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
+    ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..hasRequiredFields = false
   ;
 
@@ -880,6 +945,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $0.Date? endDate,
     User? responsible,
     Group? group,
+    Duration? estimate,
   }) {
     final _result = create();
     if (id != null) {
@@ -902,6 +968,9 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     }
     if (group != null) {
       _result.group = group;
+    }
+    if (estimate != null) {
+      _result.estimate = estimate;
     }
     return _result;
   }
@@ -996,6 +1065,17 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearGroup() => clearField(7);
   @$pb.TagNumber(7)
   Group ensureGroup() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  Duration get estimate => $_getN(7);
+  @$pb.TagNumber(8)
+  set estimate(Duration v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasEstimate() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearEstimate() => clearField(8);
+  @$pb.TagNumber(8)
+  Duration ensureEstimate() => $_ensure(7);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
@@ -1820,6 +1900,81 @@ class Group extends $pb.GeneratedMessage {
   $core.bool hasUid() => $_has(2);
   @$pb.TagNumber(3)
   void clearUid() => clearField(3);
+}
+
+class Duration extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Duration', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'days', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hours', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'minutes', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  Duration._() : super();
+  factory Duration({
+    $core.int? days,
+    $core.int? hours,
+    $core.int? minutes,
+  }) {
+    final _result = create();
+    if (days != null) {
+      _result.days = days;
+    }
+    if (hours != null) {
+      _result.hours = hours;
+    }
+    if (minutes != null) {
+      _result.minutes = minutes;
+    }
+    return _result;
+  }
+  factory Duration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Duration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Duration clone() => Duration()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Duration copyWith(void Function(Duration) updates) => super.copyWith((message) => updates(message as Duration)) as Duration; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Duration create() => Duration._();
+  Duration createEmptyInstance() => create();
+  static $pb.PbList<Duration> createRepeated() => $pb.PbList<Duration>();
+  @$core.pragma('dart2js:noInline')
+  static Duration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Duration>(create);
+  static Duration? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get days => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set days($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasDays() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDays() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get hours => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set hours($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasHours() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHours() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get minutes => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set minutes($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasMinutes() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMinutes() => clearField(3);
 }
 
 class APIApi {
