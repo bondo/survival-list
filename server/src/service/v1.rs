@@ -13,7 +13,7 @@ use tonic::{Request, Response, Status};
 
 use crate::{
     auth::AuthExtension,
-    db::{Database, GroupId, TaskId, TaskPeriodInput, UserId},
+    db::{CreateTaskParams, Database, GroupId, TaskId, TaskPeriodInput, UpdateTaskParams, UserId},
 };
 
 use super::proto::{api::v1::*, google::r#type::Date as ProtoDate};
@@ -120,18 +120,18 @@ impl api_server::Api for Service {
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .create_task(
+            .create_task(CreateTaskParams {
                 user_id,
                 responsible_id,
-                &request.title,
-                &period,
+                title: request.title,
+                period,
                 group_id,
-                request.estimate.map(|e| PgInterval {
+                estimate: request.estimate.map(|e| PgInterval {
                     months: 0,
                     days: e.days,
                     microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
                 }),
-            )
+            })
             .await?;
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
@@ -174,19 +174,19 @@ impl api_server::Api for Service {
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
         let task = self
             .db
-            .update_task(
+            .update_task(UpdateTaskParams {
                 user_id,
                 responsible_id,
-                TaskId::new(request.id),
-                &request.title,
-                &period,
+                task_id: TaskId::new(request.id),
+                title: request.title,
+                period,
                 group_id,
-                request.estimate.map(|e| PgInterval {
+                estimate: request.estimate.map(|e| PgInterval {
                     months: 0,
                     days: e.days,
                     microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
                 }),
-            )
+            })
             .await?;
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),

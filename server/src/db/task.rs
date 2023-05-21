@@ -88,6 +88,25 @@ impl TaskPeriodInput {
     }
 }
 
+pub struct CreateTaskParams {
+    pub user_id: UserId,
+    pub responsible_id: UserId,
+    pub title: String,
+    pub period: TaskPeriodInput,
+    pub group_id: Option<GroupId>,
+    pub estimate: Option<PgInterval>,
+}
+
+pub struct UpdateTaskParams {
+    pub user_id: UserId,
+    pub responsible_id: UserId,
+    pub task_id: TaskId,
+    pub title: String,
+    pub period: TaskPeriodInput,
+    pub group_id: Option<GroupId>,
+    pub estimate: Option<PgInterval>,
+}
+
 impl Database {
     #[allow(clippy::needless_lifetimes)]
     pub fn get_tasks<'a>(
@@ -234,16 +253,8 @@ impl Database {
         Ok(())
     }
 
-    pub async fn create_task(
-        &self,
-        user_id: UserId,
-        responsible_id: UserId,
-        title: &str,
-        period: &TaskPeriodInput,
-        group_id: Option<GroupId>,
-        estimate: Option<PgInterval>,
-    ) -> Result<TaskResult, Status> {
-        self.validate_responsible_and_group(user_id, responsible_id, group_id)
+    pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Status> {
+        self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
 
         let task_id = sqlx::query_scalar!(
@@ -267,12 +278,12 @@ impl Database {
                 RETURNING
                     id as "id: TaskId"
             "#,
-            responsible_id.0,
-            title,
-            period.start_date(),
-            period.end_date(),
-            group_id.map(|id| id.0),
-            estimate,
+            params.responsible_id.0,
+            params.title,
+            params.period.start_date(),
+            params.period.end_date(),
+            params.group_id.map(|id| id.0),
+            params.estimate,
         )
         .fetch_one(&self.pool)
         .await
@@ -281,17 +292,8 @@ impl Database {
         self.get_task_unchecked(task_id).await
     }
 
-    pub async fn update_task(
-        &self,
-        user_id: UserId,
-        responsible_id: UserId,
-        task_id: TaskId,
-        title: &str,
-        period: &TaskPeriodInput,
-        group_id: Option<GroupId>,
-        estimate: Option<PgInterval>,
-    ) -> Result<TaskResult, Status> {
-        self.validate_responsible_and_group(user_id, responsible_id, group_id)
+    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
+        self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
 
         let task_id = sqlx::query_scalar!(
@@ -324,14 +326,14 @@ impl Database {
                 RETURNING
                     id as "id: TaskId"
             "#,
-            user_id.0,
-            task_id.0,
-            title,
-            period.start_date(),
-            period.end_date(),
-            responsible_id.0,
-            group_id.map(|id| id.0),
-            estimate,
+            params.user_id.0,
+            params.task_id.0,
+            params.title,
+            params.period.start_date(),
+            params.period.end_date(),
+            params.responsible_id.0,
+            params.group_id.map(|id| id.0),
+            params.estimate,
         )
         .fetch_one(&self.pool)
         .await
