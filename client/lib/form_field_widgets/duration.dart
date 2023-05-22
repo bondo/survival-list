@@ -53,68 +53,77 @@ class _DurationFormFieldState extends State<DurationFormField> {
 
     return Row(
       children: [
-        Expanded(
+        DurationComponent(
+          icon: const Icon(Icons.watch),
           flex: 15,
-          child: TextField(
-            controller: _daysController,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.watch),
-              labelText: l10n.widgetDurationDaysLabel,
-            ),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            keyboardType: TextInputType.number,
-            onChanged: (text) {
-              final days = int.tryParse(text, radix: 10) ?? 0;
-              setState(() {
-                _value = _value.copyWith(days: () => days);
-              });
-              widget.onChanged(_value);
-            },
-          ),
+          controller: _daysController,
+          label: l10n.widgetDurationDaysLabel,
+          onChanged: (days) {
+            setState(() {
+              _value = _value.copyWith(days: () => days);
+            });
+            widget.onChanged(_value);
+          },
         ),
-        Expanded(
+        DurationComponent(
           flex: 11,
-          child: TextField(
-            controller: _hoursController,
-            decoration: InputDecoration(
-              labelText: l10n.widgetDurationHoursLabel,
-            ),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            keyboardType: TextInputType.number,
-            onChanged: (text) {
-              final hours = int.tryParse(text, radix: 10) ?? 0;
-              setState(() {
-                _value = _value.copyWith(hours: () => hours);
-              });
-              widget.onChanged(_value);
-            },
-          ),
+          controller: _hoursController,
+          label: l10n.widgetDurationHoursLabel,
+          onChanged: (hours) {
+            setState(() {
+              _value = _value.copyWith(hours: () => hours);
+            });
+            widget.onChanged(_value);
+          },
         ),
-        Expanded(
+        DurationComponent(
           flex: 11,
-          child: TextField(
-            controller: _minutesController,
-            decoration: InputDecoration(
-              labelText: l10n.widgetDurationMinutesLabel,
-            ),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            keyboardType: TextInputType.number,
-            onChanged: (text) {
-              final minutes = int.tryParse(text, radix: 10) ?? 0;
-              setState(() {
-                _value = _value.copyWith(minutes: () => minutes);
-              });
-              widget.onChanged(_value);
-            },
-          ),
-        )
+          controller: _minutesController,
+          label: l10n.widgetDurationMinutesLabel,
+          onChanged: (minutes) {
+            setState(() {
+              _value = _value.copyWith(minutes: () => minutes);
+            });
+            widget.onChanged(_value);
+          },
+        ),
       ],
+    );
+  }
+}
+
+class DurationComponent extends StatelessWidget {
+  const DurationComponent({
+    required this.controller,
+    required this.label,
+    required this.onChanged,
+    required this.flex,
+    this.icon,
+    super.key,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final void Function(int) onChanged;
+  final Widget? icon;
+  final int flex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: flex,
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          icon: icon,
+          labelText: label,
+        ),
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly
+        ],
+        keyboardType: TextInputType.number,
+        onChanged: (text) => onChanged(int.tryParse(text, radix: 10) ?? 0),
+      ),
     );
   }
 }
