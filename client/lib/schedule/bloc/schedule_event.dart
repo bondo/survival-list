@@ -49,3 +49,7 @@ class ScheduleFilterChanged extends ScheduleEvent {
 class ScheduleLogoutRequested extends ScheduleEvent {
   const ScheduleLogoutRequested();
 }
+
+class ScheduleRefreshRequested extends ScheduleEvent {
+  const ScheduleRefreshRequested();
+}

@@ -22,6 +22,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     on<ScheduleLogoutRequested>(_onLogoutRequested);
     on<ScheduleSubscriptionRequested>(_onSubscriptionRequested);
     on<ScheduleUndoDeletionRequested>(_onUndoDeletionRequested);
+    on<ScheduleRefreshRequested>(_onRefreshRequested);
   }
 
   final AuthenticationRepository _authenticationRepository;
@@ -116,5 +117,12 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) {
     emit(state.copyWith(filter: () => event.filter));
+  }
+
+  void _onRefreshRequested(
+    ScheduleRefreshRequested event,
+    Emitter<ScheduleState> emit,
+  ) {
+    _survivalListRepository.refreshItems();
   }
 }

@@ -104,32 +104,42 @@ class ScheduleView extends StatelessWidget {
               }
             }
 
-            return ListView(
-              children: [
-                for (final item in state.filteredItems)
-                  ItemListTile(
-                    item: item,
-                    viewerPerson: state.viewerPerson,
-                    onToggleCompleted: (isCompleted) {
-                      context.read<ScheduleBloc>().add(
-                            ScheduleItemCompletionToggled(
-                              item: item,
-                              isCompleted: isCompleted,
-                            ),
-                          );
-                    },
-                    onDismissed: (_) {
-                      context
-                          .read<ScheduleBloc>()
-                          .add(ScheduleItemDeleted(item));
-                    },
-                    onTap: () {
-                      Navigator.of(context).push(
-                        EditItemPage.route(item: item),
-                      );
-                    },
-                  ),
-              ],
+            return RefreshIndicator(
+              onRefresh: () {
+                final bloc = context.read<ScheduleBloc>()
+                  ..add(const ScheduleRefreshRequested());
+                return bloc.stream.firstWhere(
+                  (element) => element.status != ScheduleStatus.loading,
+                );
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  for (final item in state.filteredItems)
+                    ItemListTile(
+                      item: item,
+                      viewerPerson: state.viewerPerson,
+                      onToggleCompleted: (isCompleted) {
+                        context.read<ScheduleBloc>().add(
+                              ScheduleItemCompletionToggled(
+                                item: item,
+                                isCompleted: isCompleted,
+                              ),
+                            );
+                      },
+                      onDismissed: (_) {
+                        context
+                            .read<ScheduleBloc>()
+                            .add(ScheduleItemDeleted(item));
+                      },
+                      onTap: () {
+                        Navigator.of(context).push(
+                          EditItemPage.route(item: item),
+                        );
+                      },
+                    ),
+                ],
+              ),
             );
           },
         ),

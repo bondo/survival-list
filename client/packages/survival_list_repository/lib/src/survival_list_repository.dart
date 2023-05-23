@@ -80,6 +80,10 @@ class SurvivalListRepository {
     return _isFetchingItemsStreamController.asBroadcastStream();
   }
 
+  void refreshItems() {
+    unawaited(_fetchItems());
+  }
+
   void _onItemsListen() {
     assert(_itemsUserSubscription == null, 'Already listening for items');
 
