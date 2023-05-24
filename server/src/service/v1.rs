@@ -118,6 +118,11 @@ impl api_server::Api for Service {
             Some(GroupId::new(request.group_id))
         };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
+        if request.recurring.is_some() {
+            return Err(Status::unimplemented(
+                "Recurring events not yet implemented",
+            ));
+        }
         let task = self
             .db
             .create_task(CreateTaskParams {
@@ -148,6 +153,8 @@ impl api_server::Api for Service {
                 title: task.group_title.unwrap_or_default(),
                 uid: task.group_uid.unwrap_or_default().to_string(),
             }),
+            recurring: None,
+            disabled: false,
         }))
     }
 
@@ -168,6 +175,11 @@ impl api_server::Api for Service {
             Some(GroupId::new(request.group_id))
         };
         let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
+        if request.recurring.is_some() {
+            return Err(Status::unimplemented(
+                "Recurring events not yet implemented",
+            ));
+        }
         let task = self
             .db
             .update_task(UpdateTaskParams {
@@ -200,6 +212,8 @@ impl api_server::Api for Service {
                 title: task.group_title.unwrap_or_default(),
                 uid: task.group_uid.unwrap_or_default().to_string(),
             }),
+            recurring: None,
+            disabled: false,
         }))
     }
 
@@ -216,6 +230,9 @@ impl api_server::Api for Service {
         Ok(Response::new(ToggleTaskCompletedResponse {
             id: task.id.into(),
             is_completed: task.completed_at.is_some(),
+            tasks_created: vec![],
+            tasks_updated: vec![],
+            tasks_deleted: vec![],
         }))
     }
 
@@ -266,6 +283,8 @@ impl api_server::Api for Service {
                         title: task.group_title.unwrap_or_default(),
                         uid: task.group_uid.unwrap_or_default().to_string(),
                     }),
+                    recurring: None,
+                    disabled: false,
                 }))
                 .await
                 .unwrap();

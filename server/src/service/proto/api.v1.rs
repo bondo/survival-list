@@ -27,6 +27,19 @@ pub struct CreateTaskRequest {
     pub group_id: i32,
     #[prost(message, optional, tag = "6")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(oneof = "create_task_request::Recurring", tags = "7, 8")]
+    pub recurring: ::core::option::Option<create_task_request::Recurring>,
+}
+/// Nested message and enum types in `CreateTaskRequest`.
+pub mod create_task_request {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Recurring {
+        #[prost(message, tag = "7")]
+        Checked(super::RecurringWhenChecked),
+        #[prost(message, tag = "8")]
+        Every(super::RecurringEvery),
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -45,6 +58,21 @@ pub struct CreateTaskResponse {
     pub group: ::core::option::Option<Group>,
     #[prost(message, optional, tag = "7")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(bool, tag = "10")]
+    pub disabled: bool,
+    #[prost(oneof = "create_task_response::Recurring", tags = "8, 9")]
+    pub recurring: ::core::option::Option<create_task_response::Recurring>,
+}
+/// Nested message and enum types in `CreateTaskResponse`.
+pub mod create_task_response {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Recurring {
+        #[prost(message, tag = "8")]
+        Checked(super::RecurringWhenChecked),
+        #[prost(message, tag = "9")]
+        Every(super::RecurringEvery),
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -63,6 +91,19 @@ pub struct UpdateTaskRequest {
     pub group_id: i32,
     #[prost(message, optional, tag = "7")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(oneof = "update_task_request::Recurring", tags = "8, 9")]
+    pub recurring: ::core::option::Option<update_task_request::Recurring>,
+}
+/// Nested message and enum types in `UpdateTaskRequest`.
+pub mod update_task_request {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Recurring {
+        #[prost(message, tag = "8")]
+        Checked(super::RecurringWhenChecked),
+        #[prost(message, tag = "9")]
+        Every(super::RecurringEvery),
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -83,6 +124,21 @@ pub struct UpdateTaskResponse {
     pub group: ::core::option::Option<Group>,
     #[prost(message, optional, tag = "8")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(bool, tag = "11")]
+    pub disabled: bool,
+    #[prost(oneof = "update_task_response::Recurring", tags = "9, 10")]
+    pub recurring: ::core::option::Option<update_task_response::Recurring>,
+}
+/// Nested message and enum types in `UpdateTaskResponse`.
+pub mod update_task_response {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Recurring {
+        #[prost(message, tag = "9")]
+        Checked(super::RecurringWhenChecked),
+        #[prost(message, tag = "10")]
+        Every(super::RecurringEvery),
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -99,6 +155,12 @@ pub struct ToggleTaskCompletedResponse {
     pub id: i32,
     #[prost(bool, tag = "2")]
     pub is_completed: bool,
+    #[prost(message, repeated, tag = "3")]
+    pub tasks_created: ::prost::alloc::vec::Vec<CreateTaskResponse>,
+    #[prost(message, repeated, tag = "4")]
+    pub tasks_updated: ::prost::alloc::vec::Vec<UpdateTaskResponse>,
+    #[prost(message, repeated, tag = "5")]
+    pub tasks_deleted: ::prost::alloc::vec::Vec<DeleteTaskResponse>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -134,6 +196,21 @@ pub struct GetTasksResponse {
     pub group: ::core::option::Option<Group>,
     #[prost(message, optional, tag = "8")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(bool, tag = "11")]
+    pub disabled: bool,
+    #[prost(oneof = "get_tasks_response::Recurring", tags = "9, 10")]
+    pub recurring: ::core::option::Option<get_tasks_response::Recurring>,
+}
+/// Nested message and enum types in `GetTasksResponse`.
+pub mod get_tasks_response {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Recurring {
+        #[prost(message, tag = "9")]
+        Checked(super::RecurringWhenChecked),
+        #[prost(message, tag = "10")]
+        Every(super::RecurringEvery),
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -251,6 +328,22 @@ pub struct Duration {
     pub hours: i32,
     #[prost(int32, tag = "3")]
     pub minutes: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RecurringWhenChecked {
+    #[prost(int32, tag = "1")]
+    pub days: i32,
+    #[prost(int32, tag = "2")]
+    pub months: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RecurringEvery {
+    #[prost(int32, tag = "1")]
+    pub days: i32,
+    #[prost(int32, tag = "2")]
+    pub months: i32,
 }
 /// Generated server implementations.
 pub mod api_server {

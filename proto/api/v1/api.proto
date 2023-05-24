@@ -35,6 +35,10 @@ message CreateTaskRequest {
     int32 responsible_id = 4;
     int32 group_id = 5;
     Duration estimate = 6;
+    oneof recurring {
+        RecurringWhenChecked checked = 7;
+        RecurringEvery every = 8;
+    }
 }
 
 message CreateTaskResponse {
@@ -45,6 +49,11 @@ message CreateTaskResponse {
     User responsible = 5;
     Group group = 6;
     Duration estimate = 7;
+    oneof recurring {
+        RecurringWhenChecked checked = 8;
+        RecurringEvery every = 9;
+    }
+    bool disabled = 10;
 }
 
 message UpdateTaskRequest {
@@ -55,6 +64,10 @@ message UpdateTaskRequest {
     int32 responsible_id = 5;
     int32 group_id = 6;
     Duration estimate = 7;
+    oneof recurring {
+        RecurringWhenChecked checked = 8;
+        RecurringEvery every = 9;
+    }
 }
 
 message UpdateTaskResponse {
@@ -66,6 +79,11 @@ message UpdateTaskResponse {
     User responsible = 6;
     Group group = 7;
     Duration estimate = 8;
+    oneof recurring {
+        RecurringWhenChecked checked = 9;
+        RecurringEvery every = 10;
+    }
+    bool disabled = 11;
 }
 
 message ToggleTaskCompletedRequest {
@@ -76,6 +94,9 @@ message ToggleTaskCompletedRequest {
 message ToggleTaskCompletedResponse {
     int32 id = 1;
     bool is_completed = 2;
+    repeated CreateTaskResponse tasks_created = 3;
+    repeated UpdateTaskResponse tasks_updated = 4;
+    repeated DeleteTaskResponse tasks_deleted = 5;
 }
 
 message DeleteTaskRequest {
@@ -98,6 +119,11 @@ message GetTasksResponse {
     User responsible = 6;
     Group group = 7;
     Duration estimate = 8;
+    oneof recurring {
+        RecurringWhenChecked checked = 9;
+        RecurringEvery every = 10;
+    }
+    bool disabled = 11;
 }
 
 message CreateGroupRequest {
@@ -172,4 +198,14 @@ message Duration {
     int32 days = 1;
     int32 hours = 2;
     int32 minutes = 3;
+}
+
+message RecurringWhenChecked {
+    int32 days = 1;
+    int32 months = 2;
+}
+
+message RecurringEvery {
+    int32 days = 1;
+    int32 months = 2;
 }
