@@ -38,19 +38,59 @@ impl Display for TaskId {
 }
 
 #[derive(Debug)]
+struct TaskRawResult {
+    pub id: i32,
+    pub title: Option<String>,
+    pub completed_at: Option<PrimitiveDateTime>,
+    pub start_date: Option<Date>,
+    pub end_date: Option<Date>,
+    pub estimate: Option<PgInterval>,
+    pub responsible_id: i32,
+    pub responsible_name: String,
+    pub responsible_picture_url: Option<String>,
+    pub group_id: Option<i32>,
+    pub group_title: Option<String>,
+    pub group_uid: Option<Uuid>,
+}
+
+#[derive(Debug)]
 pub struct TaskResult {
     pub id: TaskId,
     pub title: Option<String>,
     pub completed_at: Option<PrimitiveDateTime>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
-    pub estimate: Option<PgInterval>,
+    pub estimate: Option<TaskEstimate>,
     pub responsible_id: UserId,
     pub responsible_name: String,
     pub responsible_picture_url: Option<String>,
     pub group_id: Option<GroupId>,
     pub group_title: Option<String>,
     pub group_uid: Option<Uuid>,
+}
+
+impl TryFrom<TaskRawResult> for TaskResult {
+    type Error = Status;
+
+    fn try_from(value: TaskRawResult) -> std::result::Result<Self, Self::Error> {
+        Ok(Self {
+            id: TaskId(value.id),
+            title: value.title,
+            completed_at: value.completed_at,
+            start_date: value.start_date,
+            end_date: value.end_date,
+            estimate: match value.estimate {
+                None => Ok(None),
+                Some(v) => v.try_into().map(Some),
+            }?,
+            responsible_id: UserId(value.responsible_id),
+            responsible_name: value.responsible_name,
+            responsible_picture_url: value.responsible_picture_url,
+            group_id: value.group_id.map(GroupId),
+            group_title: value.group_title,
+            group_uid: value.group_uid,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -88,13 +128,52 @@ impl TaskPeriodInput {
     }
 }
 
+#[derive(Debug)]
+pub struct TaskEstimate {
+    pub days: i32,
+    pub hours: i32,
+    pub minutes: i32,
+}
+
+impl TryFrom<PgInterval> for TaskEstimate {
+    type Error = Status;
+
+    fn try_from(value: PgInterval) -> Result<Self, Self::Error> {
+        if value.months != 0 {
+            return Err(Status::internal("Unexpected month value in estimate"));
+        }
+        let total_minutes = value.microseconds / (60_000_000);
+        let hours: i32 = (total_minutes / 60)
+            .try_into()
+            .map_err(|_| Status::internal("Failed to parse estimate hours"))?;
+        let minutes: i32 = (total_minutes % 60)
+            .try_into()
+            .map_err(|_| Status::internal("Failed to parse estimate minutes"))?;
+        Ok(Self {
+            days: value.days,
+            hours,
+            minutes,
+        })
+    }
+}
+
+impl From<TaskEstimate> for PgInterval {
+    fn from(value: TaskEstimate) -> Self {
+        Self {
+            months: 0,
+            days: value.days,
+            microseconds: ((value.hours as i64) * 60 + (value.minutes as i64)) * 60_000_000,
+        }
+    }
+}
+
 pub struct CreateTaskParams {
     pub user_id: UserId,
     pub responsible_id: UserId,
     pub title: String,
     pub period: TaskPeriodInput,
     pub group_id: Option<GroupId>,
-    pub estimate: Option<PgInterval>,
+    pub estimate: Option<TaskEstimate>,
 }
 
 pub struct UpdateTaskParams {
@@ -104,7 +183,7 @@ pub struct UpdateTaskParams {
     pub title: String,
     pub period: TaskPeriodInput,
     pub group_id: Option<GroupId>,
-    pub estimate: Option<PgInterval>,
+    pub estimate: Option<TaskEstimate>,
 }
 
 impl Database {
@@ -114,19 +193,19 @@ impl Database {
         user_id: UserId,
     ) -> impl Stream<Item = Result<TaskResult, Status>> + 'a {
         sqlx::query_as!(
-            TaskResult,
+            TaskRawResult,
             r#"
                 SELECT
-                    t.id as "id: TaskId",
+                    t.id,
                     t.title,
                     t.completed_at,
                     t.start_date,
                     t.end_date,
                     t.estimate,
-                    u.id as "responsible_id: UserId",
+                    u.id as responsible_id,
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,
-                    g.id as "group_id: Option<GroupId>",
+                    g.id as "group_id: Option<i32>",
                     g.title as "group_title: Option<String>",
                     g.uid as "group_uid: Option<Uuid>"
                 FROM
@@ -161,24 +240,27 @@ impl Database {
             user_id.0
         )
         .fetch(&self.pool)
-        .map(|i| i.or(Err(Status::internal("unexpected error loading tasks"))))
+        .map(|i| {
+            i.or(Err(Status::internal("unexpected error loading tasks")))?
+                .try_into()
+        })
     }
 
     async fn get_task_unchecked(&self, task_id: TaskId) -> Result<TaskResult, Status> {
         sqlx::query_as!(
-            TaskResult,
+            TaskRawResult,
             r#"
                 SELECT
-                    t.id as "id: TaskId",
+                    t.id,
                     t.title,
                     t.completed_at,
                     t.start_date,
                     t.end_date,
                     t.estimate,
-                    u.id as "responsible_id: UserId",
+                    u.id as responsible_id,
                     u.name as responsible_name,
                     u.picture_url as responsible_picture_url,
-                    g.id as "group_id: Option<GroupId>",
+                    g.id as "group_id: Option<i32>",
                     g.title as "group_title: Option<String>",
                     g.uid as "group_uid: Option<Uuid>"
                 FROM
@@ -196,7 +278,8 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to fetch task"))
+        .map_err(|_| Status::internal("Failed to fetch task"))?
+        .try_into()
     }
 
     async fn validate_responsible_and_group(
@@ -283,7 +366,7 @@ impl Database {
             params.period.start_date(),
             params.period.end_date(),
             params.group_id.map(|id| id.0),
-            params.estimate,
+            params.estimate.map(PgInterval::from),
         )
         .fetch_one(&self.pool)
         .await
@@ -333,7 +416,7 @@ impl Database {
             params.period.end_date(),
             params.responsible_id.0,
             params.group_id.map(|id| id.0),
-            params.estimate,
+            params.estimate.map(PgInterval::from),
         )
         .fetch_one(&self.pool)
         .await

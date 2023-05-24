@@ -3,17 +3,17 @@ use std::cmp::Ordering;
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
-use sqlx::{
-    postgres::types::PgInterval,
-    types::{time::Date, Uuid},
-};
+use sqlx::types::{time::Date, Uuid};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
 use crate::{
     auth::AuthExtension,
-    db::{CreateTaskParams, Database, GroupId, TaskId, TaskPeriodInput, UpdateTaskParams, UserId},
+    db::{
+        CreateTaskParams, Database, GroupId, TaskEstimate, TaskId, TaskPeriodInput,
+        UpdateTaskParams, UserId,
+    },
 };
 
 use super::proto::{api::v1::*, google::r#type::Date as ProtoDate};
@@ -126,11 +126,7 @@ impl api_server::Api for Service {
                 title: request.title,
                 period,
                 group_id,
-                estimate: request.estimate.map(|e| PgInterval {
-                    months: 0,
-                    days: e.days,
-                    microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
-                }),
+                estimate: request.estimate.map(Into::into),
             })
             .await?;
         Ok(Response::new(CreateTaskResponse {
@@ -141,7 +137,7 @@ impl api_server::Api for Service {
             }),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
-            estimate: parse_interval(task.estimate)?,
+            estimate: task.estimate.map(Into::into),
             responsible: Some(User {
                 id: task.responsible_id.into(),
                 name: task.responsible_name,
@@ -181,11 +177,7 @@ impl api_server::Api for Service {
                 title: request.title,
                 period,
                 group_id,
-                estimate: request.estimate.map(|e| PgInterval {
-                    months: 0,
-                    days: e.days,
-                    microseconds: ((e.hours as i64) * 60 + (e.minutes as i64)) * 60_000_000,
-                }),
+                estimate: request.estimate.map(Into::into),
             })
             .await?;
         Ok(Response::new(UpdateTaskResponse {
@@ -197,7 +189,7 @@ impl api_server::Api for Service {
             is_completed: task.completed_at.is_some(),
             start_date: task.start_date.map(Into::into),
             end_date: task.end_date.map(Into::into),
-            estimate: parse_interval(task.estimate)?,
+            estimate: task.estimate.map(Into::into),
             responsible: Some(User {
                 id: task.responsible_id.into(),
                 name: task.responsible_name,
@@ -263,13 +255,7 @@ impl api_server::Api for Service {
                     is_completed: task.completed_at.is_some(),
                     start_date: task.start_date.map(Into::into),
                     end_date: task.end_date.map(Into::into),
-                    estimate: parse_interval(task.estimate).unwrap_or_else(|_| {
-                        error!(
-                            "v1:get_tasks: Failed to parse task estimate (id {})",
-                            task.id
-                        );
-                        None
-                    }),
+                    estimate: task.estimate.map(Into::into),
                     responsible: Some(User {
                         id: task.responsible_id.into(),
                         name: task.responsible_name,
@@ -410,23 +396,22 @@ impl api_server::Api for Service {
     }
 }
 
-fn parse_interval(d: Option<PgInterval>) -> Result<Option<Duration>, Status> {
-    let Some(e) = d else {
-        return Ok(None);
-    };
-    if e.months != 0 {
-        return Err(Status::internal("Unexpected month value in interval"));
+impl From<TaskEstimate> for Duration {
+    fn from(value: TaskEstimate) -> Self {
+        Self {
+            days: value.days,
+            hours: value.hours,
+            minutes: value.minutes,
+        }
     }
-    let total_minutes = e.microseconds / (60_000_000);
-    let hours: i32 = (total_minutes / 60)
-        .try_into()
-        .map_err(|_| Status::internal("Failed to parse interval hours"))?;
-    let minutes: i32 = (total_minutes % 60)
-        .try_into()
-        .map_err(|_| Status::internal("Failed to parse interval minutes"))?;
-    Ok(Some(Duration {
-        days: e.days,
-        hours,
-        minutes,
-    }))
+}
+
+impl From<Duration> for TaskEstimate {
+    fn from(value: Duration) -> Self {
+        Self {
+            days: value.days,
+            hours: value.hours,
+            minutes: value.minutes,
+        }
+    }
 }
