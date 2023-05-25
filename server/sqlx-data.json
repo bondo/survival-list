@@ -159,92 +159,6 @@
     },
     "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
   },
-  "5e2524a36085a046d8ee15154e9bddc468a2a88ec3bd6c5b3425447173dcf790": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 3,
-          "type_info": "Date"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 4,
-          "type_info": "Date"
-        },
-        {
-          "name": "estimate",
-          "ordinal": 5,
-          "type_info": "Interval"
-        },
-        {
-          "name": "responsible_id",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "responsible_name",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "responsible_picture_url",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "group_id: Option<i32>",
-          "ordinal": 9,
-          "type_info": "Int4"
-        },
-        {
-          "name": "group_title: Option<String>",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "group_uid: Option<Uuid>",
-          "ordinal": 11,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    t.id = $1\n            "
-  },
   "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
     "describe": {
       "columns": [
@@ -411,7 +325,39 @@
     },
     "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
   },
-  "a2fb0a1a519c2407e44a9027de2ce654eb77754d8149c832691f2b6da3cc99e4": {
+  "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n                FROM\n                    groups\n                WHERE\n                    uid = $1\n            "
+  },
+  "b841979a0ae12a7330eb0696d04c06f49fcb500077e8b7fb5e8a69e2f44eceb4": {
     "describe": {
       "columns": [
         {
@@ -473,6 +419,21 @@
           "name": "group_uid: Option<Uuid>",
           "ordinal": 11,
           "type_info": "Uuid"
+        },
+        {
+          "name": "recurrence_frequency: Option<PgInterval>",
+          "ordinal": 12,
+          "type_info": "Interval"
+        },
+        {
+          "name": "recurrence_is_every: Option<bool>",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "recurrence_current_task_id: Option<i32>",
+          "ordinal": 14,
+          "type_info": "Int4"
         }
       ],
       "nullable": [
@@ -485,6 +446,9 @@
         false,
         false,
         true,
+        false,
+        false,
+        false,
         false,
         false,
         false
@@ -495,39 +459,7 @@
         ]
       }
     },
-    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    -- Hide old items\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n            "
-  },
-  "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: GroupId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "uid",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n                FROM\n                    groups\n                WHERE\n                    uid = $1\n            "
+    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\",\n                    r.frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    r.is_every as \"recurrence_is_every: Option<bool>\",\n                    r.current_task_id as \"recurrence_current_task_id: Option<i32>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                LEFT JOIN\n                    recurrences r ON\n                        r.id = t.recurrence_id\n                WHERE\n                    -- Hide old items\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n            "
   },
   "c42b3fe3bb44ec88e797bcba34bd09e399ee1feb4f61f847a77b21f95cf0ab9e": {
     "describe": {
@@ -574,5 +506,109 @@
       }
     },
     "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    -- No-op to allow RETURNING\n                    uid = EXCLUDED.uid\n                RETURNING\n                    id as \"id: UserId\"\n            "
+  },
+  "fc8b7d587ca47635dbbd46f50321e2b7610d571156043f7ed45663b640bbdc65": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 3,
+          "type_info": "Date"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "estimate",
+          "ordinal": 5,
+          "type_info": "Interval"
+        },
+        {
+          "name": "responsible_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "responsible_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "responsible_picture_url",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_id: Option<i32>",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "group_title: Option<String>",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_uid: Option<Uuid>",
+          "ordinal": 11,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "recurrence_frequency: Option<PgInterval>",
+          "ordinal": 12,
+          "type_info": "Interval"
+        },
+        {
+          "name": "recurrence_is_every: Option<bool>",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "recurrence_current_task_id: Option<i32>",
+          "ordinal": 14,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\",\n                    r.frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    r.is_every as \"recurrence_is_every: Option<bool>\",\n                    r.current_task_id as \"recurrence_current_task_id: Option<i32>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                LEFT JOIN\n                    recurrences r ON\n                        r.id = t.recurrence_id\n                WHERE\n                    t.id = $1\n            "
   }
 }

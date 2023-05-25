@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use log::error;
@@ -11,8 +9,8 @@ use tonic::{Request, Response, Status};
 use crate::{
     auth::AuthExtension,
     db::{
-        CreateTaskParams, Database, GroupId, TaskEstimate, TaskId, TaskPeriodInput,
-        UpdateTaskParams, UserId,
+        CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
+        TaskRecurrence, TaskRecurrenceFrequency, TaskResponsible, UpdateTaskParams, UserId,
     },
 };
 
@@ -25,38 +23,6 @@ pub struct Service {
 impl Service {
     pub fn new(db: Database) -> Self {
         Self { db }
-    }
-}
-
-impl TaskPeriodInput {
-    fn from_proto_dates(
-        start_date: Option<ProtoDate>,
-        end_date: Option<ProtoDate>,
-    ) -> Result<TaskPeriodInput, Status> {
-        fn convert(date: ProtoDate) -> Result<Date, Status> {
-            date.try_into().map_err(Status::invalid_argument)
-        }
-
-        match (start_date, end_date) {
-            (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(convert(start_date)?)),
-
-            (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(convert(end_date)?)),
-
-            (Some(start_date), Some(end_date)) => {
-                let start = convert(start_date)?;
-                let end = convert(end_date)?;
-
-                if end.cmp(&start) == Ordering::Less {
-                    return Err(Status::failed_precondition("End before start"));
-                }
-
-                Ok(TaskPeriodInput::StartAndEnd { start, end })
-            }
-
-            (None, None) => Err(Status::failed_precondition(
-                "Either start or end date required",
-            )),
-        }
     }
 }
 
@@ -117,21 +83,28 @@ impl api_server::Api for Service {
         } else {
             Some(GroupId::new(request.group_id))
         };
-        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
-        if request.recurring.is_some() {
-            return Err(Status::unimplemented(
-                "Recurring events not yet implemented",
-            ));
-        }
         let task = self
             .db
             .create_task(CreateTaskParams {
                 user_id,
                 responsible_id,
                 title: request.title,
-                period,
+                period: (request.start_date, request.end_date).try_into()?,
                 group_id,
-                estimate: request.estimate.map(Into::into),
+                estimate: match request.estimate {
+                    None => Ok(None),
+                    Some(estimate) => estimate.try_into().map(Some),
+                }?,
+                recurrence: match request.recurring {
+                    None => Ok(None),
+                    Some(create_task_request::Recurring::Every(frequency)) => {
+                        frequency.try_into().map(TaskRecurrence::Every).map(Some)
+                    }
+                    Some(create_task_request::Recurring::Checked(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrence::WhenChecked)
+                        .map(Some),
+                }?,
             })
             .await?;
         Ok(Response::new(CreateTaskResponse {
@@ -140,21 +113,20 @@ impl api_server::Api for Service {
                 error!("v1:create_task: Got task without title (id {})", task.id);
                 "N/A".to_string()
             }),
-            start_date: task.start_date.map(Into::into),
-            end_date: task.end_date.map(Into::into),
+            start_date: task.period.start().map(Into::into),
+            end_date: task.period.end().map(Into::into),
             estimate: task.estimate.map(Into::into),
-            responsible: Some(User {
-                id: task.responsible_id.into(),
-                name: task.responsible_name,
-                picture_url: task.responsible_picture_url.unwrap_or_default(),
+            responsible: Some(task.responsible.into()),
+            group: task.group.map(Into::into),
+            recurring: task.recurrence.map(|r| match r {
+                TaskRecurrence::Every(frequency) => {
+                    create_task_response::Recurring::Every(frequency.into())
+                }
+                TaskRecurrence::WhenChecked(frequency) => {
+                    create_task_response::Recurring::Checked(frequency.into())
+                }
             }),
-            group: task.group_id.map(|id| Group {
-                id: id.into(),
-                title: task.group_title.unwrap_or_default(),
-                uid: task.group_uid.unwrap_or_default().to_string(),
-            }),
-            recurring: None,
-            disabled: false,
+            disabled: task.disabled,
         }))
     }
 
@@ -174,12 +146,6 @@ impl api_server::Api for Service {
         } else {
             Some(GroupId::new(request.group_id))
         };
-        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
-        if request.recurring.is_some() {
-            return Err(Status::unimplemented(
-                "Recurring events not yet implemented",
-            ));
-        }
         let task = self
             .db
             .update_task(UpdateTaskParams {
@@ -187,9 +153,22 @@ impl api_server::Api for Service {
                 responsible_id,
                 task_id: TaskId::new(request.id),
                 title: request.title,
-                period,
+                period: (request.start_date, request.end_date).try_into()?,
                 group_id,
-                estimate: request.estimate.map(Into::into),
+                estimate: match request.estimate {
+                    None => Ok(None),
+                    Some(estimate) => estimate.try_into().map(Some),
+                }?,
+                recurrence: match request.recurring {
+                    None => Ok(None),
+                    Some(update_task_request::Recurring::Every(frequency)) => {
+                        frequency.try_into().map(TaskRecurrence::Every).map(Some)
+                    }
+                    Some(update_task_request::Recurring::Checked(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrence::WhenChecked)
+                        .map(Some),
+                }?,
             })
             .await?;
         Ok(Response::new(UpdateTaskResponse {
@@ -199,21 +178,20 @@ impl api_server::Api for Service {
                 "N/A".to_string()
             }),
             is_completed: task.completed_at.is_some(),
-            start_date: task.start_date.map(Into::into),
-            end_date: task.end_date.map(Into::into),
+            start_date: task.period.start().map(Into::into),
+            end_date: task.period.end().map(Into::into),
             estimate: task.estimate.map(Into::into),
-            responsible: Some(User {
-                id: task.responsible_id.into(),
-                name: task.responsible_name,
-                picture_url: task.responsible_picture_url.unwrap_or_default(),
+            responsible: Some(task.responsible.into()),
+            group: task.group.map(Into::into),
+            recurring: task.recurrence.map(|r| match r {
+                TaskRecurrence::Every(frequency) => {
+                    update_task_response::Recurring::Every(frequency.into())
+                }
+                TaskRecurrence::WhenChecked(frequency) => {
+                    update_task_response::Recurring::Checked(frequency.into())
+                }
             }),
-            group: task.group_id.map(|id| Group {
-                id: id.into(),
-                title: task.group_title.unwrap_or_default(),
-                uid: task.group_uid.unwrap_or_default().to_string(),
-            }),
-            recurring: None,
-            disabled: false,
+            disabled: task.disabled,
         }))
     }
 
@@ -270,21 +248,20 @@ impl api_server::Api for Service {
                         "N/A".to_string()
                     }),
                     is_completed: task.completed_at.is_some(),
-                    start_date: task.start_date.map(Into::into),
-                    end_date: task.end_date.map(Into::into),
+                    start_date: task.period.start().map(Into::into),
+                    end_date: task.period.end().map(Into::into),
                     estimate: task.estimate.map(Into::into),
-                    responsible: Some(User {
-                        id: task.responsible_id.into(),
-                        name: task.responsible_name,
-                        picture_url: task.responsible_picture_url.unwrap_or_default(),
+                    responsible: Some(task.responsible.into()),
+                    group: task.group.map(Into::into),
+                    recurring: task.recurrence.map(|r| match r {
+                        TaskRecurrence::Every(frequency) => {
+                            get_tasks_response::Recurring::Every(frequency.into())
+                        }
+                        TaskRecurrence::WhenChecked(frequency) => {
+                            get_tasks_response::Recurring::Checked(frequency.into())
+                        }
                     }),
-                    group: task.group_id.map(|id| Group {
-                        id: id.into(),
-                        title: task.group_title.unwrap_or_default(),
-                        uid: task.group_uid.unwrap_or_default().to_string(),
-                    }),
-                    recurring: None,
-                    disabled: false,
+                    disabled: task.disabled,
                 }))
                 .await
                 .unwrap();
@@ -415,6 +392,22 @@ impl api_server::Api for Service {
     }
 }
 
+impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
+    type Error = Status;
+
+    fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self, Self::Error> {
+        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Status> {
+            match date {
+                None => Ok(None),
+                Some(date) => date.try_into().map(Some).map_err(Status::invalid_argument),
+            }
+        }
+        let start = convert(start)?;
+        let end = convert(end)?;
+        Ok((start, end).try_into().map_err(Status::invalid_argument)?)
+    }
+}
+
 impl From<TaskEstimate> for Duration {
     fn from(value: TaskEstimate) -> Self {
         Self {
@@ -425,12 +418,105 @@ impl From<TaskEstimate> for Duration {
     }
 }
 
-impl From<Duration> for TaskEstimate {
-    fn from(value: Duration) -> Self {
-        Self {
+impl TryFrom<Duration> for TaskEstimate {
+    type Error = Status;
+
+    fn try_from(value: Duration) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.hours < 0 || value.minutes < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days, hours or minutes in estimate not supported",
+            ));
+        }
+        Ok(Self {
             days: value.days,
             hours: value.hours,
             minutes: value.minutes,
+        })
+    }
+}
+
+impl From<&Date> for ProtoDate {
+    fn from(value: &Date) -> Self {
+        value.to_owned().into()
+    }
+}
+
+impl From<TaskResponsible> for User {
+    fn from(value: TaskResponsible) -> Self {
+        User {
+            id: value.id.into(),
+            name: value.name,
+            picture_url: value.picture_url.unwrap_or_default(),
         }
+    }
+}
+
+impl From<TaskGroup> for Group {
+    fn from(value: TaskGroup) -> Self {
+        Group {
+            id: value.id.into(),
+            title: value.title,
+            uid: value.uid.to_string(),
+        }
+    }
+}
+
+impl From<TaskRecurrenceFrequency> for RecurringEvery {
+    fn from(value: TaskRecurrenceFrequency) -> Self {
+        Self {
+            days: value.days,
+            months: value.months,
+        }
+    }
+}
+
+impl TryFrom<RecurringEvery> for TaskRecurrenceFrequency {
+    type Error = Status;
+
+    fn try_from(value: RecurringEvery) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.months < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days or months in RecurringEvery not supported",
+            ));
+        }
+        if value.days == 0 && value.months == 0 {
+            return Err(Status::invalid_argument(
+                "Either days or months must be greater in 0 in RecurringEvery",
+            ));
+        }
+        Ok(Self {
+            days: value.days,
+            months: value.months,
+        })
+    }
+}
+
+impl From<TaskRecurrenceFrequency> for RecurringWhenChecked {
+    fn from(value: TaskRecurrenceFrequency) -> Self {
+        Self {
+            days: value.days,
+            months: value.months,
+        }
+    }
+}
+
+impl TryFrom<RecurringWhenChecked> for TaskRecurrenceFrequency {
+    type Error = Status;
+
+    fn try_from(value: RecurringWhenChecked) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.months < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days or months in RecurringWhenChecked not supported",
+            ));
+        }
+        if value.days == 0 && value.months == 0 {
+            return Err(Status::invalid_argument(
+                "Either days or months must be greater in 0 in RecurringWhenChecked",
+            ));
+        }
+        Ok(Self {
+            days: value.days,
+            months: value.months,
+        })
     }
 }

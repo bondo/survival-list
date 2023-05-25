@@ -1,6 +1,6 @@
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
-use std::fmt::Display;
+use std::{cmp::Ordering, fmt::Display};
 
 use anyhow::Result;
 use sqlx::{
@@ -51,6 +51,9 @@ struct TaskRawResult {
     pub group_id: Option<i32>,
     pub group_title: Option<String>,
     pub group_uid: Option<Uuid>,
+    pub recurrence_frequency: Option<PgInterval>,
+    pub recurrence_is_every: Option<bool>,
+    pub recurrence_current_task_id: Option<i32>,
 }
 
 #[derive(Debug)]
@@ -58,15 +61,12 @@ pub struct TaskResult {
     pub id: TaskId,
     pub title: Option<String>,
     pub completed_at: Option<PrimitiveDateTime>,
-    pub start_date: Option<Date>,
-    pub end_date: Option<Date>,
+    pub period: TaskPeriod,
     pub estimate: Option<TaskEstimate>,
-    pub responsible_id: UserId,
-    pub responsible_name: String,
-    pub responsible_picture_url: Option<String>,
-    pub group_id: Option<GroupId>,
-    pub group_title: Option<String>,
-    pub group_uid: Option<Uuid>,
+    pub responsible: TaskResponsible,
+    pub group: Option<TaskGroup>,
+    pub recurrence: Option<TaskRecurrence>,
+    pub disabled: bool,
 }
 
 impl TryFrom<TaskRawResult> for TaskResult {
@@ -77,18 +77,40 @@ impl TryFrom<TaskRawResult> for TaskResult {
             id: TaskId(value.id),
             title: value.title,
             completed_at: value.completed_at,
-            start_date: value.start_date,
-            end_date: value.end_date,
+            period: (value.start_date, value.end_date)
+                .try_into()
+                .map_err(Status::internal)?,
             estimate: match value.estimate {
                 None => Ok(None),
                 Some(v) => v.try_into().map(Some),
             }?,
-            responsible_id: UserId(value.responsible_id),
-            responsible_name: value.responsible_name,
-            responsible_picture_url: value.responsible_picture_url,
-            group_id: value.group_id.map(GroupId),
-            group_title: value.group_title,
-            group_uid: value.group_uid,
+            responsible: TaskResponsible {
+                id: UserId(value.responsible_id),
+                name: value.responsible_name,
+                picture_url: value.responsible_picture_url,
+            },
+            group: match (value.group_id, value.group_title, value.group_uid) {
+                (None, None, None) => Ok(None),
+                (Some(id), Some(title), Some(uid)) => Ok(Some(TaskGroup {
+                    id: GroupId(id),
+                    title,
+                    uid,
+                })),
+                _ => Err(Status::internal("Unexpected group result")),
+            }?,
+            recurrence: match (value.recurrence_frequency, value.recurrence_is_every) {
+                (None, None) => Ok(None),
+                (Some(frequency), Some(true)) => Ok(Some(TaskRecurrence::Every(frequency.into()))),
+                (Some(frequency), Some(false)) => {
+                    Ok(Some(TaskRecurrence::WhenChecked(frequency.into())))
+                }
+                _ => Err(Status::internal("Unexpected recurrence result")),
+            }?,
+            disabled: if let Some(current_task_id) = value.recurrence_current_task_id {
+                current_task_id != value.id
+            } else {
+                false
+            },
         })
     }
 }
@@ -104,14 +126,15 @@ pub struct DeleteResult {
     pub id: TaskId,
 }
 
-pub enum TaskPeriodInput {
+#[derive(Debug)]
+pub enum TaskPeriod {
     OnlyStart(Date),
     OnlyEnd(Date),
     StartAndEnd { start: Date, end: Date },
 }
 
-impl TaskPeriodInput {
-    pub fn start_date(&self) -> Option<&Date> {
+impl TaskPeriod {
+    pub fn start(&self) -> Option<&Date> {
         match self {
             Self::OnlyStart(date) => Some(date),
             Self::OnlyEnd(_) => None,
@@ -119,13 +142,46 @@ impl TaskPeriodInput {
         }
     }
 
-    pub fn end_date(&self) -> Option<&Date> {
+    pub fn end(&self) -> Option<&Date> {
         match self {
             Self::OnlyStart(_) => None,
             Self::OnlyEnd(date) => Some(date),
             Self::StartAndEnd { end, .. } => Some(end),
         }
     }
+}
+
+impl TryFrom<(Option<Date>, Option<Date>)> for TaskPeriod {
+    type Error = &'static str;
+
+    fn try_from(value: (Option<Date>, Option<Date>)) -> std::result::Result<Self, Self::Error> {
+        match value {
+            (Some(start), None) => Ok(TaskPeriod::OnlyStart(start)),
+            (None, Some(end)) => Ok(TaskPeriod::OnlyEnd(end)),
+            (Some(start), Some(end)) => {
+                if end.cmp(&start) == Ordering::Less {
+                    Err("End before start")
+                } else {
+                    Ok(TaskPeriod::StartAndEnd { start, end })
+                }
+            }
+            (None, None) => Err("Either start or end date required"),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct TaskResponsible {
+    pub id: UserId,
+    pub name: String,
+    pub picture_url: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct TaskGroup {
+    pub id: GroupId,
+    pub title: String,
+    pub uid: Uuid,
 }
 
 #[derive(Debug)]
@@ -167,13 +223,35 @@ impl From<TaskEstimate> for PgInterval {
     }
 }
 
+#[derive(Debug)]
+pub struct TaskRecurrenceFrequency {
+    pub days: i32,
+    pub months: i32,
+}
+
+impl From<PgInterval> for TaskRecurrenceFrequency {
+    fn from(value: PgInterval) -> Self {
+        Self {
+            months: value.months,
+            days: value.days,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum TaskRecurrence {
+    Every(TaskRecurrenceFrequency),
+    WhenChecked(TaskRecurrenceFrequency),
+}
+
 pub struct CreateTaskParams {
     pub user_id: UserId,
     pub responsible_id: UserId,
     pub title: String,
-    pub period: TaskPeriodInput,
+    pub period: TaskPeriod,
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
+    pub recurrence: Option<TaskRecurrence>,
 }
 
 pub struct UpdateTaskParams {
@@ -181,9 +259,10 @@ pub struct UpdateTaskParams {
     pub responsible_id: UserId,
     pub task_id: TaskId,
     pub title: String,
-    pub period: TaskPeriodInput,
+    pub period: TaskPeriod,
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
+    pub recurrence: Option<TaskRecurrence>,
 }
 
 impl Database {
@@ -207,7 +286,10 @@ impl Database {
                     u.picture_url as responsible_picture_url,
                     g.id as "group_id: Option<i32>",
                     g.title as "group_title: Option<String>",
-                    g.uid as "group_uid: Option<Uuid>"
+                    g.uid as "group_uid: Option<Uuid>",
+                    r.frequency as "recurrence_frequency: Option<PgInterval>",
+                    r.is_every as "recurrence_is_every: Option<bool>",
+                    r.current_task_id as "recurrence_current_task_id: Option<i32>"
                 FROM
                     tasks t
                 INNER JOIN
@@ -216,6 +298,9 @@ impl Database {
                 LEFT JOIN
                     groups g ON
                         g.id = t.group_id
+                LEFT JOIN
+                    recurrences r ON
+                        r.id = t.recurrence_id
                 WHERE
                     -- Hide old items
                     (
@@ -262,7 +347,10 @@ impl Database {
                     u.picture_url as responsible_picture_url,
                     g.id as "group_id: Option<i32>",
                     g.title as "group_title: Option<String>",
-                    g.uid as "group_uid: Option<Uuid>"
+                    g.uid as "group_uid: Option<Uuid>",
+                    r.frequency as "recurrence_frequency: Option<PgInterval>",
+                    r.is_every as "recurrence_is_every: Option<bool>",
+                    r.current_task_id as "recurrence_current_task_id: Option<i32>"
                 FROM
                     tasks t
                 INNER JOIN
@@ -271,6 +359,9 @@ impl Database {
                 LEFT JOIN
                     groups g ON
                         g.id = t.group_id
+                LEFT JOIN
+                    recurrences r ON
+                        r.id = t.recurrence_id
                 WHERE
                     t.id = $1
             "#,
@@ -337,6 +428,12 @@ impl Database {
     }
 
     pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Status> {
+        if params.recurrence.is_some() {
+            return Err(Status::unimplemented(
+                "Insert of recurrence not yet supported",
+            ));
+        }
+
         self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
 
@@ -363,8 +460,8 @@ impl Database {
             "#,
             params.responsible_id.0,
             params.title,
-            params.period.start_date(),
-            params.period.end_date(),
+            params.period.start(),
+            params.period.end(),
             params.group_id.map(|id| id.0),
             params.estimate.map(PgInterval::from),
         )
@@ -376,6 +473,12 @@ impl Database {
     }
 
     pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
+        if params.recurrence.is_some() {
+            return Err(Status::unimplemented(
+                "Update of recurrence not yet supported",
+            ));
+        }
+
         self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
 
@@ -412,8 +515,8 @@ impl Database {
             params.user_id.0,
             params.task_id.0,
             params.title,
-            params.period.start_date(),
-            params.period.end_date(),
+            params.period.start(),
+            params.period.end(),
             params.responsible_id.0,
             params.group_id.map(|id| id.0),
             params.estimate.map(PgInterval::from),
