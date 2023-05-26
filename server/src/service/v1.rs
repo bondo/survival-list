@@ -10,7 +10,8 @@ use crate::{
     auth::AuthExtension,
     db::{
         CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
-        TaskRecurrence, TaskRecurrenceFrequency, TaskResponsible, UpdateTaskParams, UserId,
+        TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
+        TaskResponsible, UpdateTaskParams, UserId,
     },
 };
 
@@ -97,12 +98,13 @@ impl api_server::Api for Service {
                 }?,
                 recurrence: match request.recurring {
                     None => Ok(None),
-                    Some(create_task_request::Recurring::Every(frequency)) => {
-                        frequency.try_into().map(TaskRecurrence::Every).map(Some)
-                    }
+                    Some(create_task_request::Recurring::Every(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Every)
+                        .map(Some),
                     Some(create_task_request::Recurring::Checked(frequency)) => frequency
                         .try_into()
-                        .map(TaskRecurrence::WhenChecked)
+                        .map(TaskRecurrenceInput::Checked)
                         .map(Some),
                 }?,
             })
@@ -119,10 +121,10 @@ impl api_server::Api for Service {
             responsible: Some(task.responsible.into()),
             group: task.group.map(Into::into),
             recurring: task.recurrence.map(|r| match r {
-                TaskRecurrence::Every(frequency) => {
-                    create_task_response::Recurring::Every(frequency.into())
+                TaskRecurrenceOutput::Every(every) => {
+                    create_task_response::Recurring::Every(every.into())
                 }
-                TaskRecurrence::WhenChecked(frequency) => {
+                TaskRecurrenceOutput::Checked(frequency) => {
                     create_task_response::Recurring::Checked(frequency.into())
                 }
             }),
@@ -161,12 +163,13 @@ impl api_server::Api for Service {
                 }?,
                 recurrence: match request.recurring {
                     None => Ok(None),
-                    Some(update_task_request::Recurring::Every(frequency)) => {
-                        frequency.try_into().map(TaskRecurrence::Every).map(Some)
-                    }
+                    Some(update_task_request::Recurring::Every(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Every)
+                        .map(Some),
                     Some(update_task_request::Recurring::Checked(frequency)) => frequency
                         .try_into()
-                        .map(TaskRecurrence::WhenChecked)
+                        .map(TaskRecurrenceInput::Checked)
                         .map(Some),
                 }?,
             })
@@ -184,10 +187,10 @@ impl api_server::Api for Service {
             responsible: Some(task.responsible.into()),
             group: task.group.map(Into::into),
             recurring: task.recurrence.map(|r| match r {
-                TaskRecurrence::Every(frequency) => {
-                    update_task_response::Recurring::Every(frequency.into())
+                TaskRecurrenceOutput::Every(every) => {
+                    update_task_response::Recurring::Every(every.into())
                 }
-                TaskRecurrence::WhenChecked(frequency) => {
+                TaskRecurrenceOutput::Checked(frequency) => {
                     update_task_response::Recurring::Checked(frequency.into())
                 }
             }),
@@ -254,10 +257,10 @@ impl api_server::Api for Service {
                     responsible: Some(task.responsible.into()),
                     group: task.group.map(Into::into),
                     recurring: task.recurrence.map(|r| match r {
-                        TaskRecurrence::Every(frequency) => {
-                            get_tasks_response::Recurring::Every(frequency.into())
+                        TaskRecurrenceOutput::Every(every) => {
+                            get_tasks_response::Recurring::Every(every.into())
                         }
-                        TaskRecurrence::WhenChecked(frequency) => {
+                        TaskRecurrenceOutput::Checked(frequency) => {
                             get_tasks_response::Recurring::Checked(frequency.into())
                         }
                     }),
@@ -461,27 +464,29 @@ impl From<TaskGroup> for Group {
     }
 }
 
-impl From<TaskRecurrenceFrequency> for RecurringEvery {
-    fn from(value: TaskRecurrenceFrequency) -> Self {
+impl From<TaskRecurrenceEvery> for RecurringEveryResponse {
+    fn from(value: TaskRecurrenceEvery) -> Self {
         Self {
-            days: value.days,
-            months: value.months,
+            days: value.frequency.days,
+            months: value.frequency.months,
+            num_ready_to_start: value.pending.num_ready_to_start,
+            num_reached_deadline: value.pending.num_ready_to_start,
         }
     }
 }
 
-impl TryFrom<RecurringEvery> for TaskRecurrenceFrequency {
+impl TryFrom<RecurringEveryRequest> for TaskRecurrenceFrequency {
     type Error = Status;
 
-    fn try_from(value: RecurringEvery) -> Result<Self, Self::Error> {
+    fn try_from(value: RecurringEveryRequest) -> Result<Self, Self::Error> {
         if value.days < 0 || value.months < 0 {
             return Err(Status::invalid_argument(
-                "Negative days or months in RecurringEvery not supported",
+                "Negative days or months in RecurringEveryRequest not supported",
             ));
         }
         if value.days == 0 && value.months == 0 {
             return Err(Status::invalid_argument(
-                "Either days or months must be greater in 0 in RecurringEvery",
+                "Either days or months must be greater in 0 in RecurringEveryRequest",
             ));
         }
         Ok(Self {
@@ -491,7 +496,7 @@ impl TryFrom<RecurringEvery> for TaskRecurrenceFrequency {
     }
 }
 
-impl From<TaskRecurrenceFrequency> for RecurringWhenChecked {
+impl From<TaskRecurrenceFrequency> for RecurringChecked {
     fn from(value: TaskRecurrenceFrequency) -> Self {
         Self {
             days: value.days,
@@ -500,18 +505,18 @@ impl From<TaskRecurrenceFrequency> for RecurringWhenChecked {
     }
 }
 
-impl TryFrom<RecurringWhenChecked> for TaskRecurrenceFrequency {
+impl TryFrom<RecurringChecked> for TaskRecurrenceFrequency {
     type Error = Status;
 
-    fn try_from(value: RecurringWhenChecked) -> Result<Self, Self::Error> {
+    fn try_from(value: RecurringChecked) -> Result<Self, Self::Error> {
         if value.days < 0 || value.months < 0 {
             return Err(Status::invalid_argument(
-                "Negative days or months in RecurringWhenChecked not supported",
+                "Negative days or months in RecurringChecked not supported",
             ));
         }
         if value.days == 0 && value.months == 0 {
             return Err(Status::invalid_argument(
-                "Either days or months must be greater in 0 in RecurringWhenChecked",
+                "Either days or months must be greater in 0 in RecurringChecked",
             ));
         }
         Ok(Self {

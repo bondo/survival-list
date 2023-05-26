@@ -36,9 +36,9 @@ pub mod create_task_request {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Recurring {
         #[prost(message, tag = "7")]
-        Checked(super::RecurringWhenChecked),
+        Checked(super::RecurringChecked),
         #[prost(message, tag = "8")]
-        Every(super::RecurringEvery),
+        Every(super::RecurringEveryRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -69,9 +69,9 @@ pub mod create_task_response {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Recurring {
         #[prost(message, tag = "8")]
-        Checked(super::RecurringWhenChecked),
+        Checked(super::RecurringChecked),
         #[prost(message, tag = "9")]
-        Every(super::RecurringEvery),
+        Every(super::RecurringEveryResponse),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -100,9 +100,9 @@ pub mod update_task_request {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Recurring {
         #[prost(message, tag = "8")]
-        Checked(super::RecurringWhenChecked),
+        Checked(super::RecurringChecked),
         #[prost(message, tag = "9")]
-        Every(super::RecurringEvery),
+        Every(super::RecurringEveryRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -135,9 +135,9 @@ pub mod update_task_response {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Recurring {
         #[prost(message, tag = "9")]
-        Checked(super::RecurringWhenChecked),
+        Checked(super::RecurringChecked),
         #[prost(message, tag = "10")]
-        Every(super::RecurringEvery),
+        Every(super::RecurringEveryResponse),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -207,9 +207,9 @@ pub mod get_tasks_response {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Recurring {
         #[prost(message, tag = "9")]
-        Checked(super::RecurringWhenChecked),
+        Checked(super::RecurringChecked),
         #[prost(message, tag = "10")]
-        Every(super::RecurringEvery),
+        Every(super::RecurringEveryResponse),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -331,7 +331,7 @@ pub struct Duration {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RecurringWhenChecked {
+pub struct RecurringChecked {
     #[prost(int32, tag = "1")]
     pub days: i32,
     #[prost(int32, tag = "2")]
@@ -339,11 +339,23 @@ pub struct RecurringWhenChecked {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RecurringEvery {
+pub struct RecurringEveryRequest {
     #[prost(int32, tag = "1")]
     pub days: i32,
     #[prost(int32, tag = "2")]
     pub months: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RecurringEveryResponse {
+    #[prost(int32, tag = "1")]
+    pub days: i32,
+    #[prost(int32, tag = "2")]
+    pub months: i32,
+    #[prost(int32, tag = "3")]
+    pub num_ready_to_start: i32,
+    #[prost(int32, tag = "4")]
+    pub num_reached_deadline: i32,
 }
 /// Generated server implementations.
 pub mod api_server {

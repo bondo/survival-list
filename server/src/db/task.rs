@@ -54,6 +54,8 @@ struct TaskRawResult {
     pub recurrence_frequency: Option<PgInterval>,
     pub recurrence_is_every: Option<bool>,
     pub recurrence_current_task_id: Option<i32>,
+    pub recurrence_num_ready_to_start: Option<i32>,
+    pub recurrence_num_reached_deadline: Option<i32>,
 }
 
 #[derive(Debug)]
@@ -65,7 +67,7 @@ pub struct TaskResult {
     pub estimate: Option<TaskEstimate>,
     pub responsible: TaskResponsible,
     pub group: Option<TaskGroup>,
-    pub recurrence: Option<TaskRecurrence>,
+    pub recurrence: Option<TaskRecurrenceOutput>,
     pub disabled: bool,
 }
 
@@ -100,9 +102,21 @@ impl TryFrom<TaskRawResult> for TaskResult {
             }?,
             recurrence: match (value.recurrence_frequency, value.recurrence_is_every) {
                 (None, None) => Ok(None),
-                (Some(frequency), Some(true)) => Ok(Some(TaskRecurrence::Every(frequency.into()))),
+                (Some(frequency), Some(true)) => {
+                    Ok(Some(TaskRecurrenceOutput::Every(TaskRecurrenceEvery {
+                        frequency: frequency.into(),
+                        pending: TaskRecurrencePending {
+                            num_ready_to_start: value
+                                .recurrence_num_ready_to_start
+                                .unwrap_or_default(),
+                            num_reached_deadline: value
+                                .recurrence_num_reached_deadline
+                                .unwrap_or_default(),
+                        },
+                    })))
+                }
                 (Some(frequency), Some(false)) => {
-                    Ok(Some(TaskRecurrence::WhenChecked(frequency.into())))
+                    Ok(Some(TaskRecurrenceOutput::Checked(frequency.into())))
                 }
                 _ => Err(Status::internal("Unexpected recurrence result")),
             }?,
@@ -229,6 +243,12 @@ pub struct TaskRecurrenceFrequency {
     pub months: i32,
 }
 
+#[derive(Debug)]
+pub struct TaskRecurrencePending {
+    pub num_ready_to_start: i32,
+    pub num_reached_deadline: i32,
+}
+
 impl From<PgInterval> for TaskRecurrenceFrequency {
     fn from(value: PgInterval) -> Self {
         Self {
@@ -239,9 +259,21 @@ impl From<PgInterval> for TaskRecurrenceFrequency {
 }
 
 #[derive(Debug)]
-pub enum TaskRecurrence {
+pub struct TaskRecurrenceEvery {
+    pub frequency: TaskRecurrenceFrequency,
+    pub pending: TaskRecurrencePending,
+}
+
+#[derive(Debug)]
+pub enum TaskRecurrenceInput {
     Every(TaskRecurrenceFrequency),
-    WhenChecked(TaskRecurrenceFrequency),
+    Checked(TaskRecurrenceFrequency),
+}
+
+#[derive(Debug)]
+pub enum TaskRecurrenceOutput {
+    Every(TaskRecurrenceEvery),
+    Checked(TaskRecurrenceFrequency),
 }
 
 pub struct CreateTaskParams {
@@ -251,7 +283,7 @@ pub struct CreateTaskParams {
     pub period: TaskPeriod,
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
-    pub recurrence: Option<TaskRecurrence>,
+    pub recurrence: Option<TaskRecurrenceInput>,
 }
 
 pub struct UpdateTaskParams {
@@ -262,7 +294,7 @@ pub struct UpdateTaskParams {
     pub period: TaskPeriod,
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
-    pub recurrence: Option<TaskRecurrence>,
+    pub recurrence: Option<TaskRecurrenceInput>,
 }
 
 impl Database {
@@ -274,53 +306,105 @@ impl Database {
         sqlx::query_as!(
             TaskRawResult,
             r#"
-                SELECT
-                    t.id,
-                    t.title,
-                    t.completed_at,
-                    t.start_date,
-                    t.end_date,
-                    t.estimate,
-                    u.id as responsible_id,
-                    u.name as responsible_name,
-                    u.picture_url as responsible_picture_url,
-                    g.id as "group_id: Option<i32>",
-                    g.title as "group_title: Option<String>",
-                    g.uid as "group_uid: Option<Uuid>",
-                    r.frequency as "recurrence_frequency: Option<PgInterval>",
-                    r.is_every as "recurrence_is_every: Option<bool>",
-                    r.current_task_id as "recurrence_current_task_id: Option<i32>"
-                FROM
-                    tasks t
-                INNER JOIN
-                    users u ON
-                        u.id = t.responsible_user_id
-                LEFT JOIN
-                    groups g ON
-                        g.id = t.group_id
-                LEFT JOIN
-                    recurrences r ON
-                        r.id = t.recurrence_id
-                WHERE
-                    -- Hide old items
-                    (
-                        t.completed_at IS NULL OR
-                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
-                    ) AND
-                    -- Permission check
-                    (
-                        -- Viewer is responsible
-                        t.responsible_user_id = $1 OR
-                        -- Viewer is in task group
-                        EXISTS (
-                            SELECT
-                            FROM
-                                users_groups ug
-                            WHERE
-                                ug.group_id = t.group_id AND
-                                ug.user_id = $1
-                        )
+                WITH RECURSIVE
+                    base_tasks AS (
+                        SELECT
+                            t.id,
+                            t.title,
+                            t.completed_at,
+                            t.start_date,
+                            t.end_date,
+                            t.estimate,
+                            u.id as responsible_id,
+                            u.name as responsible_name,
+                            u.picture_url as responsible_picture_url,
+                            g.id as group_id,
+                            g.title as group_title,
+                            g.uid as group_uid,
+                            r.frequency as recurrence_frequency,
+                            r.is_every as recurrence_is_every,
+                            r.current_task_id as recurrence_current_task_id
+                        FROM
+                            tasks t
+                        INNER JOIN
+                            users u ON
+                                u.id = t.responsible_user_id
+                        LEFT JOIN
+                            groups g ON
+                                g.id = t.group_id
+                        LEFT JOIN
+                            recurrences r ON
+                                r.id = t.recurrence_id
+                        WHERE
+                            -- Hide old items
+                            (
+                                t.completed_at IS NULL OR
+                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
+                            ) AND
+                            -- Permission check
+                            (
+                                -- Viewer is responsible
+                                t.responsible_user_id = $1 OR
+                                -- Viewer is in task group
+                                EXISTS (
+                                    SELECT
+                                    FROM
+                                        users_groups ug
+                                    WHERE
+                                        ug.group_id = t.group_id AND
+                                        ug.user_id = $1
+                                )
+                            )
+                    ),
+                    every_tasks AS (
+                        SELECT
+                            bt.*
+                        FROM
+                            base_tasks bt
+                        WHERE
+                            bt.recurrence_is_every
+                        UNION ALL
+                        SELECT
+                            et.id,
+                            et.title,
+                            et.completed_at,
+                            (et.start_date + et.recurrence_frequency)::date,
+                            (et.end_date + et.recurrence_frequency)::date,
+                            et.estimate,
+                            et.responsible_id,
+                            et.responsible_name,
+                            et.responsible_picture_url,
+                            et.group_id,
+                            et.group_title,
+                            et.group_uid,
+                            et.recurrence_frequency,
+                            et.recurrence_is_every,
+                            et.recurrence_current_task_id
+                        FROM
+                            every_tasks et
+                        WHERE
+                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP
                     )
+                SELECT
+                    bt.id,
+                    bt.title,
+                    bt.completed_at,
+                    bt.start_date,
+                    bt.end_date,
+                    bt.estimate,
+                    bt.responsible_id,
+                    bt.responsible_name,
+                    bt.responsible_picture_url,
+                    bt.group_id as "group_id: Option<i32>",
+                    bt.group_title as "group_title: Option<String>",
+                    bt.group_uid as "group_uid: Option<Uuid>",
+                    bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
+                    bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
+                    bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
+                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,
+                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
+                FROM
+                    base_tasks bt
             "#,
             user_id.0
         )
@@ -335,35 +419,87 @@ impl Database {
         sqlx::query_as!(
             TaskRawResult,
             r#"
+                WITH RECURSIVE
+                    base_task AS (
+                        SELECT
+                            t.id,
+                            t.title,
+                            t.completed_at,
+                            t.start_date,
+                            t.end_date,
+                            t.estimate,
+                            u.id as responsible_id,
+                            u.name as responsible_name,
+                            u.picture_url as responsible_picture_url,
+                            g.id as group_id,
+                            g.title as group_title,
+                            g.uid as group_uid,
+                            r.frequency as recurrence_frequency,
+                            r.is_every as recurrence_is_every,
+                            r.current_task_id as recurrence_current_task_id
+                        FROM
+                            tasks t
+                        INNER JOIN
+                            users u ON
+                                u.id = t.responsible_user_id
+                        LEFT JOIN
+                            groups g ON
+                                g.id = t.group_id
+                        LEFT JOIN
+                            recurrences r ON
+                                r.id = t.recurrence_id
+                        WHERE
+                            t.id = $1
+                    ),
+                    every_task AS (
+                        SELECT
+                            bt.*
+                        FROM
+                            base_task bt
+                        WHERE
+                            bt.recurrence_is_every
+                        UNION ALL
+                        SELECT
+                            et.id,
+                            et.title,
+                            et.completed_at,
+                            (et.start_date + et.recurrence_frequency)::date,
+                            (et.end_date + et.recurrence_frequency)::date,
+                            et.estimate,
+                            et.responsible_id,
+                            et.responsible_name,
+                            et.responsible_picture_url,
+                            et.group_id,
+                            et.group_title,
+                            et.group_uid,
+                            et.recurrence_frequency,
+                            et.recurrence_is_every,
+                            et.recurrence_current_task_id
+                        FROM
+                            every_task et
+                        WHERE
+                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP
+                    )
                 SELECT
-                    t.id,
-                    t.title,
-                    t.completed_at,
-                    t.start_date,
-                    t.end_date,
-                    t.estimate,
-                    u.id as responsible_id,
-                    u.name as responsible_name,
-                    u.picture_url as responsible_picture_url,
-                    g.id as "group_id: Option<i32>",
-                    g.title as "group_title: Option<String>",
-                    g.uid as "group_uid: Option<Uuid>",
-                    r.frequency as "recurrence_frequency: Option<PgInterval>",
-                    r.is_every as "recurrence_is_every: Option<bool>",
-                    r.current_task_id as "recurrence_current_task_id: Option<i32>"
+                    bt.id,
+                    bt.title,
+                    bt.completed_at,
+                    bt.start_date,
+                    bt.end_date,
+                    bt.estimate,
+                    bt.responsible_id,
+                    bt.responsible_name,
+                    bt.responsible_picture_url,
+                    bt.group_id as "group_id: Option<i32>",
+                    bt.group_title as "group_title: Option<String>",
+                    bt.group_uid as "group_uid: Option<Uuid>",
+                    bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
+                    bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
+                    bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
+                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,
+                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
-                    tasks t
-                INNER JOIN
-                    users u ON
-                        u.id = t.responsible_user_id
-                LEFT JOIN
-                    groups g ON
-                        g.id = t.group_id
-                LEFT JOIN
-                    recurrences r ON
-                        r.id = t.recurrence_id
-                WHERE
-                    t.id = $1
+                    base_task bt
             "#,
             task_id.0,
         )

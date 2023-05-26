@@ -36,8 +36,8 @@ message CreateTaskRequest {
     int32 group_id = 5;
     Duration estimate = 6;
     oneof recurring {
-        RecurringWhenChecked checked = 7;
-        RecurringEvery every = 8;
+        RecurringChecked checked = 7;
+        RecurringEveryRequest every = 8;
     }
 }
 
@@ -50,8 +50,8 @@ message CreateTaskResponse {
     Group group = 6;
     Duration estimate = 7;
     oneof recurring {
-        RecurringWhenChecked checked = 8;
-        RecurringEvery every = 9;
+        RecurringChecked checked = 8;
+        RecurringEveryResponse every = 9;
     }
     bool disabled = 10;
 }
@@ -65,8 +65,8 @@ message UpdateTaskRequest {
     int32 group_id = 6;
     Duration estimate = 7;
     oneof recurring {
-        RecurringWhenChecked checked = 8;
-        RecurringEvery every = 9;
+        RecurringChecked checked = 8;
+        RecurringEveryRequest every = 9;
     }
 }
 
@@ -80,8 +80,8 @@ message UpdateTaskResponse {
     Group group = 7;
     Duration estimate = 8;
     oneof recurring {
-        RecurringWhenChecked checked = 9;
-        RecurringEvery every = 10;
+        RecurringChecked checked = 9;
+        RecurringEveryResponse every = 10;
     }
     bool disabled = 11;
 }
@@ -120,8 +120,8 @@ message GetTasksResponse {
     Group group = 7;
     Duration estimate = 8;
     oneof recurring {
-        RecurringWhenChecked checked = 9;
-        RecurringEvery every = 10;
+        RecurringChecked checked = 9;
+        RecurringEveryResponse every = 10;
     }
     bool disabled = 11;
 }
@@ -200,12 +200,19 @@ message Duration {
     int32 minutes = 3;
 }
 
-message RecurringWhenChecked {
+message RecurringChecked {
     int32 days = 1;
     int32 months = 2;
 }
 
-message RecurringEvery {
+message RecurringEveryRequest {
     int32 days = 1;
     int32 months = 2;
+}
+
+message RecurringEveryResponse {
+    int32 days = 1;
+    int32 months = 2;
+    int32 num_ready_to_start = 3;
+    int32 num_reached_deadline = 4;
 }
