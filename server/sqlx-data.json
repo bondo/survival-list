@@ -147,6 +147,19 @@
     },
     "query": "\n                UPDATE\n                    tasks t\n                SET\n                    group_id = NULL\n                WHERE\n                    t.responsible_user_id = $1 AND\n                    t.group_id = $2\n            "
   },
+  "392c26fd19e857241c56a7270364cb3e2e256261b87ab6fd3699af6a1a169fb5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Interval",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                        INSERT INTO recurrences (\n                            frequency,\n                            is_every,\n                            current_task_id\n                        )\n                        VALUES (\n                            $1,\n                            false,\n                            $2\n                        )\n                    "
+  },
   "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b": {
     "describe": {
       "columns": [],
@@ -440,6 +453,19 @@
       }
     },
     "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
+  },
+  "a375e3e83536669f2ca61e1aeb9a7116b93d019a4c786dade58acc3c060b2d58": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Interval",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                        INSERT INTO recurrences (\n                            frequency,\n                            is_every,\n                            current_task_id\n                        )\n                        VALUES (\n                            $1,\n                            true,\n                            $2\n                        )\n                    "
   },
   "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
     "describe": {

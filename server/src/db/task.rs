@@ -258,6 +258,16 @@ impl From<PgInterval> for TaskRecurrenceFrequency {
     }
 }
 
+impl From<TaskRecurrenceFrequency> for PgInterval {
+    fn from(value: TaskRecurrenceFrequency) -> Self {
+        Self {
+            months: value.months,
+            days: value.days,
+            microseconds: 0,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct TaskRecurrenceEvery {
     pub frequency: TaskRecurrenceFrequency,
@@ -564,12 +574,6 @@ impl Database {
     }
 
     pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Status> {
-        if params.recurrence.is_some() {
-            return Err(Status::unimplemented(
-                "Insert of recurrence not yet supported",
-            ));
-        }
-
         self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
 
@@ -604,6 +608,52 @@ impl Database {
         .fetch_one(&self.pool)
         .await
         .map_err(|_| Status::internal("Failed to create task"))?;
+
+        match params.recurrence {
+            None => (),
+            Some(TaskRecurrenceInput::Every(frequency)) => {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO recurrences (
+                            frequency,
+                            is_every,
+                            current_task_id
+                        )
+                        VALUES (
+                            $1,
+                            true,
+                            $2
+                        )
+                    "#,
+                    Some(PgInterval::from(frequency)),
+                    task_id.0
+                )
+                .execute(&self.pool)
+                .await
+                .map_err(|_| Status::internal("Failed to create recurrence"))?;
+            }
+            Some(TaskRecurrenceInput::Checked(frequency)) => {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO recurrences (
+                            frequency,
+                            is_every,
+                            current_task_id
+                        )
+                        VALUES (
+                            $1,
+                            false,
+                            $2
+                        )
+                    "#,
+                    Some(PgInterval::from(frequency)),
+                    task_id.0
+                )
+                .execute(&self.pool)
+                .await
+                .map_err(|_| Status::internal("Failed to create recurrence"))?;
+            }
+        }
 
         self.get_task_unchecked(task_id).await
     }
