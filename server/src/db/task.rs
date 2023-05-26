@@ -51,6 +51,7 @@ struct TaskRawResult {
     pub group_id: Option<i32>,
     pub group_title: Option<String>,
     pub group_uid: Option<Uuid>,
+    pub recurrence_id: Option<i32>,
     pub recurrence_frequency: Option<PgInterval>,
     pub recurrence_is_every: Option<bool>,
     pub recurrence_current_task_id: Option<i32>,
@@ -331,6 +332,7 @@ impl Database {
                             g.id as group_id,
                             g.title as group_title,
                             g.uid as group_uid,
+                            r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
                             r.current_task_id as recurrence_current_task_id
@@ -387,6 +389,7 @@ impl Database {
                             et.group_id,
                             et.group_title,
                             et.group_uid,
+                            et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
                             et.recurrence_current_task_id
@@ -408,6 +411,7 @@ impl Database {
                     bt.group_id as "group_id: Option<i32>",
                     bt.group_title as "group_title: Option<String>",
                     bt.group_uid as "group_uid: Option<Uuid>",
+                    bt.recurrence_id as "recurrence_id: Option<i32>",
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
                     bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
@@ -425,7 +429,7 @@ impl Database {
         })
     }
 
-    async fn get_task_unchecked(&self, task_id: TaskId) -> Result<TaskResult, Status> {
+    async fn get_task_unchecked(&self, task_id: TaskId) -> Result<TaskRawResult, Status> {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -444,6 +448,7 @@ impl Database {
                             g.id as group_id,
                             g.title as group_title,
                             g.uid as group_uid,
+                            r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
                             r.current_task_id as recurrence_current_task_id
@@ -482,6 +487,7 @@ impl Database {
                             et.group_id,
                             et.group_title,
                             et.group_uid,
+                            et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
                             et.recurrence_current_task_id
@@ -503,6 +509,7 @@ impl Database {
                     bt.group_id as "group_id: Option<i32>",
                     bt.group_title as "group_title: Option<String>",
                     bt.group_uid as "group_uid: Option<Uuid>",
+                    bt.recurrence_id as "recurrence_id: Option<i32>",
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
                     bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
@@ -515,8 +522,7 @@ impl Database {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|_| Status::internal("Failed to fetch task"))?
-        .try_into()
+        .map_err(|_| Status::internal("Failed to fetch task"))
     }
 
     async fn validate_responsible_and_group(
@@ -655,18 +661,22 @@ impl Database {
             }
         }
 
-        self.get_task_unchecked(task_id).await
+        self.get_task_unchecked(task_id).await?.try_into()
     }
 
     pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
-        if params.recurrence.is_some() {
-            return Err(Status::unimplemented(
-                "Update of recurrence not yet supported",
-            ));
-        }
-
         self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
             .await?;
+
+        let current_task = self.get_task_unchecked(params.task_id).await?;
+
+        if let Some(current_task_id) = current_task.recurrence_current_task_id {
+            if current_task_id != params.task_id.0 {
+                return Err(Status::failed_precondition(
+                    "Recurring tasks may only be updated when current",
+                ));
+            }
+        }
 
         let task_id = sqlx::query_scalar!(
             r#"
@@ -711,7 +721,106 @@ impl Database {
         .await
         .map_err(|_| Status::internal("Failed to update task"))?;
 
-        self.get_task_unchecked(task_id).await
+        match params.recurrence {
+            None => {
+                if let Some(recurrence_id) = current_task.recurrence_id {
+                    sqlx::query!(
+                        r#"
+                            DELETE FROM
+                                recurrences r
+                            WHERE
+                                r.id = $1
+                        "#,
+                        recurrence_id
+                    )
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|_| Status::internal("Failed to delete recurrence"))?;
+                }
+            }
+            Some(TaskRecurrenceInput::Every(frequency)) => {
+                if let Some(recurrence_id) = current_task.recurrence_id {
+                    sqlx::query!(
+                        r#"
+                            UPDATE
+                                recurrences r
+                            SET
+                                frequency = $1,
+                                is_every = true
+                            WHERE
+                                r.id = $2
+                        "#,
+                        Some(PgInterval::from(frequency)),
+                        recurrence_id
+                    )
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                } else {
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO recurrences (
+                                frequency,
+                                is_every,
+                                current_task_id
+                            )
+                            VALUES (
+                                $1,
+                                true,
+                                $2
+                            )
+                        "#,
+                        Some(PgInterval::from(frequency)),
+                        task_id.0
+                    )
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                }
+            }
+            Some(TaskRecurrenceInput::Checked(frequency)) => {
+                if let Some(recurrence_id) = current_task.recurrence_id {
+                    sqlx::query!(
+                        r#"
+                            UPDATE
+                                recurrences r
+                            SET
+                                frequency = $1,
+                                is_every = false
+                            WHERE
+                                r.id = $2
+                        "#,
+                        Some(PgInterval::from(frequency)),
+                        recurrence_id
+                    )
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                } else {
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO recurrences (
+                                frequency,
+                                is_every,
+                                current_task_id
+                            )
+                            VALUES (
+                                $1,
+                                false,
+                                $2
+                            )
+                        "#,
+                        Some(PgInterval::from(frequency)),
+                        task_id.0
+                    )
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                }
+            }
+        }
+
+        self.get_task_unchecked(task_id).await?.try_into()
     }
 
     pub async fn toggle_task_completed(
