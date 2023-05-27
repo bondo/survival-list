@@ -55,10 +55,12 @@ impl api_server::Api for Service {
         } else {
             Some(&request.picture_url)
         };
+
         let user = self
             .db
             .upsert_user(&uid, &request.name, picture_url)
             .await?;
+
         Ok(Response::new(LoginResponse {
             user: Some(User {
                 id: user.id.into(),
@@ -74,24 +76,23 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == i32::default() {
-            user_id
-        } else {
-            UserId::new(request.responsible_id)
-        };
-        let group_id = if request.group_id == i32::default() {
-            None
-        } else {
-            Some(GroupId::new(request.group_id))
-        };
+
         let task = self
             .db
             .create_task(CreateTaskParams {
                 user_id,
-                responsible_id,
+                responsible_id: if request.responsible_id == i32::default() {
+                    user_id
+                } else {
+                    UserId::new(request.responsible_id)
+                },
                 title: request.title,
                 period: (request.start_date, request.end_date).try_into()?,
-                group_id,
+                group_id: if request.group_id == i32::default() {
+                    None
+                } else {
+                    Some(GroupId::new(request.group_id))
+                },
                 estimate: match request.estimate {
                     None => Ok(None),
                     Some(estimate) => estimate.try_into().map(Some),
@@ -109,6 +110,7 @@ impl api_server::Api for Service {
                 }?,
             })
             .await?;
+
         Ok(Response::new(CreateTaskResponse {
             id: task.id.into(),
             title: task.title.unwrap_or_else(|| {
@@ -128,7 +130,9 @@ impl api_server::Api for Service {
                     create_task_response::Recurring::Checked(frequency.into())
                 }
             }),
-            disabled: task.disabled,
+            can_update: task.can_update,
+            can_toggle: task.can_toggle,
+            can_delete: task.can_delete,
         }))
     }
 
@@ -138,25 +142,24 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == i32::default() {
-            user_id
-        } else {
-            UserId::new(request.responsible_id)
-        };
-        let group_id = if request.group_id == i32::default() {
-            None
-        } else {
-            Some(GroupId::new(request.group_id))
-        };
+
         let task = self
             .db
             .update_task(UpdateTaskParams {
                 user_id,
-                responsible_id,
+                responsible_id: if request.responsible_id == i32::default() {
+                    user_id
+                } else {
+                    UserId::new(request.responsible_id)
+                },
                 task_id: TaskId::new(request.id),
                 title: request.title,
                 period: (request.start_date, request.end_date).try_into()?,
-                group_id,
+                group_id: if request.group_id == i32::default() {
+                    None
+                } else {
+                    Some(GroupId::new(request.group_id))
+                },
                 estimate: match request.estimate {
                     None => Ok(None),
                     Some(estimate) => estimate.try_into().map(Some),
@@ -174,6 +177,7 @@ impl api_server::Api for Service {
                 }?,
             })
             .await?;
+
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),
             title: task.title.unwrap_or_else(|| {
@@ -194,7 +198,9 @@ impl api_server::Api for Service {
                     update_task_response::Recurring::Checked(frequency.into())
                 }
             }),
-            disabled: task.disabled,
+            can_update: task.can_update,
+            can_toggle: task.can_toggle,
+            can_delete: task.can_delete,
         }))
     }
 
@@ -204,16 +210,18 @@ impl api_server::Api for Service {
     ) -> Result<Response<ToggleTaskCompletedResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let task = self
             .db
             .toggle_task_completed(user_id, TaskId::new(request.id), request.is_completed)
             .await?;
+
         Ok(Response::new(ToggleTaskCompletedResponse {
             id: task.id.into(),
             is_completed: task.completed_at.is_some(),
-            tasks_created: vec![],
-            tasks_updated: vec![],
-            tasks_deleted: vec![],
+            tasks_created: vec![], // TODO
+            tasks_updated: vec![], // TODO
+            tasks_deleted: vec![], // TODO
         }))
     }
 
@@ -223,10 +231,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<DeleteTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let id = self
             .db
             .delete_task(user_id, TaskId::new(request.id))
             .await?;
+
         Ok(Response::new(DeleteTaskResponse { id: id.into() }))
     }
 
@@ -264,7 +274,9 @@ impl api_server::Api for Service {
                             get_tasks_response::Recurring::Checked(frequency.into())
                         }
                     }),
-                    disabled: task.disabled,
+                    can_update: task.can_update,
+                    can_toggle: task.can_toggle,
+                    can_delete: task.can_delete,
                 }))
                 .await
                 .unwrap();
@@ -280,10 +292,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let group = self
             .db
             .create_and_join_group(user_id, &request.title)
             .await?;
+
         Ok(Response::new(CreateGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -299,7 +313,9 @@ impl api_server::Api for Service {
         let request = request.into_inner();
         let uid =
             Uuid::parse_str(&request.uid).map_err(|_| Status::invalid_argument("Invalid uid"))?;
+
         let group = self.db.join_group_by_uid(user_id, &uid).await?;
+
         Ok(Response::new(JoinGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -313,10 +329,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let group = self
             .db
             .update_group(user_id, GroupId::new(request.id), &request.title)
             .await?;
+
         Ok(Response::new(UpdateGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -330,10 +348,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<LeaveGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let id = self
             .db
             .leave_group(user_id, GroupId::new(request.id))
             .await?;
+
         Ok(Response::new(LeaveGroupResponse { id: id.into() }))
     }
 
@@ -470,7 +490,9 @@ impl From<TaskRecurrenceEvery> for RecurringEveryResponse {
             days: value.frequency.days,
             months: value.frequency.months,
             num_ready_to_start: value.pending.num_ready_to_start,
-            num_reached_deadline: value.pending.num_ready_to_start,
+            num_ready_to_start_is_lower_bound: value.pending.num_ready_to_start_is_lower_bound,
+            num_reached_deadline: value.pending.num_reached_deadline,
+            num_reached_deadline_is_lower_bound: value.pending.num_reached_deadline_is_lower_bound,
         }
     }
 }

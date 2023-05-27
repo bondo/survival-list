@@ -5,7 +5,7 @@ DROP TABLE schedules;
 
 CREATE TABLE recurrences(
 	id serial PRIMARY KEY,
-	frequency interval NOT NULL,
+	frequency interval NOT NULL CHECK (frequency > interval '0'),
 	is_every boolean NOT NULL,
 	current_task_id int NOT NULL REFERENCES tasks(id) ON DELETE CASCADE
 );

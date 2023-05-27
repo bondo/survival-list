@@ -59,7 +59,11 @@ pub struct CreateTaskResponse {
     #[prost(message, optional, tag = "7")]
     pub estimate: ::core::option::Option<Duration>,
     #[prost(bool, tag = "10")]
-    pub disabled: bool,
+    pub can_update: bool,
+    #[prost(bool, tag = "11")]
+    pub can_toggle: bool,
+    #[prost(bool, tag = "12")]
+    pub can_delete: bool,
     #[prost(oneof = "create_task_response::Recurring", tags = "8, 9")]
     pub recurring: ::core::option::Option<create_task_response::Recurring>,
 }
@@ -125,7 +129,11 @@ pub struct UpdateTaskResponse {
     #[prost(message, optional, tag = "8")]
     pub estimate: ::core::option::Option<Duration>,
     #[prost(bool, tag = "11")]
-    pub disabled: bool,
+    pub can_update: bool,
+    #[prost(bool, tag = "12")]
+    pub can_toggle: bool,
+    #[prost(bool, tag = "13")]
+    pub can_delete: bool,
     #[prost(oneof = "update_task_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<update_task_response::Recurring>,
 }
@@ -197,7 +205,11 @@ pub struct GetTasksResponse {
     #[prost(message, optional, tag = "8")]
     pub estimate: ::core::option::Option<Duration>,
     #[prost(bool, tag = "11")]
-    pub disabled: bool,
+    pub can_update: bool,
+    #[prost(bool, tag = "12")]
+    pub can_toggle: bool,
+    #[prost(bool, tag = "13")]
+    pub can_delete: bool,
     #[prost(oneof = "get_tasks_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<get_tasks_response::Recurring>,
 }
@@ -354,8 +366,12 @@ pub struct RecurringEveryResponse {
     pub months: i32,
     #[prost(int32, tag = "3")]
     pub num_ready_to_start: i32,
-    #[prost(int32, tag = "4")]
+    #[prost(bool, tag = "4")]
+    pub num_ready_to_start_is_lower_bound: bool,
+    #[prost(int32, tag = "5")]
     pub num_reached_deadline: i32,
+    #[prost(bool, tag = "6")]
+    pub num_reached_deadline_is_lower_bound: bool,
 }
 /// Generated server implementations.
 pub mod api_server {

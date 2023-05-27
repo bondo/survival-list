@@ -53,7 +53,9 @@ message CreateTaskResponse {
         RecurringChecked checked = 8;
         RecurringEveryResponse every = 9;
     }
-    bool disabled = 10;
+    bool can_update = 10;
+    bool can_toggle = 11;
+    bool can_delete = 12;
 }
 
 message UpdateTaskRequest {
@@ -83,7 +85,9 @@ message UpdateTaskResponse {
         RecurringChecked checked = 9;
         RecurringEveryResponse every = 10;
     }
-    bool disabled = 11;
+    bool can_update = 11;
+    bool can_toggle = 12;
+    bool can_delete = 13;
 }
 
 message ToggleTaskCompletedRequest {
@@ -123,7 +127,9 @@ message GetTasksResponse {
         RecurringChecked checked = 9;
         RecurringEveryResponse every = 10;
     }
-    bool disabled = 11;
+    bool can_update = 11;
+    bool can_toggle = 12;
+    bool can_delete = 13;
 }
 
 message CreateGroupRequest {
@@ -213,6 +219,10 @@ message RecurringEveryRequest {
 message RecurringEveryResponse {
     int32 days = 1;
     int32 months = 2;
+
     int32 num_ready_to_start = 3;
-    int32 num_reached_deadline = 4;
+    bool num_ready_to_start_is_lower_bound = 4;
+
+    int32 num_reached_deadline = 5;
+    bool num_reached_deadline_is_lower_bound = 6;
 }

@@ -13,7 +13,7 @@ use sqlx::{
 };
 use tonic::Status;
 
-use super::{database::Database, GroupId, UserId};
+use super::{Database, GroupId, Tx, UserId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -55,8 +55,34 @@ struct TaskRawResult {
     pub recurrence_frequency: Option<PgInterval>,
     pub recurrence_is_every: Option<bool>,
     pub recurrence_current_task_id: Option<i32>,
+    pub recurrence_previous_task_id: Option<i32>,
     pub recurrence_num_ready_to_start: Option<i32>,
     pub recurrence_num_reached_deadline: Option<i32>,
+}
+
+impl TaskRawResult {
+    // Allow update
+    // - if not recurrence
+    // - if this is the current task
+    fn can_update(&self) -> bool {
+        self.recurrence_current_task_id
+            .map_or(true, |v| v == self.id)
+    }
+
+    // Allow toggle
+    // - if not recurrence
+    // - if this is the first recurrence
+    // - if this is the current task
+    // - if this is the previous task
+    fn can_toggle(&self) -> bool {
+        self.recurrence_previous_task_id
+            .zip(self.recurrence_current_task_id)
+            .map_or(true, |(p, c)| p == self.id || c == self.id)
+    }
+
+    fn can_delete(&self) -> bool {
+        self.can_update()
+    }
 }
 
 #[derive(Debug)]
@@ -69,13 +95,20 @@ pub struct TaskResult {
     pub responsible: TaskResponsible,
     pub group: Option<TaskGroup>,
     pub recurrence: Option<TaskRecurrenceOutput>,
-    pub disabled: bool,
+    pub can_update: bool,
+    pub can_toggle: bool,
+    pub can_delete: bool,
 }
+
+static RECURRENCE_MAX: i32 = 5;
 
 impl TryFrom<TaskRawResult> for TaskResult {
     type Error = Status;
 
     fn try_from(value: TaskRawResult) -> std::result::Result<Self, Self::Error> {
+        let can_update = value.can_update();
+        let can_toggle = value.can_toggle();
+        let can_delete = value.can_delete();
         Ok(Self {
             id: TaskId(value.id),
             title: value.title,
@@ -110,9 +143,15 @@ impl TryFrom<TaskRawResult> for TaskResult {
                             num_ready_to_start: value
                                 .recurrence_num_ready_to_start
                                 .unwrap_or_default(),
+                            num_ready_to_start_is_lower_bound: value
+                                .recurrence_num_ready_to_start
+                                .map_or(false, |v| v >= RECURRENCE_MAX),
                             num_reached_deadline: value
                                 .recurrence_num_reached_deadline
                                 .unwrap_or_default(),
+                            num_reached_deadline_is_lower_bound: value
+                                .recurrence_num_reached_deadline
+                                .map_or(false, |v| v >= RECURRENCE_MAX),
                         },
                     })))
                 }
@@ -121,11 +160,9 @@ impl TryFrom<TaskRawResult> for TaskResult {
                 }
                 _ => Err(Status::internal("Unexpected recurrence result")),
             }?,
-            disabled: if let Some(current_task_id) = value.recurrence_current_task_id {
-                current_task_id != value.id
-            } else {
-                false
-            },
+            can_update,
+            can_toggle,
+            can_delete,
         })
     }
 }
@@ -247,7 +284,9 @@ pub struct TaskRecurrenceFrequency {
 #[derive(Debug)]
 pub struct TaskRecurrencePending {
     pub num_ready_to_start: i32,
+    pub num_ready_to_start_is_lower_bound: bool,
     pub num_reached_deadline: i32,
+    pub num_reached_deadline_is_lower_bound: bool,
 }
 
 impl From<PgInterval> for TaskRecurrenceFrequency {
@@ -309,7 +348,6 @@ pub struct UpdateTaskParams {
 }
 
 impl Database {
-    #[allow(clippy::needless_lifetimes)]
     pub fn get_tasks<'a>(
         &'a self,
         user_id: UserId,
@@ -335,7 +373,8 @@ impl Database {
                             r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
-                            r.current_task_id as recurrence_current_task_id
+                            r.current_task_id as recurrence_current_task_id,
+                            c.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
                         INNER JOIN
@@ -347,6 +386,9 @@ impl Database {
                         LEFT JOIN
                             recurrences r ON
                                 r.id = t.recurrence_id
+                        LEFT JOIN
+                            tasks c ON
+                                c.id = r.current_task_id
                         WHERE
                             -- Hide old items
                             (
@@ -370,7 +412,8 @@ impl Database {
                     ),
                     every_tasks AS (
                         SELECT
-                            bt.*
+                            bt.*,
+                            0 depth
                         FROM
                             base_tasks bt
                         WHERE
@@ -392,10 +435,13 @@ impl Database {
                             et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
-                            et.recurrence_current_task_id
+                            et.recurrence_current_task_id,
+                            et.recurrence_previous_task_id,
+                            et.depth + 1
                         FROM
                             every_tasks et
                         WHERE
+                            et.depth < $2 AND
                             COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP
                     )
                 SELECT
@@ -415,21 +461,27 @@ impl Database {
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
                     bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
+                    bt.recurrence_previous_task_id,
                     (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,
                     (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
                     base_tasks bt
             "#,
-            user_id.0
+            user_id.0,
+            RECURRENCE_MAX
         )
-        .fetch(&self.pool)
+        .fetch(self)
         .map(|i| {
             i.or(Err(Status::internal("unexpected error loading tasks")))?
                 .try_into()
         })
     }
 
-    async fn get_task_unchecked(&self, task_id: TaskId) -> Result<TaskRawResult, Status> {
+    async fn get_task_unchecked(
+        &self,
+        tx: &mut Tx<'_>,
+        task_id: TaskId,
+    ) -> Result<TaskRawResult, sqlx::Error> {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -451,7 +503,8 @@ impl Database {
                             r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
-                            r.current_task_id as recurrence_current_task_id
+                            r.current_task_id as recurrence_current_task_id,
+                            c.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
                         INNER JOIN
@@ -463,12 +516,16 @@ impl Database {
                         LEFT JOIN
                             recurrences r ON
                                 r.id = t.recurrence_id
+                        LEFT JOIN
+                            tasks c ON
+                                c.id = r.current_task_id
                         WHERE
                             t.id = $1
                     ),
                     every_task AS (
                         SELECT
-                            bt.*
+                            bt.*,
+                            0 depth
                         FROM
                             base_task bt
                         WHERE
@@ -490,10 +547,13 @@ impl Database {
                             et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
-                            et.recurrence_current_task_id
+                            et.recurrence_current_task_id,
+                            et.recurrence_previous_task_id,
+                            et.depth + 1
                         FROM
                             every_task et
                         WHERE
+                            et.depth < $2 AND
                             COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP
                     )
                 SELECT
@@ -513,20 +573,22 @@ impl Database {
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
                     bt.recurrence_current_task_id as "recurrence_current_task_id: Option<i32>",
+                    bt.recurrence_previous_task_id,
                     (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,
                     (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
                     base_task bt
             "#,
             task_id.0,
+            RECURRENCE_MAX
         )
-        .fetch_one(&self.pool)
+        .fetch_one(tx)
         .await
-        .map_err(|_| Status::internal("Failed to fetch task"))
     }
 
     async fn validate_responsible_and_group(
         &self,
+        tx: &mut Tx<'_>,
         user_id: UserId,
         responsible_id: UserId,
         group_id: Option<GroupId>,
@@ -558,7 +620,7 @@ impl Database {
                 responsible_id.0,
                 group_id.0
             )
-            .fetch_one(&self.pool)
+            .fetch_one(tx)
             .await
             .map_err(|_| Status::internal("Failed to validate responsible and group"))?;
 
@@ -580,183 +642,52 @@ impl Database {
     }
 
     pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Status> {
-        self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
+        let mut tx = self.begin_transaction().await?;
+
+        let result = async {
+            self.validate_responsible_and_group(
+                &mut tx,
+                params.user_id,
+                params.responsible_id,
+                params.group_id,
+            )
             .await?;
 
-        let task_id = sqlx::query_scalar!(
-            r#"
-                INSERT INTO tasks (
-                    responsible_user_id,
-                    title,
-                    start_date,
-                    end_date,
-                    group_id,
-                    estimate
-                )
-                VALUES (
-                    $1,
-                    $2,
-                    $3,
-                    $4,
-                    $5,
-                    $6
-                )
-                RETURNING
-                    id as "id: TaskId"
-            "#,
-            params.responsible_id.0,
-            params.title,
-            params.period.start(),
-            params.period.end(),
-            params.group_id.map(|id| id.0),
-            params.estimate.map(PgInterval::from),
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to create task"))?;
-
-        match params.recurrence {
-            None => (),
-            Some(TaskRecurrenceInput::Every(frequency)) => {
-                sqlx::query!(
-                    r#"
-                        INSERT INTO recurrences (
-                            frequency,
-                            is_every,
-                            current_task_id
-                        )
-                        VALUES (
-                            $1,
-                            true,
-                            $2
-                        )
-                    "#,
-                    Some(PgInterval::from(frequency)),
-                    task_id.0
-                )
-                .execute(&self.pool)
-                .await
-                .map_err(|_| Status::internal("Failed to create recurrence"))?;
-            }
-            Some(TaskRecurrenceInput::Checked(frequency)) => {
-                sqlx::query!(
-                    r#"
-                        INSERT INTO recurrences (
-                            frequency,
-                            is_every,
-                            current_task_id
-                        )
-                        VALUES (
-                            $1,
-                            false,
-                            $2
-                        )
-                    "#,
-                    Some(PgInterval::from(frequency)),
-                    task_id.0
-                )
-                .execute(&self.pool)
-                .await
-                .map_err(|_| Status::internal("Failed to create recurrence"))?;
-            }
-        }
-
-        self.get_task_unchecked(task_id).await?.try_into()
-    }
-
-    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
-        self.validate_responsible_and_group(params.user_id, params.responsible_id, params.group_id)
-            .await?;
-
-        let current_task = self.get_task_unchecked(params.task_id).await?;
-
-        if let Some(current_task_id) = current_task.recurrence_current_task_id {
-            if current_task_id != params.task_id.0 {
-                return Err(Status::failed_precondition(
-                    "Recurring tasks may only be updated when current",
-                ));
-            }
-        }
-
-        let task_id = sqlx::query_scalar!(
-            r#"
-                UPDATE
-                    tasks t
-                SET
-                    title = $3,
-                    start_date = $4,
-                    end_date = $5,
-                    responsible_user_id = $6,
-                    group_id = $7,
-                    estimate = $8
-                WHERE
-                    t.id = $2 AND
-                    -- Permission check
-                    (
-                        -- Viewer is responsible
-                        t.responsible_user_id = $1 OR
-                        -- Viewer is in task group
-                        EXISTS (
-                            SELECT
-                            FROM
-                                users_groups ug
-                            WHERE
-                                ug.group_id = t.group_id AND
-                                ug.user_id = $1
-                        )
+            let task_id = sqlx::query_scalar!(
+                r#"
+                    INSERT INTO tasks (
+                        responsible_user_id,
+                        title,
+                        start_date,
+                        end_date,
+                        group_id,
+                        estimate
                     )
-                RETURNING
-                    id as "id: TaskId"
-            "#,
-            params.user_id.0,
-            params.task_id.0,
-            params.title,
-            params.period.start(),
-            params.period.end(),
-            params.responsible_id.0,
-            params.group_id.map(|id| id.0),
-            params.estimate.map(PgInterval::from),
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to update task"))?;
+                    VALUES (
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5,
+                        $6
+                    )
+                    RETURNING
+                        id as "id: TaskId"
+                "#,
+                params.responsible_id.0,
+                params.title,
+                params.period.start(),
+                params.period.end(),
+                params.group_id.map(|id| id.0),
+                params.estimate.map(PgInterval::from),
+            )
+            .fetch_one(&mut tx)
+            .await
+            .map_err(|_| Status::internal("Failed to create task"))?;
 
-        match params.recurrence {
-            None => {
-                if let Some(recurrence_id) = current_task.recurrence_id {
-                    sqlx::query!(
-                        r#"
-                            DELETE FROM
-                                recurrences r
-                            WHERE
-                                r.id = $1
-                        "#,
-                        recurrence_id
-                    )
-                    .execute(&self.pool)
-                    .await
-                    .map_err(|_| Status::internal("Failed to delete recurrence"))?;
-                }
-            }
-            Some(TaskRecurrenceInput::Every(frequency)) => {
-                if let Some(recurrence_id) = current_task.recurrence_id {
-                    sqlx::query!(
-                        r#"
-                            UPDATE
-                                recurrences r
-                            SET
-                                frequency = $1,
-                                is_every = true
-                            WHERE
-                                r.id = $2
-                        "#,
-                        Some(PgInterval::from(frequency)),
-                        recurrence_id
-                    )
-                    .execute(&self.pool)
-                    .await
-                    .map_err(|_| Status::internal("Failed to update recurrence"))?;
-                } else {
+            match params.recurrence {
+                None => (),
+                Some(TaskRecurrenceInput::Every(frequency)) => {
                     sqlx::query!(
                         r#"
                             INSERT INTO recurrences (
@@ -773,30 +704,11 @@ impl Database {
                         Some(PgInterval::from(frequency)),
                         task_id.0
                     )
-                    .execute(&self.pool)
+                    .execute(&mut tx)
                     .await
-                    .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                    .map_err(|_| Status::internal("Failed to create recurrence"))?;
                 }
-            }
-            Some(TaskRecurrenceInput::Checked(frequency)) => {
-                if let Some(recurrence_id) = current_task.recurrence_id {
-                    sqlx::query!(
-                        r#"
-                            UPDATE
-                                recurrences r
-                            SET
-                                frequency = $1,
-                                is_every = false
-                            WHERE
-                                r.id = $2
-                        "#,
-                        Some(PgInterval::from(frequency)),
-                        recurrence_id
-                    )
-                    .execute(&self.pool)
-                    .await
-                    .map_err(|_| Status::internal("Failed to update recurrence"))?;
-                } else {
+                Some(TaskRecurrenceInput::Checked(frequency)) => {
                     sqlx::query!(
                         r#"
                             INSERT INTO recurrences (
@@ -813,14 +725,195 @@ impl Database {
                         Some(PgInterval::from(frequency)),
                         task_id.0
                     )
-                    .execute(&self.pool)
+                    .execute(&mut tx)
                     .await
-                    .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                    .map_err(|_| Status::internal("Failed to create recurrence"))?;
                 }
             }
-        }
 
-        self.get_task_unchecked(task_id).await?.try_into()
+            self.get_task_unchecked(&mut tx, task_id)
+                .await
+                .map_err(|_| Status::internal("Failed to load task after create"))?
+                .try_into()
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
+    }
+
+    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
+        let mut tx = self.begin_transaction().await?;
+
+        let result = async {
+            self.validate_responsible_and_group(
+                &mut tx,
+                params.user_id,
+                params.responsible_id,
+                params.group_id,
+            )
+            .await?;
+
+            let current_task = self
+                .get_task_unchecked(&mut tx, params.task_id)
+                .await
+                .map_err(|_| Status::not_found("Task not found"))?;
+
+            if !current_task.can_update() {
+                return Err(Status::permission_denied(
+                    "You are not allowed to update this item",
+                ));
+            }
+
+            let task_id = sqlx::query_scalar!(
+                r#"
+                    UPDATE
+                        tasks t
+                    SET
+                        title = $3,
+                        start_date = $4,
+                        end_date = $5,
+                        responsible_user_id = $6,
+                        group_id = $7,
+                        estimate = $8
+                    WHERE
+                        t.id = $2 AND
+                        -- Permission check
+                        (
+                            -- Viewer is responsible
+                            t.responsible_user_id = $1 OR
+                            -- Viewer is in task group
+                            EXISTS (
+                                SELECT
+                                FROM
+                                    users_groups ug
+                                WHERE
+                                    ug.group_id = t.group_id AND
+                                    ug.user_id = $1
+                            )
+                        )
+                    RETURNING
+                        id as "id: TaskId"
+                "#,
+                params.user_id.0,
+                params.task_id.0,
+                params.title,
+                params.period.start(),
+                params.period.end(),
+                params.responsible_id.0,
+                params.group_id.map(|id| id.0),
+                params.estimate.map(PgInterval::from),
+            )
+            .fetch_one(&mut tx)
+            .await
+            .map_err(|_| Status::permission_denied("You are not allowed to update this item"))?;
+
+            match params.recurrence {
+                None => {
+                    if let Some(recurrence_id) = current_task.recurrence_id {
+                        sqlx::query!(
+                            r#"
+                                DELETE FROM
+                                    recurrences r
+                                WHERE
+                                    r.id = $1
+                            "#,
+                            recurrence_id
+                        )
+                        .execute(&mut tx)
+                        .await
+                        .map_err(|_| Status::internal("Failed to delete recurrence"))?;
+                    }
+                }
+                Some(TaskRecurrenceInput::Every(frequency)) => {
+                    if let Some(recurrence_id) = current_task.recurrence_id {
+                        sqlx::query!(
+                            r#"
+                                UPDATE
+                                    recurrences r
+                                SET
+                                    frequency = $1,
+                                    is_every = true
+                                WHERE
+                                    r.id = $2
+                            "#,
+                            Some(PgInterval::from(frequency)),
+                            recurrence_id
+                        )
+                        .execute(&mut tx)
+                        .await
+                        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                    } else {
+                        sqlx::query!(
+                            r#"
+                                INSERT INTO recurrences (
+                                    frequency,
+                                    is_every,
+                                    current_task_id
+                                )
+                                VALUES (
+                                    $1,
+                                    true,
+                                    $2
+                                )
+                            "#,
+                            Some(PgInterval::from(frequency)),
+                            task_id.0
+                        )
+                        .execute(&mut tx)
+                        .await
+                        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                    }
+                }
+                Some(TaskRecurrenceInput::Checked(frequency)) => {
+                    if let Some(recurrence_id) = current_task.recurrence_id {
+                        sqlx::query!(
+                            r#"
+                                UPDATE
+                                    recurrences r
+                                SET
+                                    frequency = $1,
+                                    is_every = false
+                                WHERE
+                                    r.id = $2
+                            "#,
+                            Some(PgInterval::from(frequency)),
+                            recurrence_id
+                        )
+                        .execute(&mut tx)
+                        .await
+                        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                    } else {
+                        sqlx::query!(
+                            r#"
+                                INSERT INTO recurrences (
+                                    frequency,
+                                    is_every,
+                                    current_task_id
+                                )
+                                VALUES (
+                                    $1,
+                                    false,
+                                    $2
+                                )
+                            "#,
+                            Some(PgInterval::from(frequency)),
+                            task_id.0
+                        )
+                        .execute(&mut tx)
+                        .await
+                        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                    }
+                }
+            }
+
+            self.get_task_unchecked(&mut tx, task_id)
+                .await
+                .map_err(|_| Status::internal("Failed to load task after update"))?
+                .try_into()
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 
     pub async fn toggle_task_completed(
@@ -829,76 +922,119 @@ impl Database {
         task_id: TaskId,
         is_completed: bool,
     ) -> Result<ToggleResult, Status> {
-        sqlx::query_as!(
-            ToggleResult,
-            r#"
-                UPDATE
-                    tasks t
-                SET
-                    completed_at = CASE
-                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
-                        ELSE NULL
-                    END
-                WHERE
-                    t.id = $2 AND
-                    -- Permission check
-                    (
-                        -- Viewer is responsible
-                        t.responsible_user_id = $1 OR
-                        -- Viewer is in task group
-                        EXISTS (
-                            SELECT
-                            FROM
-                                users_groups ug
-                            WHERE
-                                ug.group_id = t.group_id AND
-                                ug.user_id = $1
+        let mut tx = self.begin_transaction().await?;
+
+        let result = async {
+            let current_task = self
+                .get_task_unchecked(&mut tx, task_id)
+                .await
+                .map_err(|_| Status::not_found("Task not found"))?;
+
+            if current_task.completed_at.is_some() == is_completed {
+                return Ok(ToggleResult {
+                    id: task_id,
+                    completed_at: current_task.completed_at,
+                });
+            }
+
+            if !current_task.can_toggle() {
+                return Err(Status::permission_denied(
+                    "You are not allowed to toggle this item",
+                ));
+            }
+
+            sqlx::query_as!(
+                ToggleResult,
+                r#"
+                    UPDATE
+                        tasks t
+                    SET
+                        completed_at = CASE
+                            WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+                            ELSE NULL
+                        END
+                    WHERE
+                        t.id = $2 AND
+                        -- Permission check
+                        (
+                            -- Viewer is responsible
+                            t.responsible_user_id = $1 OR
+                            -- Viewer is in task group
+                            EXISTS (
+                                SELECT
+                                FROM
+                                    users_groups ug
+                                WHERE
+                                    ug.group_id = t.group_id AND
+                                    ug.user_id = $1
+                            )
                         )
-                    )
-                RETURNING
-                    id as "id: TaskId",
-                    completed_at
-            "#,
-            user_id.0,
-            task_id.0,
-            is_completed,
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to update task"))
+                    RETURNING
+                        id as "id: TaskId",
+                        completed_at
+                "#,
+                user_id.0,
+                task_id.0,
+                is_completed,
+            )
+            .fetch_one(&mut tx)
+            .await
+            .map_err(|_| Status::permission_denied("You are not allowed to toggle this item"))
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 
     pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId, Status> {
-        sqlx::query_as!(
-            DeleteResult,
-            r#"
-                DELETE FROM
-                    tasks t
-                WHERE
-                    t.id = $2 AND
-                    -- Permission check
-                    (
-                        -- Viewer is responsible
-                        t.responsible_user_id = $1 OR
-                        -- Viewer is in task group
-                        EXISTS (
-                            SELECT
-                            FROM
-                                users_groups ug
-                            WHERE
-                                ug.group_id = t.group_id AND
-                                ug.user_id = $1
+        let mut tx = self.begin_transaction().await?;
+
+        let result = async {
+            let current_task = self
+                .get_task_unchecked(&mut tx, task_id)
+                .await
+                .map_err(|_| Status::not_found("Task not found"))?;
+
+            if !current_task.can_delete() {
+                return Err(Status::permission_denied(
+                    "You are not allowed to delete this item",
+                ));
+            }
+
+            sqlx::query_as!(
+                DeleteResult,
+                r#"
+                    DELETE FROM
+                        tasks t
+                    WHERE
+                        t.id = $2 AND
+                        -- Permission check
+                        (
+                            -- Viewer is responsible
+                            t.responsible_user_id = $1 OR
+                            -- Viewer is in task group
+                            EXISTS (
+                                SELECT
+                                FROM
+                                    users_groups ug
+                                WHERE
+                                    ug.group_id = t.group_id AND
+                                    ug.user_id = $1
+                            )
                         )
-                    )
-                RETURNING
-                    id as "id: TaskId"
-            "#,
-            user_id.0,
-            task_id.0,
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to delete task"))
-        .map(|result| result.id)
+                    RETURNING
+                        id as "id: TaskId"
+                "#,
+                user_id.0,
+                task_id.0,
+            )
+            .fetch_one(&mut tx)
+            .await
+            .map_err(|_| Status::permission_denied("You are not allowed to delete this item"))
+            .map(|result| result.id)
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 }

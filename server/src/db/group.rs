@@ -6,7 +6,7 @@ use std::fmt::Display;
 use anyhow::Result;
 use tonic::Status;
 
-use super::{database::Database, UserId};
+use super::{Database, Tx, UserId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -43,7 +43,6 @@ pub struct DeleteResult {
 }
 
 impl Database {
-    #[allow(clippy::needless_lifetimes)]
     pub fn get_user_groups<'a>(
         &'a self,
         user_id: UserId,
@@ -65,7 +64,7 @@ impl Database {
             "#,
             user_id.0
         )
-        .fetch(&self.pool)
+        .fetch(self)
         .map(|i| {
             i.or(Err(Status::internal(
                 "unexpected error loading user groups",
@@ -78,11 +77,18 @@ impl Database {
         user_id: UserId,
         title: &str,
     ) -> Result<GroupResult, Status> {
-        let group = self.create_group(title).await?;
+        let mut tx = self.begin_transaction().await?;
 
-        self.join_group(user_id, group.id).await?;
+        let result = async {
+            let group = self.create_group(&mut tx, title).await?;
 
-        Ok(group)
+            self.join_group(&mut tx, user_id, group.id).await?;
+
+            Ok(group)
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 
     pub async fn join_group_by_uid(
@@ -90,14 +96,21 @@ impl Database {
         user_id: UserId,
         uid: &Uuid,
     ) -> Result<GroupResult, Status> {
-        let group = self.get_group_by_uid(uid).await?;
+        let mut tx = self.begin_transaction().await?;
 
-        self.join_group(user_id, group.id).await?;
+        let result = async {
+            let group = self.get_group_by_uid(&mut tx, uid).await?;
 
-        Ok(group)
+            self.join_group(&mut tx, user_id, group.id).await?;
+
+            Ok(group)
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 
-    async fn create_group(&self, title: &str) -> Result<GroupResult, Status> {
+    async fn create_group(&self, tx: &mut Tx<'_>, title: &str) -> Result<GroupResult, Status> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -114,12 +127,12 @@ impl Database {
             "#,
             title
         )
-        .fetch_one(&self.pool)
+        .fetch_one(tx)
         .await
         .map_err(|_| Status::internal("Failed to create group"))
     }
 
-    async fn get_group_by_uid(&self, uid: &Uuid) -> Result<GroupResult, Status> {
+    async fn get_group_by_uid(&self, tx: &mut Tx<'_>, uid: &Uuid) -> Result<GroupResult, Status> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -134,12 +147,17 @@ impl Database {
             "#,
             uid
         )
-        .fetch_one(&self.pool)
+        .fetch_one(tx)
         .await
         .map_err(|_| Status::not_found("Group not found"))
     }
 
-    async fn join_group(&self, user_id: UserId, group_id: GroupId) -> Result<(), Status> {
+    async fn join_group(
+        &self,
+        tx: &mut Tx<'_>,
+        user_id: UserId,
+        group_id: GroupId,
+    ) -> Result<(), Status> {
         sqlx::query!(
             r#"
                 INSERT INTO users_groups (
@@ -154,7 +172,7 @@ impl Database {
             user_id.0,
             group_id.0
         )
-        .execute(&self.pool)
+        .execute(tx)
         .await
         .map_err(|_| Status::internal("Failed to update group"))?;
 
@@ -193,12 +211,16 @@ impl Database {
             group_id.0,
             title
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self)
         .await
         .map_err(|_| Status::internal("Failed to update group"))
     }
 
-    async fn delete_group_if_empty(&self, group_id: GroupId) -> Result<(), Status> {
+    async fn delete_group_if_empty(
+        &self,
+        tx: &mut Tx<'_>,
+        group_id: GroupId,
+    ) -> Result<(), Status> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -215,7 +237,7 @@ impl Database {
             "#,
             group_id.0,
         )
-        .execute(&self.pool)
+        .execute(tx)
         .await
         .map_err(|_| Status::internal("Failed to delete group"))?;
 
@@ -223,42 +245,49 @@ impl Database {
     }
 
     pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Status> {
-        // Unset task group where viewer is responsible
-        sqlx::query!(
-            r#"
-                UPDATE
-                    tasks t
-                SET
-                    group_id = NULL
-                WHERE
-                    t.responsible_user_id = $1 AND
-                    t.group_id = $2
-            "#,
-            user_id.0,
-            group_id.0,
-        )
-        .execute(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to leave group"))?;
+        let mut tx = self.begin_transaction().await?;
 
-        // Remove viewer from group
-        sqlx::query!(
-            r#"
-                DELETE FROM
-                    users_groups ug
-                WHERE
-                    ug.user_id = $1 AND
-                    ug.group_id = $2
-            "#,
-            user_id.0,
-            group_id.0,
-        )
-        .execute(&self.pool)
-        .await
-        .map_err(|_| Status::internal("Failed to leave group"))?;
+        let result = async {
+            // Unset task group where viewer is responsible
+            sqlx::query!(
+                r#"
+                    UPDATE
+                        tasks t
+                    SET
+                        group_id = NULL
+                    WHERE
+                        t.responsible_user_id = $1 AND
+                        t.group_id = $2
+                "#,
+                user_id.0,
+                group_id.0,
+            )
+            .execute(&mut tx)
+            .await
+            .map_err(|_| Status::internal("Failed to leave group"))?;
 
-        self.delete_group_if_empty(group_id).await?;
+            // Remove viewer from group
+            sqlx::query!(
+                r#"
+                    DELETE FROM
+                        users_groups ug
+                    WHERE
+                        ug.user_id = $1 AND
+                        ug.group_id = $2
+                "#,
+                user_id.0,
+                group_id.0,
+            )
+            .execute(&mut tx)
+            .await
+            .map_err(|_| Status::internal("Failed to leave group"))?;
 
-        Ok(group_id)
+            self.delete_group_if_empty(&mut tx, group_id).await?;
+
+            Ok(group_id)
+        }
+        .await;
+
+        self.end_transaction(tx, result).await
     }
 }
