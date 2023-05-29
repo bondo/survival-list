@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:survival_list/create_item/create_item.dart';
 import 'package:survival_list/form_field_widgets/date.dart';
-import 'package:survival_list/form_field_widgets/duration.dart';
 import 'package:survival_list/form_field_widgets/group.dart';
+import 'package:survival_list/form_field_widgets/long_duration.dart';
 import 'package:survival_list/form_field_widgets/person.dart';
+import 'package:survival_list/form_field_widgets/recurrence_kind.dart';
+import 'package:survival_list/form_field_widgets/short_duration.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
@@ -79,6 +81,8 @@ class CreateItemView extends StatelessWidget {
                 _StartDateField(),
                 _EndDateField(),
                 _EstimateField(),
+                _RecurrenceKindField(),
+                _RecurrenceFrequencyField(),
                 _GroupField(),
                 _ResponsibleField()
               ],
@@ -218,7 +222,7 @@ class _EstimateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DurationFormField(
+    return ShortDurationFormField(
       initialValue: context.read<CreateItemBloc>().state.estimate,
       onChanged: (pickedEstimate) {
         context
@@ -226,5 +230,48 @@ class _EstimateField extends StatelessWidget {
             .add(CreateItemEstimateChanged(pickedEstimate));
       },
     );
+  }
+}
+
+class _RecurrenceKindField extends StatelessWidget {
+  const _RecurrenceKindField();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<CreateItemBloc>().state;
+
+    return RecurrenceKindFormField(
+      value: state.recurrenceKind,
+      onChanged: (pickedRecurrenceKind) {
+        context
+            .read<CreateItemBloc>()
+            .add(CreateItemRecurrenceKindChanged(pickedRecurrenceKind));
+      },
+      label: l10n.createItemRecurrenceKindLabel,
+    );
+  }
+}
+
+class _RecurrenceFrequencyField extends StatelessWidget {
+  const _RecurrenceFrequencyField();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CreateItemBloc>().state;
+
+    return state.recurrenceKind == RecurrenceKind.none
+        ? const SizedBox.shrink()
+        : LongDurationFormField(
+            initialValue:
+                context.read<CreateItemBloc>().state.recurrenceFrequency,
+            onChanged: (pickedRecurrenceFrequency) {
+              context.read<CreateItemBloc>().add(
+                    CreateItemRecurrenceFrequencyChanged(
+                      pickedRecurrenceFrequency,
+                    ),
+                  );
+            },
+          );
   }
 }

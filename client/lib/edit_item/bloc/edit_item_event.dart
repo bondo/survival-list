@@ -37,10 +37,28 @@ class EditItemEndDateChanged extends EditItemEvent {
 class EditItemEstimateChanged extends EditItemEvent {
   const EditItemEstimateChanged(this.estimate);
 
-  final SimpleDuration estimate;
+  final ShortDuration estimate;
 
   @override
   List<Object> get props => [estimate];
+}
+
+class EditItemRecurrenceKindChanged extends EditItemEvent {
+  const EditItemRecurrenceKindChanged(this.kind);
+
+  final RecurrenceKind kind;
+
+  @override
+  List<Object> get props => [kind];
+}
+
+class EditItemRecurrenceFrequencyChanged extends EditItemEvent {
+  const EditItemRecurrenceFrequencyChanged(this.frequency);
+
+  final LongDuration frequency;
+
+  @override
+  List<Object> get props => [frequency];
 }
 
 class EditItemGroupChanged extends EditItemEvent {

@@ -108,6 +108,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       endDate: item.endDate,
       estimate: item.estimate,
       group: item.group,
+      recurrence: item.recurrence,
       responsible: item.responsible,
     );
   }

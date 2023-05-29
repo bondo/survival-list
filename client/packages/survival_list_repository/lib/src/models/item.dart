@@ -11,6 +11,7 @@ class Item extends Equatable {
     required this.startDate,
     required this.endDate,
     required this.estimate,
+    required this.recurrence,
     required this.responsible,
     required this.group,
   });
@@ -20,7 +21,8 @@ class Item extends Equatable {
   final bool isCompleted;
   final DateTime? startDate;
   final DateTime? endDate;
-  final SimpleDuration estimate;
+  final ShortDuration estimate;
+  final Recurrence recurrence;
   final Person? responsible;
   final Group? group;
 
@@ -30,7 +32,8 @@ class Item extends Equatable {
     bool Function()? isCompleted,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    SimpleDuration Function()? estimate,
+    ShortDuration Function()? estimate,
+    Recurrence Function()? recurrence,
     Person? Function()? responsible,
     Group? Function()? group,
   }) {
@@ -41,6 +44,7 @@ class Item extends Equatable {
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       estimate: estimate != null ? estimate() : this.estimate,
+      recurrence: recurrence != null ? recurrence() : this.recurrence,
       responsible: responsible != null ? responsible() : this.responsible,
       group: group != null ? group() : this.group,
     );
@@ -54,6 +58,7 @@ class Item extends Equatable {
         startDate,
         endDate,
         estimate,
+        recurrence,
         responsible,
         group
       ];

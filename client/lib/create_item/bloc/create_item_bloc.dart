@@ -16,6 +16,8 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     on<CreateItemEndDateChanged>(_onEndDateChanged);
     on<CreateItemEstimateChanged>(_onEstimateChanged);
     on<CreateItemGroupChanged>(_onGroupChanged);
+    on<CreateItemRecurrenceFrequencyChanged>(_onRecurrenceFrequencyChanged);
+    on<CreateItemRecurrenceKindChanged>(_onRecurrenceKindChanged);
     on<CreateItemResponsibleChanged>(_onResponsibleChanged);
     on<CreateItemSubmitted>(_onSubmitted);
     on<CreateItemSubscriptionRequested>(_onSubscriptionRequested);
@@ -74,6 +76,20 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     add(const CreateItemResponsibleChanged(null));
   }
 
+  void _onRecurrenceKindChanged(
+    CreateItemRecurrenceKindChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(recurrenceKind: () => event.kind));
+  }
+
+  void _onRecurrenceFrequencyChanged(
+    CreateItemRecurrenceFrequencyChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(recurrenceFrequency: () => event.frequency));
+  }
+
   void _onResponsibleChanged(
     CreateItemResponsibleChanged event,
     Emitter<CreateItemState> emit,
@@ -94,6 +110,10 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
         endDate: state.endDate,
         estimate: state.estimate,
         group: state.group,
+        recurrence: Recurrence(
+          kind: state.recurrenceKind,
+          frequency: state.recurrenceFrequency,
+        ),
         responsible: state.responsible,
       );
       emit(state.copyWith(status: () => CreateItemStatus.success));

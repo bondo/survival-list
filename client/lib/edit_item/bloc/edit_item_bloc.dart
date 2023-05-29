@@ -20,6 +20,8 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
             estimate: item.estimate,
             group: item.group,
             responsible: item.responsible,
+            recurrenceKind: item.recurrence.kind,
+            recurrenceFrequency: item.recurrence.frequency,
           ),
         ) {
     on<EditItemTitleChanged>(_onTitleChanged);
@@ -27,6 +29,8 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     on<EditItemEndDateChanged>(_onEndDateChanged);
     on<EditItemEstimateChanged>(_onEstimateChanged);
     on<EditItemGroupChanged>(_onGroupChanged);
+    on<EditItemRecurrenceFrequencyChanged>(_onRecurrenceFrequencyChanged);
+    on<EditItemRecurrenceKindChanged>(_onRecurrenceKindChanged);
     on<EditItemResponsibleChanged>(_onResponsibleChanged);
     on<EditItemSubmitted>(_onSubmitted);
     on<EditItemSubscriptionRequested>(_onSubscriptionRequested);
@@ -85,6 +89,20 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     add(const EditItemResponsibleChanged(null));
   }
 
+  void _onRecurrenceKindChanged(
+    EditItemRecurrenceKindChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(recurrenceKind: () => event.kind));
+  }
+
+  void _onRecurrenceFrequencyChanged(
+    EditItemRecurrenceFrequencyChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(recurrenceFrequency: () => event.frequency));
+  }
+
   void _onResponsibleChanged(
     EditItemResponsibleChanged event,
     Emitter<EditItemState> emit,
@@ -103,6 +121,10 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
       endDate: () => state.endDate,
       estimate: () => state.estimate,
       group: () => state.group,
+      recurrence: () => Recurrence(
+        kind: state.recurrenceKind,
+        frequency: state.recurrenceFrequency,
+      ),
       responsible: () => state.responsible,
     );
 

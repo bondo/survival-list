@@ -37,10 +37,28 @@ class CreateItemEndDateChanged extends CreateItemEvent {
 class CreateItemEstimateChanged extends CreateItemEvent {
   const CreateItemEstimateChanged(this.estimate);
 
-  final SimpleDuration estimate;
+  final ShortDuration estimate;
 
   @override
   List<Object> get props => [estimate];
+}
+
+class CreateItemRecurrenceKindChanged extends CreateItemEvent {
+  const CreateItemRecurrenceKindChanged(this.kind);
+
+  final RecurrenceKind kind;
+
+  @override
+  List<Object> get props => [kind];
+}
+
+class CreateItemRecurrenceFrequencyChanged extends CreateItemEvent {
+  const CreateItemRecurrenceFrequencyChanged(this.frequency);
+
+  final LongDuration frequency;
+
+  @override
+  List<Object> get props => [frequency];
 }
 
 class CreateItemGroupChanged extends CreateItemEvent {

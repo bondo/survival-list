@@ -122,14 +122,28 @@ class LoginResponse extends $pb.GeneratedMessage {
   User ensureUser() => $_ensure(0);
 }
 
+enum CreateTaskRequest_Recurring {
+  checked, 
+  every, 
+  notSet
+}
+
 class CreateTaskRequest extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, CreateTaskRequest_Recurring> _CreateTaskRequest_RecurringByTag = {
+    7 : CreateTaskRequest_Recurring.checked,
+    8 : CreateTaskRequest_Recurring.every,
+    0 : CreateTaskRequest_Recurring.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..oo(0, [7, 8])
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$0.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
     ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..aOM<Duration>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
+    ..aOM<RecurringChecked>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
+    ..aOM<RecurringEveryRequest>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryRequest.create)
     ..hasRequiredFields = false
   ;
 
@@ -141,6 +155,8 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     $core.int? responsibleId,
     $core.int? groupId,
     Duration? estimate,
+    RecurringChecked? checked,
+    RecurringEveryRequest? every,
   }) {
     final _result = create();
     if (title != null) {
@@ -160,6 +176,12 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     }
     if (estimate != null) {
       _result.estimate = estimate;
+    }
+    if (checked != null) {
+      _result.checked = checked;
+    }
+    if (every != null) {
+      _result.every = every;
     }
     return _result;
   }
@@ -183,6 +205,9 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static CreateTaskRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateTaskRequest>(create);
   static CreateTaskRequest? _defaultInstance;
+
+  CreateTaskRequest_Recurring whichRecurring() => _CreateTaskRequest_RecurringByTag[$_whichOneof(0)]!;
+  void clearRecurring() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.String get title => $_getSZ(0);
@@ -243,10 +268,44 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   void clearEstimate() => clearField(6);
   @$pb.TagNumber(6)
   Duration ensureEstimate() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  RecurringChecked get checked => $_getN(6);
+  @$pb.TagNumber(7)
+  set checked(RecurringChecked v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasChecked() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearChecked() => clearField(7);
+  @$pb.TagNumber(7)
+  RecurringChecked ensureChecked() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  RecurringEveryRequest get every => $_getN(7);
+  @$pb.TagNumber(8)
+  set every(RecurringEveryRequest v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasEvery() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearEvery() => clearField(8);
+  @$pb.TagNumber(8)
+  RecurringEveryRequest ensureEvery() => $_ensure(7);
+}
+
+enum CreateTaskResponse_Recurring {
+  checked, 
+  every, 
+  notSet
 }
 
 class CreateTaskResponse extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, CreateTaskResponse_Recurring> _CreateTaskResponse_RecurringByTag = {
+    8 : CreateTaskResponse_Recurring.checked,
+    9 : CreateTaskResponse_Recurring.every,
+    0 : CreateTaskResponse_Recurring.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..oo(0, [8, 9])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
@@ -254,6 +313,11 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..aOM<User>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
+    ..aOM<RecurringChecked>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
+    ..aOM<RecurringEveryResponse>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryResponse.create)
+    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
+    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
+    ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..hasRequiredFields = false
   ;
 
@@ -266,6 +330,11 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     User? responsible,
     Group? group,
     Duration? estimate,
+    RecurringChecked? checked,
+    RecurringEveryResponse? every,
+    $core.bool? canUpdate,
+    $core.bool? canToggle,
+    $core.bool? canDelete,
   }) {
     final _result = create();
     if (id != null) {
@@ -289,6 +358,21 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     if (estimate != null) {
       _result.estimate = estimate;
     }
+    if (checked != null) {
+      _result.checked = checked;
+    }
+    if (every != null) {
+      _result.every = every;
+    }
+    if (canUpdate != null) {
+      _result.canUpdate = canUpdate;
+    }
+    if (canToggle != null) {
+      _result.canToggle = canToggle;
+    }
+    if (canDelete != null) {
+      _result.canDelete = canDelete;
+    }
     return _result;
   }
   factory CreateTaskResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
@@ -311,6 +395,9 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static CreateTaskResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateTaskResponse>(create);
   static CreateTaskResponse? _defaultInstance;
+
+  CreateTaskResponse_Recurring whichRecurring() => _CreateTaskResponse_RecurringByTag[$_whichOneof(0)]!;
+  void clearRecurring() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
@@ -384,10 +471,71 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearEstimate() => clearField(7);
   @$pb.TagNumber(7)
   Duration ensureEstimate() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  RecurringChecked get checked => $_getN(7);
+  @$pb.TagNumber(8)
+  set checked(RecurringChecked v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasChecked() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearChecked() => clearField(8);
+  @$pb.TagNumber(8)
+  RecurringChecked ensureChecked() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  RecurringEveryResponse get every => $_getN(8);
+  @$pb.TagNumber(9)
+  set every(RecurringEveryResponse v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasEvery() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearEvery() => clearField(9);
+  @$pb.TagNumber(9)
+  RecurringEveryResponse ensureEvery() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $core.bool get canUpdate => $_getBF(9);
+  @$pb.TagNumber(10)
+  set canUpdate($core.bool v) { $_setBool(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasCanUpdate() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearCanUpdate() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.bool get canToggle => $_getBF(10);
+  @$pb.TagNumber(11)
+  set canToggle($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasCanToggle() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCanToggle() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.bool get canDelete => $_getBF(11);
+  @$pb.TagNumber(12)
+  set canDelete($core.bool v) { $_setBool(11, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasCanDelete() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearCanDelete() => clearField(12);
+}
+
+enum UpdateTaskRequest_Recurring {
+  checked, 
+  every, 
+  notSet
 }
 
 class UpdateTaskRequest extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, UpdateTaskRequest_Recurring> _UpdateTaskRequest_RecurringByTag = {
+    8 : UpdateTaskRequest_Recurring.checked,
+    9 : UpdateTaskRequest_Recurring.every,
+    0 : UpdateTaskRequest_Recurring.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..oo(0, [8, 9])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
@@ -395,6 +543,8 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
+    ..aOM<RecurringChecked>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
+    ..aOM<RecurringEveryRequest>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryRequest.create)
     ..hasRequiredFields = false
   ;
 
@@ -407,6 +557,8 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     $core.int? responsibleId,
     $core.int? groupId,
     Duration? estimate,
+    RecurringChecked? checked,
+    RecurringEveryRequest? every,
   }) {
     final _result = create();
     if (id != null) {
@@ -430,6 +582,12 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     if (estimate != null) {
       _result.estimate = estimate;
     }
+    if (checked != null) {
+      _result.checked = checked;
+    }
+    if (every != null) {
+      _result.every = every;
+    }
     return _result;
   }
   factory UpdateTaskRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
@@ -452,6 +610,9 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static UpdateTaskRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateTaskRequest>(create);
   static UpdateTaskRequest? _defaultInstance;
+
+  UpdateTaskRequest_Recurring whichRecurring() => _UpdateTaskRequest_RecurringByTag[$_whichOneof(0)]!;
+  void clearRecurring() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
@@ -521,10 +682,44 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   void clearEstimate() => clearField(7);
   @$pb.TagNumber(7)
   Duration ensureEstimate() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  RecurringChecked get checked => $_getN(7);
+  @$pb.TagNumber(8)
+  set checked(RecurringChecked v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasChecked() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearChecked() => clearField(8);
+  @$pb.TagNumber(8)
+  RecurringChecked ensureChecked() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  RecurringEveryRequest get every => $_getN(8);
+  @$pb.TagNumber(9)
+  set every(RecurringEveryRequest v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasEvery() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearEvery() => clearField(9);
+  @$pb.TagNumber(9)
+  RecurringEveryRequest ensureEvery() => $_ensure(8);
+}
+
+enum UpdateTaskResponse_Recurring {
+  checked, 
+  every, 
+  notSet
 }
 
 class UpdateTaskResponse extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, UpdateTaskResponse_Recurring> _UpdateTaskResponse_RecurringByTag = {
+    9 : UpdateTaskResponse_Recurring.checked,
+    10 : UpdateTaskResponse_Recurring.every,
+    0 : UpdateTaskResponse_Recurring.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTaskResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..oo(0, [9, 10])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
@@ -533,6 +728,11 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
+    ..aOM<RecurringChecked>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
+    ..aOM<RecurringEveryResponse>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryResponse.create)
+    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
+    ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
+    ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..hasRequiredFields = false
   ;
 
@@ -546,6 +746,11 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     User? responsible,
     Group? group,
     Duration? estimate,
+    RecurringChecked? checked,
+    RecurringEveryResponse? every,
+    $core.bool? canUpdate,
+    $core.bool? canToggle,
+    $core.bool? canDelete,
   }) {
     final _result = create();
     if (id != null) {
@@ -572,6 +777,21 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     if (estimate != null) {
       _result.estimate = estimate;
     }
+    if (checked != null) {
+      _result.checked = checked;
+    }
+    if (every != null) {
+      _result.every = every;
+    }
+    if (canUpdate != null) {
+      _result.canUpdate = canUpdate;
+    }
+    if (canToggle != null) {
+      _result.canToggle = canToggle;
+    }
+    if (canDelete != null) {
+      _result.canDelete = canDelete;
+    }
     return _result;
   }
   factory UpdateTaskResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
@@ -594,6 +814,9 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static UpdateTaskResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateTaskResponse>(create);
   static UpdateTaskResponse? _defaultInstance;
+
+  UpdateTaskResponse_Recurring whichRecurring() => _UpdateTaskResponse_RecurringByTag[$_whichOneof(0)]!;
+  void clearRecurring() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
@@ -676,6 +899,55 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearEstimate() => clearField(8);
   @$pb.TagNumber(8)
   Duration ensureEstimate() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  RecurringChecked get checked => $_getN(8);
+  @$pb.TagNumber(9)
+  set checked(RecurringChecked v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasChecked() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearChecked() => clearField(9);
+  @$pb.TagNumber(9)
+  RecurringChecked ensureChecked() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  RecurringEveryResponse get every => $_getN(9);
+  @$pb.TagNumber(10)
+  set every(RecurringEveryResponse v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasEvery() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearEvery() => clearField(10);
+  @$pb.TagNumber(10)
+  RecurringEveryResponse ensureEvery() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  $core.bool get canUpdate => $_getBF(10);
+  @$pb.TagNumber(11)
+  set canUpdate($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasCanUpdate() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCanUpdate() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.bool get canToggle => $_getBF(11);
+  @$pb.TagNumber(12)
+  set canToggle($core.bool v) { $_setBool(11, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasCanToggle() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearCanToggle() => clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.bool get canDelete => $_getBF(12);
+  @$pb.TagNumber(13)
+  set canDelete($core.bool v) { $_setBool(12, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasCanDelete() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearCanDelete() => clearField(13);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -743,6 +1015,8 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ToggleTaskCompletedResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
+    ..aOM<CreateTaskResponse>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'taskCreated', subBuilder: CreateTaskResponse.create)
+    ..aOM<DeleteTaskResponse>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'taskDeleted', subBuilder: DeleteTaskResponse.create)
     ..hasRequiredFields = false
   ;
 
@@ -750,6 +1024,8 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
   factory ToggleTaskCompletedResponse({
     $core.int? id,
     $core.bool? isCompleted,
+    CreateTaskResponse? taskCreated,
+    DeleteTaskResponse? taskDeleted,
   }) {
     final _result = create();
     if (id != null) {
@@ -757,6 +1033,12 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
     }
     if (isCompleted != null) {
       _result.isCompleted = isCompleted;
+    }
+    if (taskCreated != null) {
+      _result.taskCreated = taskCreated;
+    }
+    if (taskDeleted != null) {
+      _result.taskDeleted = taskDeleted;
     }
     return _result;
   }
@@ -798,6 +1080,28 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
   $core.bool hasIsCompleted() => $_has(1);
   @$pb.TagNumber(2)
   void clearIsCompleted() => clearField(2);
+
+  @$pb.TagNumber(3)
+  CreateTaskResponse get taskCreated => $_getN(2);
+  @$pb.TagNumber(3)
+  set taskCreated(CreateTaskResponse v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTaskCreated() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTaskCreated() => clearField(3);
+  @$pb.TagNumber(3)
+  CreateTaskResponse ensureTaskCreated() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  DeleteTaskResponse get taskDeleted => $_getN(3);
+  @$pb.TagNumber(4)
+  set taskDeleted(DeleteTaskResponse v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTaskDeleted() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTaskDeleted() => clearField(4);
+  @$pb.TagNumber(4)
+  DeleteTaskResponse ensureTaskDeleted() => $_ensure(3);
 }
 
 class DeleteTaskRequest extends $pb.GeneratedMessage {
@@ -923,8 +1227,20 @@ class GetTasksRequest extends $pb.GeneratedMessage {
   static GetTasksRequest? _defaultInstance;
 }
 
+enum GetTasksResponse_Recurring {
+  checked, 
+  every, 
+  notSet
+}
+
 class GetTasksResponse extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, GetTasksResponse_Recurring> _GetTasksResponse_RecurringByTag = {
+    9 : GetTasksResponse_Recurring.checked,
+    10 : GetTasksResponse_Recurring.every,
+    0 : GetTasksResponse_Recurring.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetTasksResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..oo(0, [9, 10])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
@@ -933,6 +1249,11 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
+    ..aOM<RecurringChecked>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
+    ..aOM<RecurringEveryResponse>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryResponse.create)
+    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
+    ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
+    ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..hasRequiredFields = false
   ;
 
@@ -946,6 +1267,11 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     User? responsible,
     Group? group,
     Duration? estimate,
+    RecurringChecked? checked,
+    RecurringEveryResponse? every,
+    $core.bool? canUpdate,
+    $core.bool? canToggle,
+    $core.bool? canDelete,
   }) {
     final _result = create();
     if (id != null) {
@@ -972,6 +1298,21 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     if (estimate != null) {
       _result.estimate = estimate;
     }
+    if (checked != null) {
+      _result.checked = checked;
+    }
+    if (every != null) {
+      _result.every = every;
+    }
+    if (canUpdate != null) {
+      _result.canUpdate = canUpdate;
+    }
+    if (canToggle != null) {
+      _result.canToggle = canToggle;
+    }
+    if (canDelete != null) {
+      _result.canDelete = canDelete;
+    }
     return _result;
   }
   factory GetTasksResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
@@ -994,6 +1335,9 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static GetTasksResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetTasksResponse>(create);
   static GetTasksResponse? _defaultInstance;
+
+  GetTasksResponse_Recurring whichRecurring() => _GetTasksResponse_RecurringByTag[$_whichOneof(0)]!;
+  void clearRecurring() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
@@ -1076,6 +1420,55 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearEstimate() => clearField(8);
   @$pb.TagNumber(8)
   Duration ensureEstimate() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  RecurringChecked get checked => $_getN(8);
+  @$pb.TagNumber(9)
+  set checked(RecurringChecked v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasChecked() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearChecked() => clearField(9);
+  @$pb.TagNumber(9)
+  RecurringChecked ensureChecked() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  RecurringEveryResponse get every => $_getN(9);
+  @$pb.TagNumber(10)
+  set every(RecurringEveryResponse v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasEvery() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearEvery() => clearField(10);
+  @$pb.TagNumber(10)
+  RecurringEveryResponse ensureEvery() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  $core.bool get canUpdate => $_getBF(10);
+  @$pb.TagNumber(11)
+  set canUpdate($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasCanUpdate() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCanUpdate() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.bool get canToggle => $_getBF(11);
+  @$pb.TagNumber(12)
+  set canToggle($core.bool v) { $_setBool(11, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasCanToggle() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearCanToggle() => clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.bool get canDelete => $_getBF(12);
+  @$pb.TagNumber(13)
+  set canDelete($core.bool v) { $_setBool(12, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasCanDelete() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearCanDelete() => clearField(13);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
@@ -1975,6 +2368,245 @@ class Duration extends $pb.GeneratedMessage {
   $core.bool hasMinutes() => $_has(2);
   @$pb.TagNumber(3)
   void clearMinutes() => clearField(3);
+}
+
+class RecurringChecked extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecurringChecked', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'days', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'months', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  RecurringChecked._() : super();
+  factory RecurringChecked({
+    $core.int? days,
+    $core.int? months,
+  }) {
+    final _result = create();
+    if (days != null) {
+      _result.days = days;
+    }
+    if (months != null) {
+      _result.months = months;
+    }
+    return _result;
+  }
+  factory RecurringChecked.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecurringChecked.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RecurringChecked clone() => RecurringChecked()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RecurringChecked copyWith(void Function(RecurringChecked) updates) => super.copyWith((message) => updates(message as RecurringChecked)) as RecurringChecked; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RecurringChecked create() => RecurringChecked._();
+  RecurringChecked createEmptyInstance() => create();
+  static $pb.PbList<RecurringChecked> createRepeated() => $pb.PbList<RecurringChecked>();
+  @$core.pragma('dart2js:noInline')
+  static RecurringChecked getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecurringChecked>(create);
+  static RecurringChecked? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get days => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set days($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasDays() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDays() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get months => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set months($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMonths() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMonths() => clearField(2);
+}
+
+class RecurringEveryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecurringEveryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'days', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'months', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  RecurringEveryRequest._() : super();
+  factory RecurringEveryRequest({
+    $core.int? days,
+    $core.int? months,
+  }) {
+    final _result = create();
+    if (days != null) {
+      _result.days = days;
+    }
+    if (months != null) {
+      _result.months = months;
+    }
+    return _result;
+  }
+  factory RecurringEveryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecurringEveryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RecurringEveryRequest clone() => RecurringEveryRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RecurringEveryRequest copyWith(void Function(RecurringEveryRequest) updates) => super.copyWith((message) => updates(message as RecurringEveryRequest)) as RecurringEveryRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RecurringEveryRequest create() => RecurringEveryRequest._();
+  RecurringEveryRequest createEmptyInstance() => create();
+  static $pb.PbList<RecurringEveryRequest> createRepeated() => $pb.PbList<RecurringEveryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static RecurringEveryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecurringEveryRequest>(create);
+  static RecurringEveryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get days => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set days($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasDays() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDays() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get months => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set months($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMonths() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMonths() => clearField(2);
+}
+
+class RecurringEveryResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecurringEveryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'days', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'months', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numReadyToStart', $pb.PbFieldType.O3)
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numReadyToStartIsLowerBound')
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numReachedDeadline', $pb.PbFieldType.O3)
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numReachedDeadlineIsLowerBound')
+    ..hasRequiredFields = false
+  ;
+
+  RecurringEveryResponse._() : super();
+  factory RecurringEveryResponse({
+    $core.int? days,
+    $core.int? months,
+    $core.int? numReadyToStart,
+    $core.bool? numReadyToStartIsLowerBound,
+    $core.int? numReachedDeadline,
+    $core.bool? numReachedDeadlineIsLowerBound,
+  }) {
+    final _result = create();
+    if (days != null) {
+      _result.days = days;
+    }
+    if (months != null) {
+      _result.months = months;
+    }
+    if (numReadyToStart != null) {
+      _result.numReadyToStart = numReadyToStart;
+    }
+    if (numReadyToStartIsLowerBound != null) {
+      _result.numReadyToStartIsLowerBound = numReadyToStartIsLowerBound;
+    }
+    if (numReachedDeadline != null) {
+      _result.numReachedDeadline = numReachedDeadline;
+    }
+    if (numReachedDeadlineIsLowerBound != null) {
+      _result.numReachedDeadlineIsLowerBound = numReachedDeadlineIsLowerBound;
+    }
+    return _result;
+  }
+  factory RecurringEveryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecurringEveryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RecurringEveryResponse clone() => RecurringEveryResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RecurringEveryResponse copyWith(void Function(RecurringEveryResponse) updates) => super.copyWith((message) => updates(message as RecurringEveryResponse)) as RecurringEveryResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RecurringEveryResponse create() => RecurringEveryResponse._();
+  RecurringEveryResponse createEmptyInstance() => create();
+  static $pb.PbList<RecurringEveryResponse> createRepeated() => $pb.PbList<RecurringEveryResponse>();
+  @$core.pragma('dart2js:noInline')
+  static RecurringEveryResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecurringEveryResponse>(create);
+  static RecurringEveryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get days => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set days($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasDays() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDays() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get months => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set months($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMonths() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMonths() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get numReadyToStart => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set numReadyToStart($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasNumReadyToStart() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNumReadyToStart() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get numReadyToStartIsLowerBound => $_getBF(3);
+  @$pb.TagNumber(4)
+  set numReadyToStartIsLowerBound($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasNumReadyToStartIsLowerBound() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearNumReadyToStartIsLowerBound() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get numReachedDeadline => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set numReachedDeadline($core.int v) { $_setSignedInt32(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasNumReachedDeadline() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearNumReachedDeadline() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get numReachedDeadlineIsLowerBound => $_getBF(5);
+  @$pb.TagNumber(6)
+  set numReachedDeadlineIsLowerBound($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasNumReachedDeadlineIsLowerBound() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearNumReachedDeadlineIsLowerBound() => clearField(6);
 }
 
 class APIApi {

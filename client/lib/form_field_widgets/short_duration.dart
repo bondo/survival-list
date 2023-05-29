@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
+import 'package:survival_list/form_field_widgets/duration_component.dart';
 import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
-class DurationFormField extends StatefulWidget {
-  const DurationFormField({
+class ShortDurationFormField extends StatefulWidget {
+  const ShortDurationFormField({
     required this.initialValue,
     required this.onChanged,
     super.key,
   });
 
-  final SimpleDuration initialValue;
-  final void Function(SimpleDuration) onChanged;
+  final ShortDuration initialValue;
+  final void Function(ShortDuration) onChanged;
 
   @override
-  State<DurationFormField> createState() => _DurationFormFieldState();
+  State<ShortDurationFormField> createState() => _ShortDurationFormFieldState();
 }
 
-class _DurationFormFieldState extends State<DurationFormField> {
-  late SimpleDuration _value;
+class _ShortDurationFormFieldState extends State<ShortDurationFormField> {
+  late ShortDuration _value;
   late TextEditingController _daysController;
   late TextEditingController _hoursController;
   late TextEditingController _minutesController;
@@ -88,42 +87,6 @@ class _DurationFormFieldState extends State<DurationFormField> {
           },
         ),
       ],
-    );
-  }
-}
-
-class DurationComponent extends StatelessWidget {
-  const DurationComponent({
-    required this.controller,
-    required this.label,
-    required this.onChanged,
-    required this.flex,
-    this.icon,
-    super.key,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final void Function(int) onChanged;
-  final Widget? icon;
-  final int flex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          icon: icon,
-          labelText: label,
-        ),
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly
-        ],
-        keyboardType: TextInputType.number,
-        onChanged: (text) => onChanged(int.tryParse(text, radix: 10) ?? 0),
-      ),
     );
   }
 }

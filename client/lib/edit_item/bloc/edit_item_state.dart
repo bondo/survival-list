@@ -17,6 +17,8 @@ class EditItemState extends Equatable {
     required this.startDate,
     required this.endDate,
     required this.estimate,
+    required this.recurrenceKind,
+    required this.recurrenceFrequency,
     required this.responsible,
     this.status = EditItemStatus.initial,
     this.groups = const [],
@@ -37,7 +39,9 @@ class EditItemState extends Equatable {
   final String title;
   final DateTime? startDate;
   final DateTime? endDate;
-  final SimpleDuration estimate;
+  final ShortDuration estimate;
+  final RecurrenceKind recurrenceKind;
+  final LongDuration recurrenceFrequency;
   final Person? viewerPerson;
 
   EditItemState copyWith({
@@ -52,7 +56,9 @@ class EditItemState extends Equatable {
     String Function()? title,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    SimpleDuration Function()? estimate,
+    ShortDuration Function()? estimate,
+    RecurrenceKind Function()? recurrenceKind,
+    LongDuration Function()? recurrenceFrequency,
     Person? Function()? viewerPerson,
   }) {
     return EditItemState(
@@ -72,6 +78,11 @@ class EditItemState extends Equatable {
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       estimate: estimate != null ? estimate() : this.estimate,
+      recurrenceKind:
+          recurrenceKind != null ? recurrenceKind() : this.recurrenceKind,
+      recurrenceFrequency: recurrenceFrequency != null
+          ? recurrenceFrequency()
+          : this.recurrenceFrequency,
       viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
   }
@@ -90,6 +101,8 @@ class EditItemState extends Equatable {
         startDate,
         endDate,
         estimate,
+        recurrenceKind,
+        recurrenceFrequency,
         viewerPerson,
       ];
 }

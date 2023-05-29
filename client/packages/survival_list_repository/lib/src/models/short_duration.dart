@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class SimpleDuration extends Equatable {
-  const SimpleDuration({
+class ShortDuration extends Equatable {
+  const ShortDuration({
     required this.days,
     required this.hours,
     required this.minutes,
@@ -13,12 +13,12 @@ class SimpleDuration extends Equatable {
   final int hours;
   final int minutes;
 
-  SimpleDuration copyWith({
+  ShortDuration copyWith({
     int Function()? days,
     int Function()? hours,
     int Function()? minutes,
   }) {
-    return SimpleDuration(
+    return ShortDuration(
       days: days != null ? days() : this.days,
       hours: hours != null ? hours() : this.hours,
       minutes: minutes != null ? minutes() : this.minutes,

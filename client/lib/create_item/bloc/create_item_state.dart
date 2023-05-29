@@ -21,7 +21,9 @@ class CreateItemState extends Equatable {
     this.title = '',
     this.startDate,
     this.endDate,
-    this.estimate = const SimpleDuration(days: 0, hours: 0, minutes: 0),
+    this.estimate = const ShortDuration(days: 0, hours: 0, minutes: 0),
+    this.recurrenceKind = RecurrenceKind.none,
+    this.recurrenceFrequency = const LongDuration(months: 0, days: 0),
     this.viewerPerson,
   });
 
@@ -35,7 +37,9 @@ class CreateItemState extends Equatable {
   final String title;
   final DateTime? startDate;
   final DateTime? endDate;
-  final SimpleDuration estimate;
+  final ShortDuration estimate;
+  final RecurrenceKind recurrenceKind;
+  final LongDuration recurrenceFrequency;
   final Person? viewerPerson;
 
   CreateItemState copyWith({
@@ -49,7 +53,9 @@ class CreateItemState extends Equatable {
     String Function()? title,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
-    SimpleDuration Function()? estimate,
+    ShortDuration Function()? estimate,
+    RecurrenceKind Function()? recurrenceKind,
+    LongDuration Function()? recurrenceFrequency,
     Person? Function()? viewerPerson,
   }) {
     return CreateItemState(
@@ -68,6 +74,11 @@ class CreateItemState extends Equatable {
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       estimate: estimate != null ? estimate() : this.estimate,
+      recurrenceKind:
+          recurrenceKind != null ? recurrenceKind() : this.recurrenceKind,
+      recurrenceFrequency: recurrenceFrequency != null
+          ? recurrenceFrequency()
+          : this.recurrenceFrequency,
       viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
   }
@@ -85,6 +96,8 @@ class CreateItemState extends Equatable {
         startDate,
         endDate,
         estimate,
+        recurrenceKind,
+        recurrenceFrequency,
         viewerPerson,
       ];
 }

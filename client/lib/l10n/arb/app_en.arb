@@ -87,10 +87,18 @@
   "joinGroupAppBarTitle": "Join group",
 
   "widgetGroupEmptyValueTitle": "None",
+  "widgetDurationMonthsLabel": "Months",
   "widgetDurationDaysLabel": "Days",
   "widgetDurationHoursLabel": "Hours",
   "widgetDurationMinutesLabel": "Minutes",
 
   "createItemResponsibleLabel": "Responsible",
-  "editItemResponsibleLabel": "Responsible"
+  "editItemResponsibleLabel": "Responsible",
+
+  "createItemRecurrenceKindLabel": "Repeat",
+  "editItemRecurrenceKindLabel": "Repeat",
+
+  "widgetRecurrenceKindNever": "Never",
+  "widgetRecurrenceKindChecked": "When checked",
+  "widgetRecurrenceKindEvery": "Every"
 }

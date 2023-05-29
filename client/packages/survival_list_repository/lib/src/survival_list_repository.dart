@@ -127,6 +127,20 @@ class SurvivalListRepository {
         startDate: _parseDate(response.startDate),
         endDate: _parseDate(response.endDate),
         estimate: _parseDuration(response.estimate),
+        recurrence: switch (response.whichRecurring()) {
+          api.GetTasksResponse_Recurring.notSet => const Recurrence(
+              kind: RecurrenceKind.none,
+              frequency: LongDuration(months: 0, days: 0),
+            ),
+          api.GetTasksResponse_Recurring.every => Recurrence(
+              kind: RecurrenceKind.every,
+              frequency: _parseRecurrenceEvery(response.every),
+            ),
+          api.GetTasksResponse_Recurring.checked => Recurrence(
+              kind: RecurrenceKind.checked,
+              frequency: _parseRecurrenceChecked(response.checked),
+            )
+        },
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
       ),
@@ -163,7 +177,8 @@ class SurvivalListRepository {
     required DateTime? endDate,
     required Group? group,
     required Person? responsible,
-    required SimpleDuration estimate,
+    required ShortDuration estimate,
+    required Recurrence recurrence,
   }) async {
     final response = await _client.createTask(
       api.CreateTaskRequest(
@@ -173,20 +188,21 @@ class SurvivalListRepository {
         estimate: _buildDuration(estimate),
         groupId: group?.id,
         responsibleId: responsible?.id,
+        every: recurrence.kind == RecurrenceKind.every
+            ? api.RecurringEveryRequest(
+                months: recurrence.frequency.months,
+                days: recurrence.frequency.days,
+              )
+            : null,
+        checked: recurrence.kind == RecurrenceKind.checked
+            ? api.RecurringChecked(
+                months: recurrence.frequency.months,
+                days: recurrence.frequency.days,
+              )
+            : null,
       ),
     );
-    _upsertItem(
-      Item(
-        id: response.id,
-        title: response.title,
-        isCompleted: false,
-        startDate: _parseDate(response.startDate),
-        endDate: _parseDate(response.endDate),
-        estimate: _parseDuration(response.estimate),
-        responsible: _parseUser(response.responsible),
-        group: _parseGroup(response.group),
-      ),
-    );
+    _upsertItem(_parseCreateTaskResponse(response));
   }
 
   Future<void> deleteItem(Item item) async {
@@ -220,6 +236,18 @@ class SurvivalListRepository {
           estimate: _buildDuration(newItem.estimate),
           groupId: newItem.group?.id,
           responsibleId: newItem.responsible?.id,
+          every: newItem.recurrence.kind == RecurrenceKind.every
+              ? api.RecurringEveryRequest(
+                  months: newItem.recurrence.frequency.months,
+                  days: newItem.recurrence.frequency.days,
+                )
+              : null,
+          checked: newItem.recurrence.kind == RecurrenceKind.checked
+              ? api.RecurringChecked(
+                  months: newItem.recurrence.frequency.months,
+                  days: newItem.recurrence.frequency.days,
+                )
+              : null,
         ),
       );
     } catch (e) {
@@ -236,12 +264,20 @@ class SurvivalListRepository {
     _upsertItem(newItem);
 
     try {
-      await _client.toggleTaskCompleted(
+      final response = await _client.toggleTaskCompleted(
         api.ToggleTaskCompletedRequest(
           id: newItem.id,
           isCompleted: newItem.isCompleted,
         ),
       );
+      if (response.hasTaskCreated()) {
+        _upsertItem(_parseCreateTaskResponse(response.taskCreated));
+      }
+      if (response.hasTaskDeleted()) {
+        final newValue = HashMap<int, Item>.from(_itemsStreamController.value)
+          ..remove(response.taskDeleted.id);
+        _itemsStreamController.add(newValue);
+      }
     } catch (e) {
       _upsertItem(item);
       rethrow;
@@ -458,7 +494,7 @@ class SurvivalListRepository {
         : google.Date(year: date.year, month: date.month, day: date.day);
   }
 
-  api.Duration? _buildDuration(SimpleDuration duration) {
+  api.Duration? _buildDuration(ShortDuration duration) {
     return duration.isEmpty
         ? null
         : api.Duration(
@@ -475,8 +511,8 @@ class SurvivalListRepository {
     return null;
   }
 
-  SimpleDuration _parseDuration(api.Duration duration) {
-    return SimpleDuration(
+  ShortDuration _parseDuration(api.Duration duration) {
+    return ShortDuration(
       days: duration.days,
       hours: duration.hours,
       minutes: duration.minutes,
@@ -501,5 +537,40 @@ class SurvivalListRepository {
     } else {
       return null;
     }
+  }
+
+  LongDuration _parseRecurrenceChecked(api.RecurringChecked checked) {
+    return LongDuration(months: checked.months, days: checked.days);
+  }
+
+  LongDuration _parseRecurrenceEvery(api.RecurringEveryResponse every) {
+    return LongDuration(months: every.months, days: every.days);
+  }
+
+  Item _parseCreateTaskResponse(api.CreateTaskResponse task) {
+    return Item(
+      id: task.id,
+      title: task.title,
+      isCompleted: false,
+      startDate: _parseDate(task.startDate),
+      endDate: _parseDate(task.endDate),
+      estimate: _parseDuration(task.estimate),
+      responsible: _parseUser(task.responsible),
+      recurrence: switch (task.whichRecurring()) {
+        api.CreateTaskResponse_Recurring.notSet => const Recurrence(
+            kind: RecurrenceKind.none,
+            frequency: LongDuration(months: 0, days: 0),
+          ),
+        api.CreateTaskResponse_Recurring.every => Recurrence(
+            kind: RecurrenceKind.every,
+            frequency: _parseRecurrenceEvery(task.every),
+          ),
+        api.CreateTaskResponse_Recurring.checked => Recurrence(
+            kind: RecurrenceKind.checked,
+            frequency: _parseRecurrenceChecked(task.checked),
+          )
+      },
+      group: _parseGroup(task.group),
+    );
   }
 }
