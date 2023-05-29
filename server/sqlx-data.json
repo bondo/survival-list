@@ -1,17 +1,5 @@
 {
   "db": "PostgreSQL",
-  "09cf364af27f4b8c1f9d8d410f8d37ed986643b3207aaea2e3b5a6a89b79d0cb": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                                UPDATE\n                                    tasks t\n                                SET\n                                    previous_task_id = NULL\n                                WHERE\n                                    t.recurrence_id = $1\n                            "
-  },
   "09fc532228732d6a182abf13cb1808f9c37f010718a2c6b475ede3455833a377": {
     "describe": {
       "columns": [
@@ -220,6 +208,20 @@
     },
     "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
   },
+  "29a2e90c1d7e246ccfc4bf02af698eb19ee28950e467990f2db633c79c71d1ae": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Interval",
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                WITH\n                    rec AS (\n                        INSERT INTO recurrences (\n                            frequency,\n                            is_every,\n                            current_task_id\n                        )\n                        VALUES (\n                            $1,\n                            $2,\n                            $3\n                        )\n                        RETURNING\n                            id\n                    )\n                UPDATE\n                    tasks t\n                SET\n                    recurrence_id = r.id\n                FROM\n                    rec r\n                WHERE\n                    t.id = $3\n            "
+  },
   "3ca8e3b2b68c196f66ab3faa7be66eb48a81a95bfa9a7b75bb9275a03c8443ef": {
     "describe": {
       "columns": [
@@ -278,6 +280,18 @@
       }
     },
     "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = $1\n                WHERE\n                    r.current_task_id = $2\n            "
+  },
+  "5c14a93b26d253a259508d4ac28fe7231bdb3658e01446bf2bb04726390f437a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                                UPDATE\n                                    tasks t\n                                SET\n                                    previous_task_id = NULL,\n                                    recurrence_id = NULL\n                                WHERE\n                                    t.recurrence_id = $1\n                            "
   },
   "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
     "describe": {
@@ -561,20 +575,6 @@
       }
     },
     "query": "\n                DELETE FROM\n                    tasks t\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
-  },
-  "8b3d9674bd9bb257edfc098edc4a77bdada5249b1f0e9cbb16f7c4607f02b0ca": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Interval",
-          "Bool",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO recurrences (\n                    frequency,\n                    is_every,\n                    current_task_id\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n            "
   },
   "93dd67fb48b492608ccf8efa9376a4c3118b7f2ee3ee624f26615c28cce4c958": {
     "describe": {
