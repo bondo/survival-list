@@ -794,7 +794,8 @@ impl Database {
                                 UPDATE
                                     tasks t
                                 SET
-                                    previous_task_id = NULL
+                                    previous_task_id = NULL,
+                                    recurrence_id = NULL
                                 WHERE
                                     t.recurrence_id = $1
                             "#,
@@ -993,16 +994,29 @@ impl Database {
     ) -> Result<(), Status> {
         sqlx::query!(
             r#"
-                INSERT INTO recurrences (
-                    frequency,
-                    is_every,
-                    current_task_id
-                )
-                VALUES (
-                    $1,
-                    $2,
-                    $3
-                )
+                WITH
+                    rec AS (
+                        INSERT INTO recurrences (
+                            frequency,
+                            is_every,
+                            current_task_id
+                        )
+                        VALUES (
+                            $1,
+                            $2,
+                            $3
+                        )
+                        RETURNING
+                            id
+                    )
+                UPDATE
+                    tasks t
+                SET
+                    recurrence_id = r.id
+                FROM
+                    rec r
+                WHERE
+                    t.id = $3
             "#,
             Some(PgInterval::from(frequency)),
             is_every,
