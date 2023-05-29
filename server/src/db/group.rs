@@ -43,10 +43,10 @@ pub struct DeleteResult {
 }
 
 impl Database {
-    pub fn get_user_groups<'a>(
-        &'a self,
+    pub fn get_user_groups(
+        &self,
         user_id: UserId,
-    ) -> impl Stream<Item = Result<GroupResult, Status>> + 'a {
+    ) -> impl Stream<Item = Result<GroupResult, Status>> + '_ {
         sqlx::query_as!(
             GroupResult,
             r#"

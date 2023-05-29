@@ -8,6 +8,6 @@ pub use group::GroupId;
 pub use task::{
     CreateTaskParams, TaskEstimate, TaskGroup, TaskId, TaskPeriod, TaskRecurrenceEvery,
     TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput, TaskRecurrencePending,
-    TaskResponsible, UpdateTaskParams,
+    TaskResponsible, TaskResult, UpdateTaskParams,
 };
 pub use user::UserId;

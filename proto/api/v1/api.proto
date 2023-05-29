@@ -98,9 +98,8 @@ message ToggleTaskCompletedRequest {
 message ToggleTaskCompletedResponse {
     int32 id = 1;
     bool is_completed = 2;
-    repeated CreateTaskResponse tasks_created = 3;
-    repeated UpdateTaskResponse tasks_updated = 4;
-    repeated DeleteTaskResponse tasks_deleted = 5;
+    CreateTaskResponse task_created = 3;
+    DeleteTaskResponse task_deleted = 4;
 }
 
 message DeleteTaskRequest {

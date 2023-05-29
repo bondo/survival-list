@@ -38,11 +38,11 @@ pub struct UserResult {
 }
 
 impl Database {
-    pub fn get_group_participants<'a>(
-        &'a self,
+    pub fn get_group_participants(
+        &self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> impl Stream<Item = Result<UserResult, Status>> + 'a {
+    ) -> impl Stream<Item = Result<UserResult, Status>> + '_ {
         sqlx::query_as!(
             UserResult,
             r#"

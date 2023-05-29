@@ -1,6 +1,5 @@
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
-use log::error;
 use sqlx::types::{time::Date, Uuid};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
@@ -11,7 +10,7 @@ use crate::{
     db::{
         CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
         TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
-        TaskResponsible, UpdateTaskParams, UserId,
+        TaskResponsible, TaskResult, UpdateTaskParams, UserId,
     },
 };
 
@@ -111,29 +110,7 @@ impl api_server::Api for Service {
             })
             .await?;
 
-        Ok(Response::new(CreateTaskResponse {
-            id: task.id.into(),
-            title: task.title.unwrap_or_else(|| {
-                error!("v1:create_task: Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
-            start_date: task.period.start().map(Into::into),
-            end_date: task.period.end().map(Into::into),
-            estimate: task.estimate.map(Into::into),
-            responsible: Some(task.responsible.into()),
-            group: task.group.map(Into::into),
-            recurring: task.recurrence.map(|r| match r {
-                TaskRecurrenceOutput::Every(every) => {
-                    create_task_response::Recurring::Every(every.into())
-                }
-                TaskRecurrenceOutput::Checked(frequency) => {
-                    create_task_response::Recurring::Checked(frequency.into())
-                }
-            }),
-            can_update: task.can_update,
-            can_toggle: task.can_toggle,
-            can_delete: task.can_delete,
-        }))
+        Ok(Response::new(task.into()))
     }
 
     async fn update_task(
@@ -180,10 +157,7 @@ impl api_server::Api for Service {
 
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),
-            title: task.title.unwrap_or_else(|| {
-                error!("v1:update_task: Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
+            title: task.title,
             is_completed: task.completed_at.is_some(),
             start_date: task.period.start().map(Into::into),
             end_date: task.period.end().map(Into::into),
@@ -215,13 +189,13 @@ impl api_server::Api for Service {
             .db
             .toggle_task_completed(user_id, TaskId::new(request.id), request.is_completed)
             .await?;
-
         Ok(Response::new(ToggleTaskCompletedResponse {
             id: task.id.into(),
             is_completed: task.completed_at.is_some(),
-            tasks_created: vec![], // TODO
-            tasks_updated: vec![], // TODO
-            tasks_deleted: vec![], // TODO
+            task_created: task.task_created.map(Into::into),
+            task_deleted: task
+                .task_deleted
+                .map(|id| DeleteTaskResponse { id: id.into() }),
         }))
     }
 
@@ -256,10 +230,7 @@ impl api_server::Api for Service {
             while let Some(res) = tasks.next().await {
                 tx.send(res.map(|task| GetTasksResponse {
                     id: task.id.into(),
-                    title: task.title.unwrap_or_else(|| {
-                        error!("v1:get_tasks: Got task without title (id {})", task.id);
-                        "N/A".to_string()
-                    }),
+                    title: task.title,
                     is_completed: task.completed_at.is_some(),
                     start_date: task.period.start().map(Into::into),
                     end_date: task.period.end().map(Into::into),
@@ -427,7 +398,7 @@ impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
         }
         let start = convert(start)?;
         let end = convert(end)?;
-        Ok((start, end).try_into().map_err(Status::invalid_argument)?)
+        (start, end).try_into().map_err(Status::invalid_argument)
     }
 }
 
@@ -545,5 +516,30 @@ impl TryFrom<RecurringChecked> for TaskRecurrenceFrequency {
             days: value.days,
             months: value.months,
         })
+    }
+}
+
+impl From<TaskResult> for CreateTaskResponse {
+    fn from(value: TaskResult) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            start_date: value.period.start().map(Into::into),
+            end_date: value.period.end().map(Into::into),
+            estimate: value.estimate.map(Into::into),
+            responsible: Some(value.responsible.into()),
+            group: value.group.map(Into::into),
+            recurring: value.recurrence.map(|r| match r {
+                TaskRecurrenceOutput::Every(every) => {
+                    create_task_response::Recurring::Every(every.into())
+                }
+                TaskRecurrenceOutput::Checked(frequency) => {
+                    create_task_response::Recurring::Checked(frequency.into())
+                }
+            }),
+            can_update: value.can_update,
+            can_toggle: value.can_toggle,
+            can_delete: value.can_delete,
+        }
     }
 }

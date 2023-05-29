@@ -163,12 +163,10 @@ pub struct ToggleTaskCompletedResponse {
     pub id: i32,
     #[prost(bool, tag = "2")]
     pub is_completed: bool,
-    #[prost(message, repeated, tag = "3")]
-    pub tasks_created: ::prost::alloc::vec::Vec<CreateTaskResponse>,
-    #[prost(message, repeated, tag = "4")]
-    pub tasks_updated: ::prost::alloc::vec::Vec<UpdateTaskResponse>,
-    #[prost(message, repeated, tag = "5")]
-    pub tasks_deleted: ::prost::alloc::vec::Vec<DeleteTaskResponse>,
+    #[prost(message, optional, tag = "3")]
+    pub task_created: ::core::option::Option<CreateTaskResponse>,
+    #[prost(message, optional, tag = "4")]
+    pub task_deleted: ::core::option::Option<DeleteTaskResponse>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
