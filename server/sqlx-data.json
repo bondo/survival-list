@@ -1,153 +1,6 @@
 {
   "db": "PostgreSQL",
-  "026e967798e1b5e4a165d1a09581c5483bc944b850ba31599088aec22082c298": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 1,
-          "type_info": "Timestamp"
-        }
-      ],
-      "nullable": [
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    completed_at = CASE\n                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\",\n                    completed_at\n            "
-  },
-  "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "?column?",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                    SELECT\n                        -- Viewer in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $1 AND\n                                group_id = $3\n                        ) AND\n                        -- Responsible in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $2 AND\n                                group_id = $3\n                        )\n                "
-  },
-  "12fc47eaed77983b8e993e5be858d0bf846045409a702bdc554e9e624d7a7dcc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4",
-          "Text",
-          "Date",
-          "Date",
-          "Int4",
-          "Int4",
-          "Interval"
-        ]
-      }
-    },
-    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    title = $3,\n                    start_date = $4,\n                    end_date = $5,\n                    responsible_user_id = $6,\n                    group_id = $7,\n                    estimate = $8\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
-  },
-  "14fd4db15ffa6910b8d4f3a085902a2194222e8dbda540674c23542e2bfb9f7e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: GroupId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "uid",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
-  },
-  "1e59d0bc0b19919938c42f0ddc1f24e1411a9546a0d5d53c0e4b1f8ba3cf686b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Text",
-          "Date",
-          "Date",
-          "Int4",
-          "Interval"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date,\n                    group_id,\n                    estimate\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4,\n                    $5,\n                    $6\n                )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
-  },
-  "33fb99aa9fd2ae03664e2ab838df099e673912f61ae5eff025a3ea5e5507909b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    group_id = NULL\n                WHERE\n                    t.responsible_user_id = $1 AND\n                    t.group_id = $2\n            "
-  },
-  "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b": {
+  "09cf364af27f4b8c1f9d8d410f8d37ed986643b3207aaea2e3b5a6a89b79d0cb": {
     "describe": {
       "columns": [],
       "nullable": [],
@@ -157,9 +10,9 @@
         ]
       }
     },
-    "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
+    "query": "\n                                UPDATE\n                                    tasks t\n                                SET\n                                    previous_task_id = NULL\n                                WHERE\n                                    t.recurrence_id = $1\n                            "
   },
-  "5e2524a36085a046d8ee15154e9bddc468a2a88ec3bd6c5b3425447173dcf790": {
+  "09fc532228732d6a182abf13cb1808f9c37f010718a2c6b475ede3455833a377": {
     "describe": {
       "columns": [
         {
@@ -221,11 +74,46 @@
           "name": "group_uid: Option<Uuid>",
           "ordinal": 11,
           "type_info": "Uuid"
+        },
+        {
+          "name": "recurrence_id: Option<i32>",
+          "ordinal": 12,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_frequency: Option<PgInterval>",
+          "ordinal": 13,
+          "type_info": "Interval"
+        },
+        {
+          "name": "recurrence_is_every: Option<bool>",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "recurrence_current_task_id: Option<i32>",
+          "ordinal": 15,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_previous_task_id",
+          "ordinal": 16,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_ready_to_start",
+          "ordinal": 17,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_reached_deadline",
+          "ordinal": 18,
+          "type_info": "Int4"
         }
       ],
       "nullable": [
         false,
-        true,
+        false,
         true,
         true,
         true,
@@ -233,6 +121,93 @@
         false,
         false,
         true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                WITH RECURSIVE\n                    base_task AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            t.id = $1\n                    ),\n                    every_task AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_task bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_task et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_task bt\n            "
+  },
+  "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "?column?",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                    SELECT\n                        -- Viewer in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $1 AND\n                                group_id = $3\n                        ) AND\n                        -- Responsible in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $2 AND\n                                group_id = $3\n                        )\n                "
+  },
+  "1080d102b1b83c61c08a2ed45ed41b66bd7e89d99733d65b2cefb28e14bbdf28": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text",
+          "Date",
+          "Date",
+          "Int4",
+          "Interval"
+        ]
+      }
+    },
+    "query": "\n                    INSERT INTO tasks (\n                        responsible_user_id,\n                        title,\n                        start_date,\n                        end_date,\n                        group_id,\n                        estimate\n                    )\n                    VALUES (\n                        $1,\n                        $2,\n                        $3,\n                        $4,\n                        $5,\n                        $6\n                    )\n                    RETURNING\n                        id as \"id: TaskId\"\n                "
+  },
+  "14fd4db15ffa6910b8d4f3a085902a2194222e8dbda540674c23542e2bfb9f7e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
         false,
         false,
         false
@@ -243,7 +218,66 @@
         ]
       }
     },
-    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    t.id = $1\n            "
+    "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n            "
+  },
+  "3ca8e3b2b68c196f66ab3faa7be66eb48a81a95bfa9a7b75bb9275a03c8443ef": {
+    "describe": {
+      "columns": [
+        {
+          "name": "completed_at",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    completed_at = CASE\n                        WHEN $3 THEN CURRENT_TIMESTAMP AT TIME ZONE 'UTC'\n                        ELSE NULL\n                    END\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    completed_at\n            "
+  },
+  "3ee3b2e61ebcd26cb17cbb8aa4ed13ae25a5e344abfc4feb15d6de1ede745fa5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    recurrences r\n                WHERE\n                    r.id = $1\n            "
+  },
+  "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            "
+  },
+  "5207d2887c50a44bf6d0b6b5c0a326dd595b1de1a1b0d9d40d8f2d723d1aea46": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = $1\n                WHERE\n                    r.current_task_id = $2\n            "
   },
   "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
     "describe": {
@@ -324,7 +358,34 @@
     },
     "query": "\n                SELECT\n                    u.id as \"id: UserId\",\n                    u.uid,\n                    u.name,\n                    u.picture_url\n                FROM\n                    users u\n                INNER JOIN\n                    users_groups ug ON\n                        ug.user_id = u.id\n                WHERE\n                    ug.group_id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups viewer_groups\n                        WHERE\n                            viewer_groups.user_id = $1 AND\n                            viewer_groups.group_id = $2\n                    )\n            "
   },
-  "89634b2042189f891057f5fd5072eb4d6ca3067ec863fca212aca81df06880bf": {
+  "792c754e379cb5de080a08b3fd0036ba44e3c372559d46fb879bfa22cce47239": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Interval",
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    frequency = $1,\n                    is_every = $2\n                WHERE\n                    r.id = $3\n            "
+  },
+  "79b8ac854f950c2899ca63bbac8db9a08d3c1633531cce4c9134ae15de6b3bbb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                    DELETE FROM\n                        users_groups ug\n                    WHERE\n                        ug.user_id = $1 AND\n                        ug.group_id = $2\n                "
+  },
+  "84ed5b6315f9481c329ab9f6868ae55c8343e55067c94287007bce7298ed0bb0": {
     "describe": {
       "columns": [
         {
@@ -339,79 +400,19 @@
       "parameters": {
         "Left": [
           "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                DELETE FROM\n                    tasks t\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
-  },
-  "959dd1255da06b62f8350e2c1735f617ab83305fc0a274fa8c25ea1229297df0": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: GroupId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "uid",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO groups (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
-  },
-  "9f4f3758dc89a08a53045521025882b21400c4e8c28369c3778dbf35a43a6f47": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: GroupId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "uid",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
+          "Int4",
+          "Text",
+          "Date",
+          "Date",
           "Int4",
           "Int4",
-          "Text"
+          "Interval"
         ]
       }
     },
-    "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
+    "query": "\n                    UPDATE\n                        tasks t\n                    SET\n                        title = $3,\n                        start_date = $4,\n                        end_date = $5,\n                        responsible_user_id = $6,\n                        group_id = $7,\n                        estimate = $8\n                    WHERE\n                        t.id = $2 AND\n                        -- Permission check\n                        (\n                            -- Viewer is responsible\n                            t.responsible_user_id = $1 OR\n                            -- Viewer is in task group\n                            EXISTS (\n                                SELECT\n                                FROM\n                                    users_groups ug\n                                WHERE\n                                    ug.group_id = t.group_id AND\n                                    ug.user_id = $1\n                            )\n                        )\n                    RETURNING\n                        id as \"id: TaskId\"\n                "
   },
-  "a2fb0a1a519c2407e44a9027de2ce654eb77754d8149c832691f2b6da3cc99e4": {
+  "8935531f6a26a8e467f0a1c483cce1aeb7f5606685a2492bd0d5fc4416c45323": {
     "describe": {
       "columns": [
         {
@@ -473,11 +474,46 @@
           "name": "group_uid: Option<Uuid>",
           "ordinal": 11,
           "type_info": "Uuid"
+        },
+        {
+          "name": "recurrence_id: Option<i32>",
+          "ordinal": 12,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_frequency: Option<PgInterval>",
+          "ordinal": 13,
+          "type_info": "Interval"
+        },
+        {
+          "name": "recurrence_is_every: Option<bool>",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "recurrence_current_task_id: Option<i32>",
+          "ordinal": 15,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_previous_task_id",
+          "ordinal": 16,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_ready_to_start",
+          "ordinal": 17,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_reached_deadline",
+          "ordinal": 18,
+          "type_info": "Int4"
         }
       ],
       "nullable": [
         false,
-        true,
+        false,
         true,
         true,
         true,
@@ -487,6 +523,114 @@
         true,
         false,
         false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                WITH RECURSIVE\n                    base_tasks AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            -- Hide old items\n                            (\n                                t.completed_at IS NULL OR\n                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                            ) AND\n                            -- Permission check\n                            (\n                                -- Viewer is responsible\n                                t.responsible_user_id = $1 OR\n                                -- Viewer is in task group\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups ug\n                                    WHERE\n                                        ug.group_id = t.group_id AND\n                                        ug.user_id = $1\n                                )\n                            )\n                    ),\n                    every_tasks AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_tasks bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_tasks et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_tasks bt\n            "
+  },
+  "89634b2042189f891057f5fd5072eb4d6ca3067ec863fca212aca81df06880bf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    tasks t\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
+  },
+  "8b3d9674bd9bb257edfc098edc4a77bdada5249b1f0e9cbb16f7c4607f02b0ca": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Interval",
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO recurrences (\n                    frequency,\n                    is_every,\n                    current_task_id\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n            "
+  },
+  "93dd67fb48b492608ccf8efa9376a4c3118b7f2ee3ee624f26615c28cce4c958": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                    UPDATE\n                        tasks t\n                    SET\n                        group_id = NULL\n                    WHERE\n                        t.responsible_user_id = $1 AND\n                        t.group_id = $2\n                "
+  },
+  "959dd1255da06b62f8350e2c1735f617ab83305fc0a274fa8c25ea1229297df0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO groups (\n                    title\n                )\n                VALUES (\n                    $1\n                )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
+  },
+  "99cb7feb76b5395b61af9edbffc05c5abd6bacb7d81db329075fe676b515cf42": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
         false
       ],
       "parameters": {
@@ -495,7 +639,41 @@
         ]
       }
     },
-    "query": "\n                SELECT\n                    t.id,\n                    t.title,\n                    t.completed_at,\n                    t.start_date,\n                    t.end_date,\n                    t.estimate,\n                    u.id as responsible_id,\n                    u.name as responsible_name,\n                    u.picture_url as responsible_picture_url,\n                    g.id as \"group_id: Option<i32>\",\n                    g.title as \"group_title: Option<String>\",\n                    g.uid as \"group_uid: Option<Uuid>\"\n                FROM\n                    tasks t\n                INNER JOIN\n                    users u ON\n                        u.id = t.responsible_user_id\n                LEFT JOIN\n                    groups g ON\n                        g.id = t.group_id\n                WHERE\n                    -- Hide old items\n                    (\n                        t.completed_at IS NULL OR\n                        t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                    ) AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n            "
+    "query": "\n                WITH\n                    new_task AS (\n                        INSERT INTO tasks (\n                            responsible_user_id,\n                            title,\n                            start_date,\n                            end_date,\n                            group_id,\n                            estimate,\n                            previous_task_id,\n                            recurrence_id\n                        )\n                        SELECT\n                            t.responsible_user_id,\n                            t.title,\n                            t.start_date + CASE\n                                WHEN r.is_every THEN\n                                    r.frequency\n                                ELSE\n                                    r.frequency +\n                                    (\n                                        CURRENT_DATE -\n                                        COALESCE(t.start_date, t.end_date)\n                                    ) * INTERVAL '1 day'\n                            END,\n                            t.end_date + CASE\n                                WHEN r.is_every THEN\n                                    r.frequency\n                                ELSE\n                                    r.frequency +\n                                    (\n                                        CURRENT_DATE -\n                                        COALESCE(t.start_date, t.end_date)\n                                    ) * INTERVAL '1 day'\n                            END,\n                            t.group_id,\n                            t.estimate,\n                            t.id,\n                            r.id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        WHERE\n                            t.id = $1\n                        RETURNING\n                            id,\n                            recurrence_id\n                    )\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = t.id\n                FROM\n                    new_task t\n                WHERE\n                    t.recurrence_id = r.id\n                RETURNING\n                    t.id as \"id: TaskId\"\n            "
+  },
+  "9f4f3758dc89a08a53045521025882b21400c4e8c28369c3778dbf35a43a6f47": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: GroupId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "uid",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
   },
   "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
     "describe": {
@@ -528,19 +706,6 @@
       }
     },
     "query": "\n                SELECT\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n                FROM\n                    groups\n                WHERE\n                    uid = $1\n            "
-  },
-  "c42b3fe3bb44ec88e797bcba34bd09e399ee1feb4f61f847a77b21f95cf0ab9e": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                DELETE FROM\n                    users_groups ug\n                WHERE\n                    ug.user_id = $1 AND\n                    ug.group_id = $2\n            "
   },
   "c69f2e7d3374e4881e9f0b7d13351e8646b318f1d4e3563545921190a8341f11": {
     "describe": {

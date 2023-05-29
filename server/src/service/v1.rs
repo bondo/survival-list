@@ -1,8 +1,5 @@
-use std::cmp::Ordering;
-
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
-use log::error;
 use sqlx::types::{time::Date, Uuid};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
@@ -11,8 +8,9 @@ use tonic::{Request, Response, Status};
 use crate::{
     auth::AuthExtension,
     db::{
-        CreateTaskParams, Database, GroupId, TaskEstimate, TaskId, TaskPeriodInput,
-        UpdateTaskParams, UserId,
+        CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
+        TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
+        TaskResponsible, TaskResult, UpdateTaskParams, UserId,
     },
 };
 
@@ -25,38 +23,6 @@ pub struct Service {
 impl Service {
     pub fn new(db: Database) -> Self {
         Self { db }
-    }
-}
-
-impl TaskPeriodInput {
-    fn from_proto_dates(
-        start_date: Option<ProtoDate>,
-        end_date: Option<ProtoDate>,
-    ) -> Result<TaskPeriodInput, Status> {
-        fn convert(date: ProtoDate) -> Result<Date, Status> {
-            date.try_into().map_err(Status::invalid_argument)
-        }
-
-        match (start_date, end_date) {
-            (Some(start_date), None) => Ok(TaskPeriodInput::OnlyStart(convert(start_date)?)),
-
-            (None, Some(end_date)) => Ok(TaskPeriodInput::OnlyEnd(convert(end_date)?)),
-
-            (Some(start_date), Some(end_date)) => {
-                let start = convert(start_date)?;
-                let end = convert(end_date)?;
-
-                if end.cmp(&start) == Ordering::Less {
-                    return Err(Status::failed_precondition("End before start"));
-                }
-
-                Ok(TaskPeriodInput::StartAndEnd { start, end })
-            }
-
-            (None, None) => Err(Status::failed_precondition(
-                "Either start or end date required",
-            )),
-        }
     }
 }
 
@@ -88,10 +54,12 @@ impl api_server::Api for Service {
         } else {
             Some(&request.picture_url)
         };
+
         let user = self
             .db
             .upsert_user(&uid, &request.name, picture_url)
             .await?;
+
         Ok(Response::new(LoginResponse {
             user: Some(User {
                 id: user.id.into(),
@@ -107,48 +75,42 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == i32::default() {
-            user_id
-        } else {
-            UserId::new(request.responsible_id)
-        };
-        let group_id = if request.group_id == i32::default() {
-            None
-        } else {
-            Some(GroupId::new(request.group_id))
-        };
-        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
+
         let task = self
             .db
             .create_task(CreateTaskParams {
                 user_id,
-                responsible_id,
+                responsible_id: if request.responsible_id == i32::default() {
+                    user_id
+                } else {
+                    UserId::new(request.responsible_id)
+                },
                 title: request.title,
-                period,
-                group_id,
-                estimate: request.estimate.map(Into::into),
+                period: (request.start_date, request.end_date).try_into()?,
+                group_id: if request.group_id == i32::default() {
+                    None
+                } else {
+                    Some(GroupId::new(request.group_id))
+                },
+                estimate: match request.estimate {
+                    None => Ok(None),
+                    Some(estimate) => estimate.try_into().map(Some),
+                }?,
+                recurrence: match request.recurring {
+                    None => Ok(None),
+                    Some(create_task_request::Recurring::Every(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Every)
+                        .map(Some),
+                    Some(create_task_request::Recurring::Checked(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Checked)
+                        .map(Some),
+                }?,
             })
             .await?;
-        Ok(Response::new(CreateTaskResponse {
-            id: task.id.into(),
-            title: task.title.unwrap_or_else(|| {
-                error!("v1:create_task: Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
-            start_date: task.start_date.map(Into::into),
-            end_date: task.end_date.map(Into::into),
-            estimate: task.estimate.map(Into::into),
-            responsible: Some(User {
-                id: task.responsible_id.into(),
-                name: task.responsible_name,
-                picture_url: task.responsible_picture_url.unwrap_or_default(),
-            }),
-            group: task.group_id.map(|id| Group {
-                id: id.into(),
-                title: task.group_title.unwrap_or_default(),
-                uid: task.group_uid.unwrap_or_default().to_string(),
-            }),
-        }))
+
+        Ok(Response::new(task.into()))
     }
 
     async fn update_task(
@@ -157,49 +119,62 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
-        let responsible_id = if request.responsible_id == i32::default() {
-            user_id
-        } else {
-            UserId::new(request.responsible_id)
-        };
-        let group_id = if request.group_id == i32::default() {
-            None
-        } else {
-            Some(GroupId::new(request.group_id))
-        };
-        let period = TaskPeriodInput::from_proto_dates(request.start_date, request.end_date)?;
+
         let task = self
             .db
             .update_task(UpdateTaskParams {
                 user_id,
-                responsible_id,
+                responsible_id: if request.responsible_id == i32::default() {
+                    user_id
+                } else {
+                    UserId::new(request.responsible_id)
+                },
                 task_id: TaskId::new(request.id),
                 title: request.title,
-                period,
-                group_id,
-                estimate: request.estimate.map(Into::into),
+                period: (request.start_date, request.end_date).try_into()?,
+                group_id: if request.group_id == i32::default() {
+                    None
+                } else {
+                    Some(GroupId::new(request.group_id))
+                },
+                estimate: match request.estimate {
+                    None => Ok(None),
+                    Some(estimate) => estimate.try_into().map(Some),
+                }?,
+                recurrence: match request.recurring {
+                    None => Ok(None),
+                    Some(update_task_request::Recurring::Every(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Every)
+                        .map(Some),
+                    Some(update_task_request::Recurring::Checked(frequency)) => frequency
+                        .try_into()
+                        .map(TaskRecurrenceInput::Checked)
+                        .map(Some),
+                }?,
             })
             .await?;
+
         Ok(Response::new(UpdateTaskResponse {
             id: task.id.into(),
-            title: task.title.unwrap_or_else(|| {
-                error!("v1:update_task: Got task without title (id {})", task.id);
-                "N/A".to_string()
-            }),
+            title: task.title,
             is_completed: task.completed_at.is_some(),
-            start_date: task.start_date.map(Into::into),
-            end_date: task.end_date.map(Into::into),
+            start_date: task.period.start().map(Into::into),
+            end_date: task.period.end().map(Into::into),
             estimate: task.estimate.map(Into::into),
-            responsible: Some(User {
-                id: task.responsible_id.into(),
-                name: task.responsible_name,
-                picture_url: task.responsible_picture_url.unwrap_or_default(),
+            responsible: Some(task.responsible.into()),
+            group: task.group.map(Into::into),
+            recurring: task.recurrence.map(|r| match r {
+                TaskRecurrenceOutput::Every(every) => {
+                    update_task_response::Recurring::Every(every.into())
+                }
+                TaskRecurrenceOutput::Checked(frequency) => {
+                    update_task_response::Recurring::Checked(frequency.into())
+                }
             }),
-            group: task.group_id.map(|id| Group {
-                id: id.into(),
-                title: task.group_title.unwrap_or_default(),
-                uid: task.group_uid.unwrap_or_default().to_string(),
-            }),
+            can_update: task.can_update,
+            can_toggle: task.can_toggle,
+            can_delete: task.can_delete,
         }))
     }
 
@@ -209,6 +184,7 @@ impl api_server::Api for Service {
     ) -> Result<Response<ToggleTaskCompletedResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let task = self
             .db
             .toggle_task_completed(user_id, TaskId::new(request.id), request.is_completed)
@@ -216,6 +192,10 @@ impl api_server::Api for Service {
         Ok(Response::new(ToggleTaskCompletedResponse {
             id: task.id.into(),
             is_completed: task.completed_at.is_some(),
+            task_created: task.task_created.map(Into::into),
+            task_deleted: task
+                .task_deleted
+                .map(|id| DeleteTaskResponse { id: id.into() }),
         }))
     }
 
@@ -225,10 +205,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<DeleteTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let id = self
             .db
             .delete_task(user_id, TaskId::new(request.id))
             .await?;
+
         Ok(Response::new(DeleteTaskResponse { id: id.into() }))
     }
 
@@ -248,24 +230,24 @@ impl api_server::Api for Service {
             while let Some(res) = tasks.next().await {
                 tx.send(res.map(|task| GetTasksResponse {
                     id: task.id.into(),
-                    title: task.title.unwrap_or_else(|| {
-                        error!("v1:get_tasks: Got task without title (id {})", task.id);
-                        "N/A".to_string()
-                    }),
+                    title: task.title,
                     is_completed: task.completed_at.is_some(),
-                    start_date: task.start_date.map(Into::into),
-                    end_date: task.end_date.map(Into::into),
+                    start_date: task.period.start().map(Into::into),
+                    end_date: task.period.end().map(Into::into),
                     estimate: task.estimate.map(Into::into),
-                    responsible: Some(User {
-                        id: task.responsible_id.into(),
-                        name: task.responsible_name,
-                        picture_url: task.responsible_picture_url.unwrap_or_default(),
+                    responsible: Some(task.responsible.into()),
+                    group: task.group.map(Into::into),
+                    recurring: task.recurrence.map(|r| match r {
+                        TaskRecurrenceOutput::Every(every) => {
+                            get_tasks_response::Recurring::Every(every.into())
+                        }
+                        TaskRecurrenceOutput::Checked(frequency) => {
+                            get_tasks_response::Recurring::Checked(frequency.into())
+                        }
                     }),
-                    group: task.group_id.map(|id| Group {
-                        id: id.into(),
-                        title: task.group_title.unwrap_or_default(),
-                        uid: task.group_uid.unwrap_or_default().to_string(),
-                    }),
+                    can_update: task.can_update,
+                    can_toggle: task.can_toggle,
+                    can_delete: task.can_delete,
                 }))
                 .await
                 .unwrap();
@@ -281,10 +263,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<CreateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let group = self
             .db
             .create_and_join_group(user_id, &request.title)
             .await?;
+
         Ok(Response::new(CreateGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -300,7 +284,9 @@ impl api_server::Api for Service {
         let request = request.into_inner();
         let uid =
             Uuid::parse_str(&request.uid).map_err(|_| Status::invalid_argument("Invalid uid"))?;
+
         let group = self.db.join_group_by_uid(user_id, &uid).await?;
+
         Ok(Response::new(JoinGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -314,10 +300,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<UpdateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let group = self
             .db
             .update_group(user_id, GroupId::new(request.id), &request.title)
             .await?;
+
         Ok(Response::new(UpdateGroupResponse {
             id: group.id.into(),
             title: group.title,
@@ -331,10 +319,12 @@ impl api_server::Api for Service {
     ) -> Result<Response<LeaveGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
+
         let id = self
             .db
             .leave_group(user_id, GroupId::new(request.id))
             .await?;
+
         Ok(Response::new(LeaveGroupResponse { id: id.into() }))
     }
 
@@ -396,6 +386,22 @@ impl api_server::Api for Service {
     }
 }
 
+impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
+    type Error = Status;
+
+    fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self, Self::Error> {
+        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Status> {
+            match date {
+                None => Ok(None),
+                Some(date) => date.try_into().map(Some).map_err(Status::invalid_argument),
+            }
+        }
+        let start = convert(start)?;
+        let end = convert(end)?;
+        (start, end).try_into().map_err(Status::invalid_argument)
+    }
+}
+
 impl From<TaskEstimate> for Duration {
     fn from(value: TaskEstimate) -> Self {
         Self {
@@ -406,12 +412,134 @@ impl From<TaskEstimate> for Duration {
     }
 }
 
-impl From<Duration> for TaskEstimate {
-    fn from(value: Duration) -> Self {
-        Self {
+impl TryFrom<Duration> for TaskEstimate {
+    type Error = Status;
+
+    fn try_from(value: Duration) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.hours < 0 || value.minutes < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days, hours or minutes in estimate not supported",
+            ));
+        }
+        Ok(Self {
             days: value.days,
             hours: value.hours,
             minutes: value.minutes,
+        })
+    }
+}
+
+impl From<&Date> for ProtoDate {
+    fn from(value: &Date) -> Self {
+        value.to_owned().into()
+    }
+}
+
+impl From<TaskResponsible> for User {
+    fn from(value: TaskResponsible) -> Self {
+        User {
+            id: value.id.into(),
+            name: value.name,
+            picture_url: value.picture_url.unwrap_or_default(),
+        }
+    }
+}
+
+impl From<TaskGroup> for Group {
+    fn from(value: TaskGroup) -> Self {
+        Group {
+            id: value.id.into(),
+            title: value.title,
+            uid: value.uid.to_string(),
+        }
+    }
+}
+
+impl From<TaskRecurrenceEvery> for RecurringEveryResponse {
+    fn from(value: TaskRecurrenceEvery) -> Self {
+        Self {
+            days: value.frequency.days,
+            months: value.frequency.months,
+            num_ready_to_start: value.pending.num_ready_to_start,
+            num_ready_to_start_is_lower_bound: value.pending.num_ready_to_start_is_lower_bound,
+            num_reached_deadline: value.pending.num_reached_deadline,
+            num_reached_deadline_is_lower_bound: value.pending.num_reached_deadline_is_lower_bound,
+        }
+    }
+}
+
+impl TryFrom<RecurringEveryRequest> for TaskRecurrenceFrequency {
+    type Error = Status;
+
+    fn try_from(value: RecurringEveryRequest) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.months < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days or months in RecurringEveryRequest not supported",
+            ));
+        }
+        if value.days == 0 && value.months == 0 {
+            return Err(Status::invalid_argument(
+                "Either days or months must be greater in 0 in RecurringEveryRequest",
+            ));
+        }
+        Ok(Self {
+            days: value.days,
+            months: value.months,
+        })
+    }
+}
+
+impl From<TaskRecurrenceFrequency> for RecurringChecked {
+    fn from(value: TaskRecurrenceFrequency) -> Self {
+        Self {
+            days: value.days,
+            months: value.months,
+        }
+    }
+}
+
+impl TryFrom<RecurringChecked> for TaskRecurrenceFrequency {
+    type Error = Status;
+
+    fn try_from(value: RecurringChecked) -> Result<Self, Self::Error> {
+        if value.days < 0 || value.months < 0 {
+            return Err(Status::invalid_argument(
+                "Negative days or months in RecurringChecked not supported",
+            ));
+        }
+        if value.days == 0 && value.months == 0 {
+            return Err(Status::invalid_argument(
+                "Either days or months must be greater in 0 in RecurringChecked",
+            ));
+        }
+        Ok(Self {
+            days: value.days,
+            months: value.months,
+        })
+    }
+}
+
+impl From<TaskResult> for CreateTaskResponse {
+    fn from(value: TaskResult) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            start_date: value.period.start().map(Into::into),
+            end_date: value.period.end().map(Into::into),
+            estimate: value.estimate.map(Into::into),
+            responsible: Some(value.responsible.into()),
+            group: value.group.map(Into::into),
+            recurring: value.recurrence.map(|r| match r {
+                TaskRecurrenceOutput::Every(every) => {
+                    create_task_response::Recurring::Every(every.into())
+                }
+                TaskRecurrenceOutput::Checked(frequency) => {
+                    create_task_response::Recurring::Checked(frequency.into())
+                }
+            }),
+            can_update: value.can_update,
+            can_toggle: value.can_toggle,
+            can_delete: value.can_delete,
         }
     }
 }

@@ -35,6 +35,10 @@ message CreateTaskRequest {
     int32 responsible_id = 4;
     int32 group_id = 5;
     Duration estimate = 6;
+    oneof recurring {
+        RecurringChecked checked = 7;
+        RecurringEveryRequest every = 8;
+    }
 }
 
 message CreateTaskResponse {
@@ -45,6 +49,13 @@ message CreateTaskResponse {
     User responsible = 5;
     Group group = 6;
     Duration estimate = 7;
+    oneof recurring {
+        RecurringChecked checked = 8;
+        RecurringEveryResponse every = 9;
+    }
+    bool can_update = 10;
+    bool can_toggle = 11;
+    bool can_delete = 12;
 }
 
 message UpdateTaskRequest {
@@ -55,6 +66,10 @@ message UpdateTaskRequest {
     int32 responsible_id = 5;
     int32 group_id = 6;
     Duration estimate = 7;
+    oneof recurring {
+        RecurringChecked checked = 8;
+        RecurringEveryRequest every = 9;
+    }
 }
 
 message UpdateTaskResponse {
@@ -66,6 +81,13 @@ message UpdateTaskResponse {
     User responsible = 6;
     Group group = 7;
     Duration estimate = 8;
+    oneof recurring {
+        RecurringChecked checked = 9;
+        RecurringEveryResponse every = 10;
+    }
+    bool can_update = 11;
+    bool can_toggle = 12;
+    bool can_delete = 13;
 }
 
 message ToggleTaskCompletedRequest {
@@ -76,6 +98,8 @@ message ToggleTaskCompletedRequest {
 message ToggleTaskCompletedResponse {
     int32 id = 1;
     bool is_completed = 2;
+    CreateTaskResponse task_created = 3;
+    DeleteTaskResponse task_deleted = 4;
 }
 
 message DeleteTaskRequest {
@@ -98,6 +122,13 @@ message GetTasksResponse {
     User responsible = 6;
     Group group = 7;
     Duration estimate = 8;
+    oneof recurring {
+        RecurringChecked checked = 9;
+        RecurringEveryResponse every = 10;
+    }
+    bool can_update = 11;
+    bool can_toggle = 12;
+    bool can_delete = 13;
 }
 
 message CreateGroupRequest {
@@ -172,4 +203,25 @@ message Duration {
     int32 days = 1;
     int32 hours = 2;
     int32 minutes = 3;
+}
+
+message RecurringChecked {
+    int32 days = 1;
+    int32 months = 2;
+}
+
+message RecurringEveryRequest {
+    int32 days = 1;
+    int32 months = 2;
+}
+
+message RecurringEveryResponse {
+    int32 days = 1;
+    int32 months = 2;
+
+    int32 num_ready_to_start = 3;
+    bool num_ready_to_start_is_lower_bound = 4;
+
+    int32 num_reached_deadline = 5;
+    bool num_reached_deadline_is_lower_bound = 6;
 }

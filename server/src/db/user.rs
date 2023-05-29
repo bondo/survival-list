@@ -5,7 +5,7 @@ use futures_core::Stream;
 use futures_util::StreamExt;
 use tonic::Status;
 
-use super::{database::Database, GroupId};
+use super::{Database, GroupId};
 
 #[derive(Clone, Copy, Debug, sqlx::Type, PartialEq, Eq)]
 #[sqlx(transparent)]
@@ -38,6 +38,46 @@ pub struct UserResult {
 }
 
 impl Database {
+    pub fn get_group_participants(
+        &self,
+        user_id: UserId,
+        group_id: GroupId,
+    ) -> impl Stream<Item = Result<UserResult, Status>> + '_ {
+        sqlx::query_as!(
+            UserResult,
+            r#"
+                SELECT
+                    u.id as "id: UserId",
+                    u.uid,
+                    u.name,
+                    u.picture_url
+                FROM
+                    users u
+                INNER JOIN
+                    users_groups ug ON
+                        ug.user_id = u.id
+                WHERE
+                    ug.group_id = $2 AND
+                    EXISTS (
+                        SELECT
+                        FROM
+                            users_groups viewer_groups
+                        WHERE
+                            viewer_groups.user_id = $1 AND
+                            viewer_groups.group_id = $2
+                    )
+            "#,
+            user_id.0,
+            group_id.0
+        )
+        .fetch(self)
+        .map(|i| {
+            i.or(Err(Status::internal(
+                "unexpected error loading group participants",
+            )))
+        })
+    }
+
     pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId, Status> {
         sqlx::query_scalar!(
             r#"
@@ -57,7 +97,7 @@ impl Database {
             "#,
             uid,
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self)
         .await
         .map_err(|_| Status::internal("Failed to upsert user id"))
     }
@@ -94,49 +134,8 @@ impl Database {
             name,
             picture_url
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self)
         .await
         .map_err(|_| Status::internal("Failed to upsert user"))
-    }
-
-    #[allow(clippy::needless_lifetimes)]
-    pub fn get_group_participants<'a>(
-        &'a self,
-        user_id: UserId,
-        group_id: GroupId,
-    ) -> impl Stream<Item = Result<UserResult, Status>> + 'a {
-        sqlx::query_as!(
-            UserResult,
-            r#"
-                SELECT
-                    u.id as "id: UserId",
-                    u.uid,
-                    u.name,
-                    u.picture_url
-                FROM
-                    users u
-                INNER JOIN
-                    users_groups ug ON
-                        ug.user_id = u.id
-                WHERE
-                    ug.group_id = $2 AND
-                    EXISTS (
-                        SELECT
-                        FROM
-                            users_groups viewer_groups
-                        WHERE
-                            viewer_groups.user_id = $1 AND
-                            viewer_groups.group_id = $2
-                    )
-            "#,
-            user_id.0,
-            group_id.0
-        )
-        .fetch(&self.pool)
-        .map(|i| {
-            i.or(Err(Status::internal(
-                "unexpected error loading group participants",
-            )))
-        })
     }
 }
