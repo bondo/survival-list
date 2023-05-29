@@ -37,6 +37,8 @@ impl Display for TaskId {
     }
 }
 
+struct RecurrenceId(i32);
+
 #[derive(Debug)]
 struct TaskRawResult {
     pub id: i32,
@@ -699,46 +701,12 @@ impl Database {
             match params.recurrence {
                 None => (),
                 Some(TaskRecurrenceInput::Every(frequency)) => {
-                    sqlx::query!(
-                        r#"
-                            INSERT INTO recurrences (
-                                frequency,
-                                is_every,
-                                current_task_id
-                            )
-                            VALUES (
-                                $1,
-                                true,
-                                $2
-                            )
-                        "#,
-                        Some(PgInterval::from(frequency)),
-                        task_id.0
-                    )
-                    .execute(&mut tx)
-                    .await
-                    .map_err(|_| Status::internal("Failed to create recurrence"))?;
+                    self.create_recurrence_internal(&mut tx, task_id, frequency, true)
+                        .await?;
                 }
                 Some(TaskRecurrenceInput::Checked(frequency)) => {
-                    sqlx::query!(
-                        r#"
-                            INSERT INTO recurrences (
-                                frequency,
-                                is_every,
-                                current_task_id
-                            )
-                            VALUES (
-                                $1,
-                                false,
-                                $2
-                            )
-                        "#,
-                        Some(PgInterval::from(frequency)),
-                        task_id.0
-                    )
-                    .execute(&mut tx)
-                    .await
-                    .map_err(|_| Status::internal("Failed to create recurrence"))?;
+                    self.create_recurrence_internal(&mut tx, task_id, frequency, false)
+                        .await?;
                 }
             }
 
@@ -836,98 +804,36 @@ impl Database {
                         .await
                         .map_err(|_| Status::internal("Failed to delete recurrence"))?;
 
-                        sqlx::query!(
-                            r#"
-                                DELETE FROM
-                                    recurrences r
-                                WHERE
-                                    r.id = $1
-                            "#,
-                            recurrence_id
-                        )
-                        .execute(&mut tx)
-                        .await
-                        .map_err(|_| Status::internal("Failed to delete recurrence"))?;
+                        self.delete_recurrence_internal(&mut tx, RecurrenceId(recurrence_id))
+                            .await?;
                     }
                 }
                 Some(TaskRecurrenceInput::Every(frequency)) => {
                     if let Some(recurrence_id) = task.recurrence_id {
-                        sqlx::query!(
-                            r#"
-                                UPDATE
-                                    recurrences r
-                                SET
-                                    frequency = $1,
-                                    is_every = true
-                                WHERE
-                                    r.id = $2
-                            "#,
-                            Some(PgInterval::from(frequency)),
-                            recurrence_id
+                        self.update_recurrence_internal(
+                            &mut tx,
+                            RecurrenceId(recurrence_id),
+                            frequency,
+                            true,
                         )
-                        .execute(&mut tx)
-                        .await
-                        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                        .await?;
                     } else {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO recurrences (
-                                    frequency,
-                                    is_every,
-                                    current_task_id
-                                )
-                                VALUES (
-                                    $1,
-                                    true,
-                                    $2
-                                )
-                            "#,
-                            Some(PgInterval::from(frequency)),
-                            task_id.0
-                        )
-                        .execute(&mut tx)
-                        .await
-                        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                        self.create_recurrence_internal(&mut tx, task_id, frequency, true)
+                            .await?;
                     }
                 }
                 Some(TaskRecurrenceInput::Checked(frequency)) => {
                     if let Some(recurrence_id) = task.recurrence_id {
-                        sqlx::query!(
-                            r#"
-                                UPDATE
-                                    recurrences r
-                                SET
-                                    frequency = $1,
-                                    is_every = false
-                                WHERE
-                                    r.id = $2
-                            "#,
-                            Some(PgInterval::from(frequency)),
-                            recurrence_id
+                        self.update_recurrence_internal(
+                            &mut tx,
+                            RecurrenceId(recurrence_id),
+                            frequency,
+                            false,
                         )
-                        .execute(&mut tx)
-                        .await
-                        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+                        .await?;
                     } else {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO recurrences (
-                                    frequency,
-                                    is_every,
-                                    current_task_id
-                                )
-                                VALUES (
-                                    $1,
-                                    false,
-                                    $2
-                                )
-                            "#,
-                            Some(PgInterval::from(frequency)),
-                            task_id.0
-                        )
-                        .execute(&mut tx)
-                        .await
-                        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+                        self.create_recurrence_internal(&mut tx, task_id, frequency, false)
+                            .await?;
                     }
                 }
             }
@@ -972,7 +878,7 @@ impl Database {
             }
 
             let completed_at = self
-                .set_task_is_completed(&mut tx, user_id, task_id, is_completed)
+                .toggle_task_completed_internal(&mut tx, user_id, task_id, is_completed)
                 .await?;
 
             match (
@@ -990,7 +896,7 @@ impl Database {
                 // Set current task completed and create new task
                 (_, Some(current_task_id)) if task.id == current_task_id && is_completed => {
                     let next_task_id = self
-                        .create_next_recurrence(&mut tx, TaskId(current_task_id))
+                        .create_next_recurrence_internal(&mut tx, TaskId(current_task_id))
                         .await?;
 
                     let next_task = self
@@ -1010,7 +916,7 @@ impl Database {
                 (Some(previous_task_id), Some(current_task_id))
                     if task.id == previous_task_id && !is_completed =>
                 {
-                    self.revert_recurrence(
+                    self.revert_recurrence_internal(
                         &mut tx,
                         TaskId(previous_task_id),
                         TaskId(current_task_id),
@@ -1034,7 +940,7 @@ impl Database {
         self.end_transaction(tx, result).await
     }
 
-    async fn set_task_is_completed(
+    async fn toggle_task_completed_internal(
         &self,
         tx: &mut Tx<'_>,
         user_id: UserId,
@@ -1078,7 +984,84 @@ impl Database {
         .map_err(|_| Status::permission_denied("You are not allowed to toggle this item"))
     }
 
-    async fn create_next_recurrence(
+    async fn create_recurrence_internal(
+        &self,
+        tx: &mut Tx<'_>,
+        task_id: TaskId,
+        frequency: TaskRecurrenceFrequency,
+        is_every: bool,
+    ) -> Result<(), Status> {
+        sqlx::query!(
+            r#"
+                INSERT INTO recurrences (
+                    frequency,
+                    is_every,
+                    current_task_id
+                )
+                VALUES (
+                    $1,
+                    $2,
+                    $3
+                )
+            "#,
+            Some(PgInterval::from(frequency)),
+            is_every,
+            task_id.0
+        )
+        .execute(tx)
+        .await
+        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+        Ok(())
+    }
+
+    async fn update_recurrence_internal(
+        &self,
+        tx: &mut Tx<'_>,
+        recurrence_id: RecurrenceId,
+        frequency: TaskRecurrenceFrequency,
+        is_every: bool,
+    ) -> Result<(), Status> {
+        sqlx::query!(
+            r#"
+                UPDATE
+                    recurrences r
+                SET
+                    frequency = $1,
+                    is_every = $2
+                WHERE
+                    r.id = $3
+            "#,
+            Some(PgInterval::from(frequency)),
+            is_every,
+            recurrence_id.0
+        )
+        .execute(tx)
+        .await
+        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+        Ok(())
+    }
+
+    async fn delete_recurrence_internal(
+        &self,
+        tx: &mut Tx<'_>,
+        recurrence_id: RecurrenceId,
+    ) -> Result<(), Status> {
+        sqlx::query!(
+            r#"
+                DELETE FROM
+                    recurrences r
+                WHERE
+                    r.id = $1
+            "#,
+            recurrence_id.0
+        )
+        .execute(tx)
+        .await
+        .map_err(|_| Status::internal("Failed to delete recurrence"))?;
+        Ok(())
+    }
+
+    async fn create_next_recurrence_internal(
         &self,
         tx: &mut Tx<'_>,
         task_id: TaskId,
@@ -1155,7 +1138,7 @@ impl Database {
         .map_err(|_| Status::internal("Failed to create task"))
     }
 
-    async fn revert_recurrence(
+    async fn revert_recurrence_internal(
         &self,
         tx: &mut Tx<'_>,
         previous_task_id: TaskId,
@@ -1175,7 +1158,7 @@ impl Database {
         )
         .execute(tx)
         .await
-        .map_err(|_| Status::internal("Failed to create task"))?;
+        .map_err(|_| Status::internal("Failed to update recurrence"))?;
         Ok(())
     }
 
