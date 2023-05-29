@@ -170,15 +170,22 @@ class _GroupField extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<EditItemBloc>().state;
 
-    return GroupFormField(
-      value: state.group,
-      options:
-          state.groupsStatus == EditItemStatus.success ? state.groups : null,
-      onChanged: (pickedGroup) {
-        context.read<EditItemBloc>().add(EditItemGroupChanged(pickedGroup));
-      },
-      label: l10n.editItemGroupLabel,
-    );
+    return state.group == null &&
+            (state.groupsStatus != EditItemStatus.success ||
+                state.groups.isEmpty)
+        ? const SizedBox.shrink()
+        : GroupFormField(
+            value: state.group,
+            options: state.groupsStatus == EditItemStatus.success
+                ? state.groups
+                : null,
+            onChanged: (pickedGroup) {
+              context
+                  .read<EditItemBloc>()
+                  .add(EditItemGroupChanged(pickedGroup));
+            },
+            label: l10n.editItemGroupLabel,
+          );
   }
 }
 
@@ -190,18 +197,20 @@ class _ResponsibleField extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<EditItemBloc>().state;
 
-    return PersonFormField(
-      value: state.responsible ?? state.viewerPerson,
-      options: state.groupParticipantsStatus == EditItemStatus.success
-          ? state.groupParticipants
-          : null,
-      onChanged: (pickedResponsible) {
-        context
-            .read<EditItemBloc>()
-            .add(EditItemResponsibleChanged(pickedResponsible));
-      },
-      label: l10n.editItemResponsibleLabel,
-    );
+    return state.group == null
+        ? const SizedBox.shrink()
+        : PersonFormField(
+            value: state.responsible ?? state.viewerPerson,
+            options: state.groupParticipantsStatus == EditItemStatus.success
+                ? state.groupParticipants
+                : null,
+            onChanged: (pickedResponsible) {
+              context
+                  .read<EditItemBloc>()
+                  .add(EditItemResponsibleChanged(pickedResponsible));
+            },
+            label: l10n.editItemResponsibleLabel,
+          );
   }
 }
 

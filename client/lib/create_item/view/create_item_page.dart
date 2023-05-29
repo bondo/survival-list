@@ -170,15 +170,21 @@ class _GroupField extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<CreateItemBloc>().state;
 
-    return GroupFormField(
-      value: state.group,
-      options:
-          state.groupsStatus == CreateItemStatus.success ? state.groups : null,
-      onChanged: (pickedGroup) {
-        context.read<CreateItemBloc>().add(CreateItemGroupChanged(pickedGroup));
-      },
-      label: l10n.createItemGroupLabel,
-    );
+    return (state.groupsStatus != CreateItemStatus.success ||
+            state.groups.isEmpty)
+        ? const SizedBox.shrink()
+        : GroupFormField(
+            value: state.group,
+            options: state.groupsStatus == CreateItemStatus.success
+                ? state.groups
+                : null,
+            onChanged: (pickedGroup) {
+              context
+                  .read<CreateItemBloc>()
+                  .add(CreateItemGroupChanged(pickedGroup));
+            },
+            label: l10n.createItemGroupLabel,
+          );
   }
 }
 
@@ -190,18 +196,20 @@ class _ResponsibleField extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<CreateItemBloc>().state;
 
-    return PersonFormField(
-      value: state.responsible ?? state.viewerPerson,
-      options: state.groupParticipantsStatus == CreateItemStatus.success
-          ? state.groupParticipants
-          : null,
-      onChanged: (pickedResponsible) {
-        context
-            .read<CreateItemBloc>()
-            .add(CreateItemResponsibleChanged(pickedResponsible));
-      },
-      label: l10n.createItemResponsibleLabel,
-    );
+    return state.group == null
+        ? const SizedBox.shrink()
+        : PersonFormField(
+            value: state.responsible ?? state.viewerPerson,
+            options: state.groupParticipantsStatus == CreateItemStatus.success
+                ? state.groupParticipants
+                : null,
+            onChanged: (pickedResponsible) {
+              context
+                  .read<CreateItemBloc>()
+                  .add(CreateItemResponsibleChanged(pickedResponsible));
+            },
+            label: l10n.createItemResponsibleLabel,
+          );
   }
 }
 
