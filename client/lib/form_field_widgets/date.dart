@@ -36,7 +36,7 @@ class DateFormField extends StatelessWidget {
         final pickedDate = await showDatePicker(
           context: context,
           initialDate: _value,
-          firstDate: firstDate ?? DateTime.now(),
+          firstDate: firstDate ?? DateTime(DateTime.now().year - 1),
           lastDate: lastDate ?? DateTime(2101),
         );
         onChanged(pickedDate);
