@@ -36,6 +36,11 @@ extension ScheduleViewVariantX on ScheduleViewVariant {
   int _compare(Item a, Item b) {
     switch (this) {
       case ScheduleViewVariant.survival:
+        final endDateCmp =
+            _compareMaybeDateTime(a.endDate, b.endDate, _NullIs.largest);
+        if (endDateCmp != 0) {
+          return endDateCmp;
+        }
         return a.title.compareTo(b.title);
       case ScheduleViewVariant.todo:
         final endDateCmp =
