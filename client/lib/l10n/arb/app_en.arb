@@ -21,7 +21,7 @@
   },
   "pageItemCreateTitle": "Create new todo",
 
-  "scheduleAppBarTitle": "Flutter Items",
+  "scheduleAppBarTitle": "Survival List",
   "scheduleFilterTooltip": "Filter",
   "scheduleFilterAll": "All",
   "scheduleFilterActiveOnly": "Active only",
