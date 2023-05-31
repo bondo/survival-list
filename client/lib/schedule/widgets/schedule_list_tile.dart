@@ -41,16 +41,18 @@ class ItemListTile extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: !item.isCompleted
-                  ? null
-                  : TextStyle(
-                      color: captionColor,
-                      decoration: TextDecoration.lineThrough,
-                    ),
+            Expanded(
+              child: Text(
+                item.title,
+                maxLines: 1,
+                style: !item.isCompleted
+                    ? const TextStyle(overflow: TextOverflow.ellipsis)
+                    : TextStyle(
+                        color: captionColor,
+                        decoration: TextDecoration.lineThrough,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
             ),
             Avatar(
               photo: (item.responsible ?? viewerPerson)?.pictureUrl,

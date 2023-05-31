@@ -18,10 +18,12 @@ class GroupsListTile extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            group.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Expanded(
+            child: Text(
+              group.title,
+              maxLines: 1,
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
+            ),
           ),
         ],
       ),
