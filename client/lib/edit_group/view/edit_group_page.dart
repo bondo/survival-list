@@ -103,7 +103,9 @@ class _TitleField extends StatelessWidget {
       maxLength: 50,
       inputFormatters: [
         LengthLimitingTextInputFormatter(50),
-        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+        FilteringTextInputFormatter.deny(
+          RegExp(r'[\p{Zl}\p{Zp}\p{C}]', unicode: true),
+        ),
       ],
       onChanged: (value) {
         context.read<EditGroupBloc>().add(EditGroupTitleChanged(value));
