@@ -16,7 +16,6 @@ class GroupsListTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: Text(

@@ -45,7 +45,6 @@ class ItemListTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Text(
@@ -64,12 +63,17 @@ class ItemListTile extends StatelessWidget {
         ),
         subtitle: item.endDate == null
             ? null
-            : Expanded(
-                child: Text(
-                  DateFormat.yMMMMEEEEd(l10n.localeName).format(item.endDate!),
-                  maxLines: 1,
-                  style: const TextStyle(overflow: TextOverflow.ellipsis),
-                ),
+            : Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      DateFormat.yMMMMEEEEd(l10n.localeName)
+                          .format(item.endDate!),
+                      maxLines: 1,
+                      style: const TextStyle(overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                ],
               ),
         leading: Checkbox(
           shape: const ContinuousRectangleBorder(

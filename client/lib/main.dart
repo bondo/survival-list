@@ -14,41 +14,43 @@ import 'package:survival_list/settings/settings_service.dart';
 import 'package:survival_list_repository/survival_list_repository.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
 
-  FlutterError.onError = (details) {
-    log(details.exceptionAsString(), stackTrace: details.stack);
-  };
+      FlutterError.onError = (details) {
+        log(details.exceptionAsString(), stackTrace: details.stack);
+      };
 
-  Bloc.observer = const AppBlocObserver();
+      Bloc.observer = const AppBlocObserver();
 
-  final authenticationRepository = AuthenticationRepository();
-  await authenticationRepository.user.first;
+      final authenticationRepository = AuthenticationRepository();
+      await authenticationRepository.user.first;
 
-  final survivalListRepository = SurvivalListRepository(
-    authenticationRepository: authenticationRepository,
-  );
-
-  // TODO(bba): Blocify
-  final settingsController = SettingsController(SettingsService());
-  await settingsController.loadSettings();
-  if (settingsController.locale != null) {
-    // TODO(bba): Update on locale change
-    Intl.systemLocale = settingsController.locale.toString();
-  }
-
-  runZonedGuarded(
-    () => runApp(
-      App(
+      final survivalListRepository = SurvivalListRepository(
         authenticationRepository: authenticationRepository,
-        settingsController: settingsController,
-        survivalListRepository: survivalListRepository,
-      ),
-    ),
+      );
+
+      // TODO(bba): Blocify
+      final settingsController = SettingsController(SettingsService());
+      await settingsController.loadSettings();
+      if (settingsController.locale != null) {
+        // TODO(bba): Update on locale change
+        Intl.systemLocale = settingsController.locale.toString();
+      }
+
+      runApp(
+        App(
+          authenticationRepository: authenticationRepository,
+          settingsController: settingsController,
+          survivalListRepository: survivalListRepository,
+        ),
+      );
+    },
     (error, stackTrace) => log(error.toString(), stackTrace: stackTrace),
   );
 }
