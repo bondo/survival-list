@@ -3,15 +3,15 @@ use std::{env, fs};
 use anyhow::Result;
 use dotenvy::dotenv;
 use futures_core::future::BoxFuture;
-use sqlx::{self, migrate::MigrateError, postgres::PgPoolOptions, PgPool, Postgres, Transaction};
+use sqlx::{self, migrate::MigrateError, postgres::PgPoolOptions, PgPool, Postgres};
 use tonic::Status;
+
+use super::Transaction;
 
 #[derive(Clone, Debug)]
 pub struct Database {
     pool: PgPool,
 }
-
-pub type Tx<'c> = Transaction<'c, Postgres>;
 
 impl Database {
     pub async fn new() -> Result<Self, sqlx::Error> {
@@ -31,29 +31,13 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
-    pub async fn begin_transaction<'c>(&self) -> Result<Tx<'c>, Status> {
-        self.pool
-            .begin()
-            .await
-            .map_err(|_| Status::internal("Failed to begin transaction"))
-    }
-
-    pub async fn end_transaction<T>(
-        &self,
-        tx: Tx<'_>,
-        result: Result<T, Status>,
-    ) -> Result<T, Status> {
-        match result {
-            Ok(_) => tx
-                .commit()
-                .await
-                .map_err(|_| Status::internal("Failed to commit transaction")),
-            Err(_) => tx
-                .rollback()
-                .await
-                .map_err(|_| Status::internal("Failed to rollback transaction")),
-        }?;
-        result
+    pub async fn in_transaction<'c, R, F>(&'c self, f: F) -> Result<R, Status>
+    where
+        F: for<'t> FnOnce(&'t mut Transaction<'c>) -> BoxFuture<'t, Result<R, Status>>,
+    {
+        let mut tx = Transaction::begin(&self.pool).await?;
+        let result = f(&mut tx).await;
+        tx.end(result).await
     }
 }
 
