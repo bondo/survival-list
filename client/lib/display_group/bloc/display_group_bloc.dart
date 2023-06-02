@@ -46,7 +46,9 @@ class DisplayGroupBloc extends Bloc<DisplayGroupEvent, DisplayGroupState> {
   }
 
   Future<void> _onLeaveGroup(
-      LeaveGroup event, Emitter<DisplayGroupState> emit) async {
+    LeaveGroup event,
+    Emitter<DisplayGroupState> emit,
+  ) async {
     await _survivalListRepository.leaveGroup(state.group);
   }
 }
