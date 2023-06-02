@@ -25,13 +25,18 @@ class DisplayGroupBloc extends Bloc<DisplayGroupEvent, DisplayGroupState> {
     emit(state.copyWith(status: () => DisplayGroupStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine2(
+      CombineLatestStream.combine3(
+        _survivalListRepository.getGroup(state.group.id),
         _survivalListRepository.groupParticipants(state.group),
         _survivalListRepository.isFetchingGroupParticipants,
-        (List<Person> participants, bool isFetching) => (participants: participants, isFetching: isFetching),
+        (Group? group, List<Person> participants, bool isFetching) =>
+            (group: group, participants: participants, isFetching: isFetching),
       ),
       onData: (data) => state.copyWith(
-        status: () => data.isFetching ? DisplayGroupStatus.loading : DisplayGroupStatus.success,
+        group: () => data.group ?? state.group,
+        status: () => data.isFetching
+            ? DisplayGroupStatus.loading
+            : DisplayGroupStatus.success,
         participants: () => data.participants,
       ),
       onError: (_, __) => state.copyWith(
@@ -40,7 +45,8 @@ class DisplayGroupBloc extends Bloc<DisplayGroupEvent, DisplayGroupState> {
     );
   }
 
-  Future<void> _onLeaveGroup(LeaveGroup event, Emitter<DisplayGroupState> emit) async {
+  Future<void> _onLeaveGroup(
+      LeaveGroup event, Emitter<DisplayGroupState> emit) async {
     await _survivalListRepository.leaveGroup(state.group);
   }
 }

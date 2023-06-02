@@ -299,6 +299,13 @@ class SurvivalListRepository {
         .map((event) => event.values.toList());
   }
 
+  Stream<Group?> getGroup(int id) {
+    return _groupsStreamController
+        .asBroadcastStream()
+        .map((event) => event[id])
+        .distinct();
+  }
+
   Stream<bool> get isFetchingGroups {
     return _isFetchingGroupsStreamController.asBroadcastStream();
   }
@@ -401,8 +408,8 @@ class SurvivalListRepository {
     _upsertGroup(newGroup);
 
     try {
-      await _client.updateTask(
-        api.UpdateTaskRequest(
+      await _client.updateGroup(
+        api.UpdateGroupRequest(
           id: newGroup.id,
           title: newGroup.title,
         ),
