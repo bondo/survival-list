@@ -13,6 +13,12 @@ class ShortDuration extends Equatable {
   final int hours;
   final int minutes;
 
+  Duration intoDuration() => Duration(
+        days: days,
+        hours: hours,
+        minutes: minutes,
+      );
+
   ShortDuration copyWith({
     int Function()? days,
     int Function()? hours,
