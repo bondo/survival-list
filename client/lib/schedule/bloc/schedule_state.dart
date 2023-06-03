@@ -21,7 +21,8 @@ class ScheduleState extends Equatable {
   final String? userPhotoUrl;
   final Person? viewerPerson;
 
-  List<Item> get filteredItems => variant.apply(filter.apply(todos));
+  List<Item> get filteredItems =>
+      variant.apply(filter.apply(todos, viewerPerson));
 
   ScheduleState copyWith({
     ScheduleStatus Function()? status,

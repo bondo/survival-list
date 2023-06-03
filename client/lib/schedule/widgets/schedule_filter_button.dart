@@ -29,12 +29,12 @@ class ScheduleFilterButton extends StatelessWidget {
             child: Text(l10n.scheduleFilterAll),
           ),
           PopupMenuItem(
-            value: ScheduleViewFilter.activeOnly,
-            child: Text(l10n.scheduleFilterActiveOnly),
+            value: ScheduleViewFilter.unchecked,
+            child: Text(l10n.scheduleFilterUnchecked),
           ),
           PopupMenuItem(
-            value: ScheduleViewFilter.completedOnly,
-            child: Text(l10n.scheduleFilterCompletedOnly),
+            value: ScheduleViewFilter.responsible,
+            child: Text(l10n.scheduleFilterResponsible),
           ),
         ];
       },

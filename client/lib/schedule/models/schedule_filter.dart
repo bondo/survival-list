@@ -1,20 +1,20 @@
 import 'package:survival_list_repository/survival_list_repository.dart';
 
-enum ScheduleViewFilter { all, activeOnly, completedOnly }
+enum ScheduleViewFilter { all, unchecked, responsible }
 
 extension ScheduleViewFilterX on ScheduleViewFilter {
-  bool _filter(Item item) {
+  bool _filter(Item item, Person? viewer) {
     switch (this) {
       case ScheduleViewFilter.all:
         return true;
-      case ScheduleViewFilter.activeOnly:
+      case ScheduleViewFilter.unchecked:
         return !item.isCompleted;
-      case ScheduleViewFilter.completedOnly:
-        return item.isCompleted;
+      case ScheduleViewFilter.responsible:
+        return item.responsible == viewer;
     }
   }
 
-  Iterable<Item> apply(Iterable<Item> todos) {
-    return todos.where(_filter);
+  Iterable<Item> apply(Iterable<Item> todos, Person? viewer) {
+    return todos.where((t) => _filter(t, viewer));
   }
 }
