@@ -1,5 +1,6 @@
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
+use log::error;
 use sqlx::types::Uuid;
 use std::fmt::Display;
 
@@ -140,7 +141,11 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to update group"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to update group: {e}");
+            Status::internal("Failed to update group")
+        })
     }
 
     pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Status> {
@@ -181,7 +186,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to leave group"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to leave group: {e}");
+            Status::internal("Failed to leave group")
+        })?;
         Ok(())
     }
 
@@ -205,7 +214,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to leave group"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to leave group: {e}");
+            Status::internal("Failed to leave group")
+        })?;
         Ok(())
     }
 
@@ -228,7 +241,11 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to create group"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to create group: {e}");
+            Status::internal("Failed to create group")
+        })
     }
 
     pub async fn get_group_by_uid(&mut self, uid: &Uuid) -> Result<GroupResult, Status> {
@@ -268,7 +285,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to update group"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to update group: {e}");
+            Status::internal("Failed to update group")
+        })?;
 
         Ok(())
     }
@@ -292,7 +313,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to delete group"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to delete group: {e}");
+            Status::internal("Failed to delete group")
+        })?;
 
         Ok(())
     }

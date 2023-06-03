@@ -1,5 +1,6 @@
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
+use log::error;
 use std::{cmp::Ordering, fmt::Display};
 
 use anyhow::Result;
@@ -517,7 +518,11 @@ impl Database {
 
                 tx.get_task_unchecked(task_id)
                     .await
-                    .map_err(|_| Status::internal("Failed to load task after create"))?
+                    .map_err(|e| {
+                        let e = e.to_string();
+                        error!("Failed to load task after create: {e}");
+                        Status::internal("Failed to load task after create")
+                    })?
                     .try_into()
             })
         })
@@ -587,7 +592,11 @@ impl Database {
 
                 tx.get_task_unchecked(task_id)
                     .await
-                    .map_err(|_| Status::internal("Failed to load task after update"))?
+                    .map_err(|e| {
+                        let e = e.to_string();
+                        error!("Failed to load task after update: {e}");
+                        Status::internal("Failed to load task after update")
+                    })?
                     .try_into()
             })
         })
@@ -646,17 +655,22 @@ impl Database {
                             .create_next_recurrence_internal(TaskId(current_task_id))
                             .await?;
 
-                        let next_task = tx
-                            .get_task_unchecked(next_task_id)
-                            .await
-                            .map_err(|_| Status::internal("Failed to load task after create"))?;
+                        let next_task = tx.get_task_unchecked(next_task_id).await.map_err(|e| {
+                            let e = e.to_string();
+                            error!("Failed to load task after create: {e}");
+                            Status::internal("Failed to load task after create")
+                        })?;
 
                         let previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
                                 tx.get_task_unchecked(TaskId(previous_task_id))
                                     .await
                                     .map(Some)
-                                    .map_err(|_| Status::internal("Failed to load previous task"))?
+                                    .map_err(|e| {
+                                        let e = e.to_string();
+                                        error!("Failed to load previous task: {e}");
+                                        Status::internal("Failed to load previous task")
+                                    })?
                             } else {
                                 None
                             }
@@ -684,17 +698,22 @@ impl Database {
                         tx.delete_task_internal(user_id, TaskId(current_task_id))
                             .await?;
 
-                        let task = tx
-                            .get_task_unchecked(TaskId(task.id))
-                            .await
-                            .map_err(|_| Status::internal("Failed to load task after toggle"))?;
+                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
+                            let e = e.to_string();
+                            error!("Failed to load task after toggle: {e}");
+                            Status::internal("Failed to load task after toggle")
+                        })?;
 
                         let new_current_previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
                                 tx.get_task_unchecked(TaskId(previous_task_id))
                                     .await
                                     .map(Some)
-                                    .map_err(|_| Status::internal("Failed to load previous task"))?
+                                    .map_err(|e| {
+                                        let e = e.to_string();
+                                        error!("Failed to load previous task: {e}");
+                                        Status::internal("Failed to load previous task")
+                                    })?
                             } else {
                                 None
                             }
@@ -880,7 +899,11 @@ impl<'c> Transaction<'c> {
             )
             .fetch_one(self)
             .await
-            .map_err(|_| Status::internal("Failed to validate responsible and group"))?;
+            .map_err(|e| {
+                let e = e.to_string();
+                error!("Failed to validate responsible and group: {e}");
+                Status::internal("Failed to validate responsible and group")
+            })?;
 
             if let Some(is_valid) = is_valid {
                 if !is_valid {
@@ -930,7 +953,11 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to create task"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to create task: {e}");
+            Status::internal("Failed to create task")
+        })
     }
 
     async fn update_task_internal(&mut self, params: &UpdateTaskParams) -> Result<TaskId, Status> {
@@ -1059,7 +1086,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to insert recurrence"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to insert recurrence: {e}");
+            Status::internal("Failed to insert recurrence")
+        })?;
         Ok(())
     }
 
@@ -1085,7 +1116,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to update recurrence: {e}");
+            Status::internal("Failed to update recurrence")
+        })?;
         Ok(())
     }
 
@@ -1107,7 +1142,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to unset recurrence"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to unset recurrence: {e}");
+            Status::internal("Failed to unset recurrence")
+        })?;
         Ok(())
     }
 
@@ -1126,7 +1165,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to delete recurrence"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to delete recurrence: {e}");
+            Status::internal("Failed to delete recurrence")
+        })?;
         Ok(())
     }
 
@@ -1200,7 +1243,11 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to create task"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to create task: {e}");
+            Status::internal("Failed to create task")
+        })
     }
 
     async fn revert_recurrence_internal(
@@ -1222,7 +1269,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|_| Status::internal("Failed to update recurrence"))?;
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to update recurrence: {e}");
+            Status::internal("Failed to update recurrence")
+        })?;
         Ok(())
     }
 

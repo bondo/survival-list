@@ -3,6 +3,7 @@ use std::fmt::Display;
 use anyhow::Result;
 use futures_core::Stream;
 use futures_util::StreamExt;
+use log::error;
 use tonic::Status;
 
 use super::{Database, GroupId};
@@ -99,7 +100,11 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to upsert user id"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to upsert user id: {e}");
+            Status::internal("Failed to upsert user id")
+        })
     }
 
     pub async fn upsert_user(
@@ -136,6 +141,10 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::internal("Failed to upsert user"))
+        .map_err(|e| {
+            let e = e.to_string();
+            error!("Failed to upsert user: {e}");
+            Status::internal("Failed to upsert user")
+        })
     }
 }
