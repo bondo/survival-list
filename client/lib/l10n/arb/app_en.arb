@@ -38,6 +38,7 @@
   },
   "scheduleUndoDeletionButtonText": "Undo",
   "scheduleErrorSnackbarText": "An error occurred while loading todos.",
+  "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",
   "scheduleOptionsTooltip": "Options",
 
   "createItemAppBarTitle": "Add Item",

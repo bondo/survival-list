@@ -133,9 +133,21 @@ class ScheduleView extends StatelessWidget {
                             .add(ScheduleItemDeleted(item));
                       },
                       onTap: () {
-                        Navigator.of(context).push(
-                          EditItemPage.route(item: item),
-                        );
+                        if (item.canUpdate) {
+                          Navigator.of(context).push(
+                            EditItemPage.route(item: item),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.scheduleUpdateNotAllowedSnackbarText,
+                                ),
+                              ),
+                            );
+                        }
                       },
                     ),
                 ],

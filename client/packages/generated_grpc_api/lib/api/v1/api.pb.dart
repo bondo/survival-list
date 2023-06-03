@@ -1017,6 +1017,10 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
     ..aOM<CreateTaskResponse>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'taskCreated', subBuilder: CreateTaskResponse.create)
     ..aOM<DeleteTaskResponse>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'taskDeleted', subBuilder: DeleteTaskResponse.create)
+    ..aOM<UpdateTaskResponse>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'taskUpdated', subBuilder: UpdateTaskResponse.create)
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
+    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
+    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..hasRequiredFields = false
   ;
 
@@ -1026,6 +1030,10 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
     $core.bool? isCompleted,
     CreateTaskResponse? taskCreated,
     DeleteTaskResponse? taskDeleted,
+    UpdateTaskResponse? taskUpdated,
+    $core.bool? canUpdate,
+    $core.bool? canToggle,
+    $core.bool? canDelete,
   }) {
     final _result = create();
     if (id != null) {
@@ -1039,6 +1047,18 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
     }
     if (taskDeleted != null) {
       _result.taskDeleted = taskDeleted;
+    }
+    if (taskUpdated != null) {
+      _result.taskUpdated = taskUpdated;
+    }
+    if (canUpdate != null) {
+      _result.canUpdate = canUpdate;
+    }
+    if (canToggle != null) {
+      _result.canToggle = canToggle;
+    }
+    if (canDelete != null) {
+      _result.canDelete = canDelete;
     }
     return _result;
   }
@@ -1102,6 +1122,44 @@ class ToggleTaskCompletedResponse extends $pb.GeneratedMessage {
   void clearTaskDeleted() => clearField(4);
   @$pb.TagNumber(4)
   DeleteTaskResponse ensureTaskDeleted() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  UpdateTaskResponse get taskUpdated => $_getN(4);
+  @$pb.TagNumber(5)
+  set taskUpdated(UpdateTaskResponse v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasTaskUpdated() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTaskUpdated() => clearField(5);
+  @$pb.TagNumber(5)
+  UpdateTaskResponse ensureTaskUpdated() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.bool get canUpdate => $_getBF(5);
+  @$pb.TagNumber(6)
+  set canUpdate($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasCanUpdate() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearCanUpdate() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.bool get canToggle => $_getBF(6);
+  @$pb.TagNumber(7)
+  set canToggle($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasCanToggle() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearCanToggle() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get canDelete => $_getBF(7);
+  @$pb.TagNumber(8)
+  set canDelete($core.bool v) { $_setBool(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasCanDelete() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearCanDelete() => clearField(8);
 }
 
 class DeleteTaskRequest extends $pb.GeneratedMessage {

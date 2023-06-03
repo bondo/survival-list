@@ -14,6 +14,9 @@ class Item extends Equatable {
     required this.recurrence,
     required this.responsible,
     required this.group,
+    required this.canUpdate,
+    required this.canToggle,
+    required this.canDelete,
   });
 
   final int id;
@@ -25,6 +28,9 @@ class Item extends Equatable {
   final Recurrence recurrence;
   final Person? responsible;
   final Group? group;
+  final bool canUpdate;
+  final bool canToggle;
+  final bool canDelete;
 
   Item copyWith({
     int Function()? id,
@@ -36,6 +42,9 @@ class Item extends Equatable {
     Recurrence Function()? recurrence,
     Person? Function()? responsible,
     Group? Function()? group,
+    bool Function()? canUpdate,
+    bool Function()? canToggle,
+    bool Function()? canDelete,
   }) {
     return Item(
       id: id != null ? id() : this.id,
@@ -47,6 +56,9 @@ class Item extends Equatable {
       recurrence: recurrence != null ? recurrence() : this.recurrence,
       responsible: responsible != null ? responsible() : this.responsible,
       group: group != null ? group() : this.group,
+      canUpdate: canUpdate != null ? canUpdate() : this.canUpdate,
+      canToggle: canToggle != null ? canToggle() : this.canToggle,
+      canDelete: canDelete != null ? canDelete() : this.canDelete,
     );
   }
 
@@ -60,6 +72,9 @@ class Item extends Equatable {
         estimate,
         recurrence,
         responsible,
-        group
+        group,
+        canUpdate,
+        canToggle,
+        canDelete,
       ];
 }

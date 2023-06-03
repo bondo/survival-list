@@ -143,6 +143,9 @@ class SurvivalListRepository {
         },
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
+        canUpdate: response.canUpdate,
+        canToggle: response.canToggle,
+        canDelete: response.canDelete,
       ),
     )
         .listen(
@@ -227,7 +230,7 @@ class SurvivalListRepository {
     _upsertItem(newItem);
 
     try {
-      await _client.updateTask(
+      final response = await _client.updateTask(
         api.UpdateTaskRequest(
           id: newItem.id,
           title: newItem.title,
@@ -250,6 +253,7 @@ class SurvivalListRepository {
               : null,
         ),
       );
+      _upsertItem(_parseUpdateTaskResponse(response));
     } catch (e) {
       _upsertItem(oldItem);
       rethrow;
@@ -270,6 +274,14 @@ class SurvivalListRepository {
           isCompleted: newItem.isCompleted,
         ),
       );
+      _upsertItem(
+        item.copyWith(
+          isCompleted: () => response.isCompleted,
+          canDelete: () => response.canDelete,
+          canToggle: () => response.canToggle,
+          canUpdate: () => response.canUpdate,
+        ),
+      );
       if (response.hasTaskCreated()) {
         _upsertItem(_parseCreateTaskResponse(response.taskCreated));
       }
@@ -277,6 +289,9 @@ class SurvivalListRepository {
         final newValue = HashMap<int, Item>.from(_itemsStreamController.value)
           ..remove(response.taskDeleted.id);
         _itemsStreamController.add(newValue);
+      }
+      if (response.hasTaskUpdated()) {
+        _upsertItem(_parseUpdateTaskResponse(response.taskUpdated));
       }
     } catch (e) {
       _upsertItem(item);
@@ -578,6 +593,39 @@ class SurvivalListRepository {
           )
       },
       group: _parseGroup(task.group),
+      canUpdate: task.canUpdate,
+      canToggle: task.canToggle,
+      canDelete: task.canDelete,
+    );
+  }
+
+  Item _parseUpdateTaskResponse(api.UpdateTaskResponse task) {
+    return Item(
+      id: task.id,
+      title: task.title,
+      isCompleted: task.isCompleted,
+      startDate: _parseDate(task.startDate),
+      endDate: _parseDate(task.endDate),
+      estimate: _parseDuration(task.estimate),
+      responsible: _parseUser(task.responsible),
+      recurrence: switch (task.whichRecurring()) {
+        api.UpdateTaskResponse_Recurring.notSet => const Recurrence(
+            kind: RecurrenceKind.none,
+            frequency: LongDuration(months: 0, days: 0),
+          ),
+        api.UpdateTaskResponse_Recurring.every => Recurrence(
+            kind: RecurrenceKind.every,
+            frequency: _parseRecurrenceEvery(task.every),
+          ),
+        api.UpdateTaskResponse_Recurring.checked => Recurrence(
+            kind: RecurrenceKind.checked,
+            frequency: _parseRecurrenceChecked(task.checked),
+          )
+      },
+      group: _parseGroup(task.group),
+      canUpdate: task.canUpdate,
+      canToggle: task.canToggle,
+      canDelete: task.canDelete,
     );
   }
 }

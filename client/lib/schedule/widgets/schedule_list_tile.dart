@@ -29,72 +29,81 @@ class ItemListTile extends StatelessWidget {
       photo: (item.responsible ?? viewerPerson)?.pictureUrl,
     );
 
-    return Dismissible(
-      key: Key('todoListTile_dismissible_${item.id}'),
-      onDismissed: onDismissed,
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        color: theme.colorScheme.error,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: const Icon(
-          Icons.delete,
-          color: Color(0xAAFFFFFF),
-        ),
-      ),
-      child: ListTile(
-        onTap: onTap,
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.title,
-                maxLines: 1,
-                style: !item.isCompleted
-                    ? const TextStyle(overflow: TextOverflow.ellipsis)
-                    : TextStyle(
-                        color: captionColor,
-                        decoration: TextDecoration.lineThrough,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-              ),
-            ),
-          ],
-        ),
-        subtitle: item.endDate == null
-            ? null
-            : Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      DateFormat.yMMMMEEEEd(l10n.localeName)
-                          .format(item.endDate!),
-                      maxLines: 1,
-                      style: const TextStyle(overflow: TextOverflow.ellipsis),
+    final tile = ListTile(
+      onTap: onTap,
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              item.title,
+              maxLines: 1,
+              style: !item.isCompleted
+                  ? const TextStyle(overflow: TextOverflow.ellipsis)
+                  : TextStyle(
+                      color: captionColor,
+                      decoration: TextDecoration.lineThrough,
+                      overflow: TextOverflow.ellipsis,
                     ),
+            ),
+          ),
+        ],
+      ),
+      subtitle: item.endDate == null
+          ? null
+          : Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    DateFormat.yMMMMEEEEd(l10n.localeName)
+                        .format(item.endDate!),
+                    maxLines: 1,
+                    style: const TextStyle(overflow: TextOverflow.ellipsis),
                   ),
+                ),
+              ],
+            ),
+      leading: Checkbox(
+        shape: const ContinuousRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        value: item.isCompleted,
+        onChanged: onToggleCompleted == null || !item.canToggle
+            ? null
+            : (value) => onToggleCompleted!(value!),
+      ),
+      trailing: onTap == null || !item.canUpdate
+          ? Padding(
+              padding: const EdgeInsets.only(right: 24),
+              child: avatar,
+            )
+          : FittedBox(
+              child: Row(
+                children: [
+                  avatar,
+                  const Icon(Icons.chevron_right),
                 ],
               ),
-        leading: Checkbox(
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
-          value: item.isCompleted,
-          onChanged: onToggleCompleted == null
-              ? null
-              : (value) => onToggleCompleted!(value!),
-        ),
-        trailing: onTap == null
-            ? avatar
-            : FittedBox(
-                child: Row(
-                  children: [
-                    avatar,
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-      ),
+            ),
     );
+
+    if (item.canDelete) {
+      return Dismissible(
+        key: Key('todoListTile_dismissible_${item.id}'),
+        onDismissed: onDismissed,
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          color: theme.colorScheme.error,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: const Icon(
+            Icons.delete,
+            color: Color(0xAAFFFFFF),
+          ),
+        ),
+        child: tile,
+      );
+    } else {
+      return tile;
+    }
   }
 }

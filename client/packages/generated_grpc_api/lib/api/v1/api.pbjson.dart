@@ -140,11 +140,15 @@ const ToggleTaskCompletedResponse$json = const {
     const {'1': 'is_completed', '3': 2, '4': 1, '5': 8, '10': 'isCompleted'},
     const {'1': 'task_created', '3': 3, '4': 1, '5': 11, '6': '.api.v1.CreateTaskResponse', '10': 'taskCreated'},
     const {'1': 'task_deleted', '3': 4, '4': 1, '5': 11, '6': '.api.v1.DeleteTaskResponse', '10': 'taskDeleted'},
+    const {'1': 'task_updated', '3': 5, '4': 1, '5': 11, '6': '.api.v1.UpdateTaskResponse', '10': 'taskUpdated'},
+    const {'1': 'can_update', '3': 6, '4': 1, '5': 8, '10': 'canUpdate'},
+    const {'1': 'can_toggle', '3': 7, '4': 1, '5': 8, '10': 'canToggle'},
+    const {'1': 'can_delete', '3': 8, '4': 1, '5': 8, '10': 'canDelete'},
   ],
 };
 
 /// Descriptor for `ToggleTaskCompletedResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List toggleTaskCompletedResponseDescriptor = $convert.base64Decode('ChtUb2dnbGVUYXNrQ29tcGxldGVkUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEiEKDGlzX2NvbXBsZXRlZBgCIAEoCFILaXNDb21wbGV0ZWQSPQoMdGFza19jcmVhdGVkGAMgASgLMhouYXBpLnYxLkNyZWF0ZVRhc2tSZXNwb25zZVILdGFza0NyZWF0ZWQSPQoMdGFza19kZWxldGVkGAQgASgLMhouYXBpLnYxLkRlbGV0ZVRhc2tSZXNwb25zZVILdGFza0RlbGV0ZWQ=');
+final $typed_data.Uint8List toggleTaskCompletedResponseDescriptor = $convert.base64Decode('ChtUb2dnbGVUYXNrQ29tcGxldGVkUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEiEKDGlzX2NvbXBsZXRlZBgCIAEoCFILaXNDb21wbGV0ZWQSPQoMdGFza19jcmVhdGVkGAMgASgLMhouYXBpLnYxLkNyZWF0ZVRhc2tSZXNwb25zZVILdGFza0NyZWF0ZWQSPQoMdGFza19kZWxldGVkGAQgASgLMhouYXBpLnYxLkRlbGV0ZVRhc2tSZXNwb25zZVILdGFza0RlbGV0ZWQSPQoMdGFza191cGRhdGVkGAUgASgLMhouYXBpLnYxLlVwZGF0ZVRhc2tSZXNwb25zZVILdGFza1VwZGF0ZWQSHQoKY2FuX3VwZGF0ZRgGIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYByABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGAggASgIUgljYW5EZWxldGU=');
 @$core.Deprecated('Use deleteTaskRequestDescriptor instead')
 const DeleteTaskRequest$json = const {
   '1': 'DeleteTaskRequest',
