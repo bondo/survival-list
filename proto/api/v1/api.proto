@@ -101,6 +101,9 @@ message ToggleTaskCompletedResponse {
     CreateTaskResponse task_created = 3;
     DeleteTaskResponse task_deleted = 4;
     UpdateTaskResponse task_updated = 5;
+    bool can_update = 6;
+    bool can_toggle = 7;
+    bool can_delete = 8;
 }
 
 message DeleteTaskRequest {

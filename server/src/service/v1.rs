@@ -165,18 +165,21 @@ impl api_server::Api for Service {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
-        let task = self
+        let result = self
             .db
             .toggle_task_completed(user_id, TaskId::new(request.id), request.is_completed)
             .await?;
         Ok(Response::new(ToggleTaskCompletedResponse {
-            id: task.id.into(),
-            is_completed: task.completed_at.is_some(),
-            task_created: task.task_created.map(Into::into),
-            task_deleted: task
+            id: result.id.into(),
+            is_completed: result.completed_at.is_some(),
+            can_update: result.can_update,
+            can_toggle: result.can_toggle,
+            can_delete: result.can_delete,
+            task_created: result.task_created.map(Into::into),
+            task_deleted: result
                 .task_deleted
                 .map(|id| DeleteTaskResponse { id: id.into() }),
-            task_updated: task.task_updated.map(Into::into),
+            task_updated: result.task_updated.map(Into::into),
         }))
     }
 

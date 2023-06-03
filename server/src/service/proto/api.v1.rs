@@ -169,6 +169,12 @@ pub struct ToggleTaskCompletedResponse {
     pub task_deleted: ::core::option::Option<DeleteTaskResponse>,
     #[prost(message, optional, tag = "5")]
     pub task_updated: ::core::option::Option<UpdateTaskResponse>,
+    #[prost(bool, tag = "6")]
+    pub can_update: bool,
+    #[prost(bool, tag = "7")]
+    pub can_toggle: bool,
+    #[prost(bool, tag = "8")]
+    pub can_delete: bool,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

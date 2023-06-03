@@ -182,6 +182,9 @@ impl TryFrom<TaskRawResult> for TaskResult {
 #[derive(Debug)]
 pub struct ToggleResult {
     pub id: TaskId,
+    pub can_update: bool,
+    pub can_toggle: bool,
+    pub can_delete: bool,
     pub completed_at: Option<PrimitiveDateTime>,
     pub task_created: Option<TaskResult>,
     pub task_deleted: Option<TaskId>,
@@ -619,6 +622,9 @@ impl Database {
                 if task.completed_at.is_some() == is_completed {
                     return Ok(ToggleResult {
                         id: task_id,
+                        can_update: task.can_update(),
+                        can_toggle: task.can_toggle()?,
+                        can_delete: task.can_delete(),
                         completed_at: task.completed_at,
                         task_created: None,
                         task_deleted: None,
@@ -641,13 +647,24 @@ impl Database {
                     task.recurrence_current_task_id,
                 ) {
                     // Non-recurring task - just set completed
-                    (None, None) => Ok(ToggleResult {
-                        id: task_id,
-                        completed_at,
-                        task_created: None,
-                        task_deleted: None,
-                        task_updated: None,
-                    }),
+                    (None, None) => {
+                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
+                            let e = e.to_string();
+                            error!("Failed to load task after toggle: {e}");
+                            Status::internal("Failed to load task after toggle")
+                        })?;
+
+                        Ok(ToggleResult {
+                            id: task_id,
+                            can_update: task.can_update(),
+                            can_toggle: task.can_toggle()?,
+                            can_delete: task.can_delete(),
+                            completed_at,
+                            task_created: None,
+                            task_deleted: None,
+                            task_updated: None,
+                        })
+                    }
 
                     // Set current task completed and create new task
                     (_, Some(current_task_id)) if task.id == current_task_id && is_completed => {
@@ -676,8 +693,17 @@ impl Database {
                             }
                         };
 
+                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
+                            let e = e.to_string();
+                            error!("Failed to load task after toggle: {e}");
+                            Status::internal("Failed to load task after toggle")
+                        })?;
+
                         Ok(ToggleResult {
                             id: task_id,
+                            can_update: task.can_update(),
+                            can_toggle: task.can_toggle()?,
+                            can_delete: task.can_delete(),
                             completed_at,
                             task_created: Some(next_task.try_into()?),
                             task_deleted: None,
@@ -721,6 +747,9 @@ impl Database {
 
                         Ok(ToggleResult {
                             id: task_id,
+                            can_update: task.can_update(),
+                            can_toggle: task.can_toggle()?,
+                            can_delete: task.can_delete(),
                             completed_at,
                             task_created: None,
                             task_deleted: Some(TaskId(current_task_id)),
