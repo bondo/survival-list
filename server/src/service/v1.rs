@@ -155,27 +155,7 @@ impl api_server::Api for Service {
             })
             .await?;
 
-        Ok(Response::new(UpdateTaskResponse {
-            id: task.id.into(),
-            title: task.title,
-            is_completed: task.completed_at.is_some(),
-            start_date: task.period.start().map(Into::into),
-            end_date: task.period.end().map(Into::into),
-            estimate: task.estimate.map(Into::into),
-            responsible: Some(task.responsible.into()),
-            group: task.group.map(Into::into),
-            recurring: task.recurrence.map(|r| match r {
-                TaskRecurrenceOutput::Every(every) => {
-                    update_task_response::Recurring::Every(every.into())
-                }
-                TaskRecurrenceOutput::Checked(frequency) => {
-                    update_task_response::Recurring::Checked(frequency.into())
-                }
-            }),
-            can_update: task.can_update,
-            can_toggle: task.can_toggle,
-            can_delete: task.can_delete,
-        }))
+        Ok(Response::new(task.into()))
     }
 
     async fn toggle_task_completed(
@@ -196,6 +176,7 @@ impl api_server::Api for Service {
             task_deleted: task
                 .task_deleted
                 .map(|id| DeleteTaskResponse { id: id.into() }),
+            task_updated: task.task_updated.map(Into::into),
         }))
     }
 
@@ -535,6 +516,32 @@ impl From<TaskResult> for CreateTaskResponse {
                 }
                 TaskRecurrenceOutput::Checked(frequency) => {
                     create_task_response::Recurring::Checked(frequency.into())
+                }
+            }),
+            can_update: value.can_update,
+            can_toggle: value.can_toggle,
+            can_delete: value.can_delete,
+        }
+    }
+}
+
+impl From<TaskResult> for UpdateTaskResponse {
+    fn from(value: TaskResult) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            is_completed: value.completed_at.is_some(),
+            start_date: value.period.start().map(Into::into),
+            end_date: value.period.end().map(Into::into),
+            estimate: value.estimate.map(Into::into),
+            responsible: Some(value.responsible.into()),
+            group: value.group.map(Into::into),
+            recurring: value.recurrence.map(|r| match r {
+                TaskRecurrenceOutput::Every(every) => {
+                    update_task_response::Recurring::Every(every.into())
+                }
+                TaskRecurrenceOutput::Checked(frequency) => {
+                    update_task_response::Recurring::Checked(frequency.into())
                 }
             }),
             can_update: value.can_update,

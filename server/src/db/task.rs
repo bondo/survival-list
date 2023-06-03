@@ -184,6 +184,7 @@ pub struct ToggleResult {
     pub completed_at: Option<PrimitiveDateTime>,
     pub task_created: Option<TaskResult>,
     pub task_deleted: Option<TaskId>,
+    pub task_updated: Option<TaskResult>,
 }
 
 #[derive(Debug)]
@@ -612,6 +613,7 @@ impl Database {
                         completed_at: task.completed_at,
                         task_created: None,
                         task_deleted: None,
+                        task_updated: None,
                     });
                 }
 
@@ -635,6 +637,7 @@ impl Database {
                         completed_at,
                         task_created: None,
                         task_deleted: None,
+                        task_updated: None,
                     }),
 
                     // Set current task completed and create new task
@@ -648,11 +651,23 @@ impl Database {
                             .await
                             .map_err(|_| Status::internal("Failed to load task after create"))?;
 
+                        let previous_task = {
+                            if let Some(previous_task_id) = task.recurrence_previous_task_id {
+                                tx.get_task_unchecked(TaskId(previous_task_id))
+                                    .await
+                                    .map(Some)
+                                    .map_err(|_| Status::internal("Failed to load previous task"))?
+                            } else {
+                                None
+                            }
+                        };
+
                         Ok(ToggleResult {
                             id: task_id,
                             completed_at,
                             task_created: Some(next_task.try_into()?),
                             task_deleted: None,
+                            task_updated: previous_task.map(TryInto::try_into).transpose()?,
                         })
                     }
 
@@ -665,13 +680,34 @@ impl Database {
                             TaskId(current_task_id),
                         )
                         .await?;
+
                         tx.delete_task_internal(user_id, TaskId(current_task_id))
                             .await?;
+
+                        let task = tx
+                            .get_task_unchecked(TaskId(task.id))
+                            .await
+                            .map_err(|_| Status::internal("Failed to load task after toggle"))?;
+
+                        let new_current_previous_task = {
+                            if let Some(previous_task_id) = task.recurrence_previous_task_id {
+                                tx.get_task_unchecked(TaskId(previous_task_id))
+                                    .await
+                                    .map(Some)
+                                    .map_err(|_| Status::internal("Failed to load previous task"))?
+                            } else {
+                                None
+                            }
+                        };
+
                         Ok(ToggleResult {
                             id: task_id,
                             completed_at,
                             task_created: None,
                             task_deleted: Some(TaskId(current_task_id)),
+                            task_updated: new_current_previous_task
+                                .map(TryInto::try_into)
+                                .transpose()?,
                         })
                     }
 
