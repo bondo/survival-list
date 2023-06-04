@@ -1,12 +1,10 @@
-use std::fmt::Display;
-
-use anyhow::Result;
+use anyhow::Context;
 use futures_core::Stream;
 use futures_util::StreamExt;
-use log::error;
-use tonic::Status;
+use std::fmt::Display;
 
 use super::{Database, GroupId};
+use crate::error::Error;
 
 #[derive(Clone, Copy, Debug, sqlx::Type, PartialEq, Eq)]
 #[sqlx(transparent)]
@@ -43,7 +41,7 @@ impl Database {
         &self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> impl Stream<Item = Result<UserResult, Status>> + '_ {
+    ) -> impl Stream<Item = Result<UserResult, Error>> + '_ {
         sqlx::query_as!(
             UserResult,
             r#"
@@ -72,14 +70,13 @@ impl Database {
             group_id.0
         )
         .fetch(self)
-        .map(|i| {
-            i.or(Err(Status::internal(
-                "unexpected error loading group participants",
-            )))
+        .map(|v| {
+            v.context("Error loading user group participants")
+                .map_err(Into::into)
         })
     }
 
-    pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId, Status> {
+    pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId, Error> {
         sqlx::query_scalar!(
             r#"
                 INSERT INTO users (
@@ -100,11 +97,8 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to upsert user id: {e}");
-            Status::internal("Failed to upsert user id")
-        })
+        .context("Failed to upsert user id")
+        .map_err(Into::into)
     }
 
     pub async fn upsert_user(
@@ -112,7 +106,7 @@ impl Database {
         uid: &str,
         name: &str,
         picture_url: Option<&str>,
-    ) -> Result<UserResult, Status> {
+    ) -> Result<UserResult, Error> {
         sqlx::query_as!(
             UserResult,
             r#"
@@ -141,10 +135,7 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to upsert user: {e}");
-            Status::internal("Failed to upsert user")
-        })
+        .context("Failed to upsert user")
+        .map_err(Into::into)
     }
 }

@@ -1,9 +1,6 @@
+use anyhow::Context;
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
-use log::error;
-use std::{cmp::Ordering, fmt::Display};
-
-use anyhow::Result;
 use sqlx::{
     self,
     postgres::types::PgInterval,
@@ -12,9 +9,10 @@ use sqlx::{
         Uuid,
     },
 };
-use tonic::Status;
+use std::{cmp::Ordering, fmt::Display};
 
 use super::{Database, GroupId, Transaction, UserId};
+use crate::error::Error;
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -78,13 +76,13 @@ impl TaskRawResult {
     // - if this is the first recurrence
     // - if this is the current task
     // - if this is the previous task
-    fn can_toggle(&self) -> Result<bool, Status> {
+    fn can_toggle(&self) -> Result<bool, Error> {
         match (
             self.recurrence_previous_task_id,
             self.recurrence_current_task_id,
         ) {
             (None, None) | (None, Some(_)) => Ok(true),
-            (Some(_), None) => Err(Status::internal("Unexpected recurrence stats")),
+            (Some(_), None) => Err(Error::InternalState("Unexpected recurrence stats")),
             (Some(previous_task_id), Some(current_task_id)) => {
                 Ok(self.id == previous_task_id || self.id == current_task_id)
             }
@@ -124,9 +122,9 @@ pub struct TaskResult {
 static RECURRENCE_MAX: i32 = 5;
 
 impl TryFrom<TaskRawResult> for TaskResult {
-    type Error = Status;
+    type Error = Error;
 
-    fn try_from(value: TaskRawResult) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: TaskRawResult) -> Result<Self, Self::Error> {
         let can_update = value.can_update();
         let can_toggle = value.can_toggle()?;
         let can_delete = value.can_delete();
@@ -134,9 +132,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
             id: TaskId(value.id),
             title: value.title,
             completed_at: value.completed_at,
-            period: (value.start_date, value.end_date)
-                .try_into()
-                .map_err(Status::internal)?,
+            period: (value.start_date, value.end_date).try_into()?,
             estimate: value.estimate.map(TryInto::try_into).transpose()?,
             responsible: TaskResponsible {
                 id: UserId(value.responsible_id),
@@ -150,7 +146,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
                     title,
                     uid,
                 })),
-                _ => Err(Status::internal("Unexpected group result")),
+                _ => Err(Error::InternalState("Unexpected group result")),
             }?,
             recurrence: match (value.recurrence_frequency, value.recurrence_is_every) {
                 (None, None) => Ok(None),
@@ -176,7 +172,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
                 (Some(frequency), Some(false)) => {
                     Ok(Some(TaskRecurrenceOutput::Checked(frequency.into())))
                 }
-                _ => Err(Status::internal("Unexpected recurrence result")),
+                _ => Err(Error::InternalState("Unexpected recurrence result")),
             }?,
             can_update,
             can_toggle,
@@ -228,7 +224,7 @@ impl TaskPeriod {
 }
 
 impl TryFrom<(Option<Date>, Option<Date>)> for TaskPeriod {
-    type Error = &'static str;
+    type Error = Error;
 
     fn try_from(value: (Option<Date>, Option<Date>)) -> std::result::Result<Self, Self::Error> {
         match value {
@@ -236,12 +232,12 @@ impl TryFrom<(Option<Date>, Option<Date>)> for TaskPeriod {
             (None, Some(end)) => Ok(TaskPeriod::OnlyEnd(end)),
             (Some(start), Some(end)) => {
                 if end.cmp(&start) == Ordering::Less {
-                    Err("End before start")
+                    Err(Error::InvalidArgument("End before start"))
                 } else {
                     Ok(TaskPeriod::StartAndEnd { start, end })
                 }
             }
-            (None, None) => Err("Either start or end date required"),
+            (None, None) => Err(Error::InvalidArgument("Either start or end date required")),
         }
     }
 }
@@ -268,19 +264,19 @@ pub struct TaskEstimate {
 }
 
 impl TryFrom<PgInterval> for TaskEstimate {
-    type Error = Status;
+    type Error = Error;
 
     fn try_from(value: PgInterval) -> Result<Self, Self::Error> {
         if value.months != 0 {
-            return Err(Status::internal("Unexpected month value in estimate"));
+            return Err(Error::InternalState("Unexpected month value in estimate"));
         }
         let total_minutes = value.microseconds / (60_000_000);
         let hours: i32 = (total_minutes / 60)
             .try_into()
-            .map_err(|_| Status::internal("Failed to parse estimate hours"))?;
+            .map_err(|_| Error::InternalState("Failed to parse estimate hours"))?;
         let minutes: i32 = (total_minutes % 60)
             .try_into()
-            .map_err(|_| Status::internal("Failed to parse estimate minutes"))?;
+            .map_err(|_| Error::InternalState("Failed to parse estimate minutes"))?;
         Ok(Self {
             days: value.days,
             hours,
@@ -372,10 +368,7 @@ pub struct UpdateTaskParams {
 }
 
 impl Database {
-    pub fn get_tasks(
-        &self,
-        user_id: UserId,
-    ) -> impl Stream<Item = Result<TaskResult, Status>> + '_ {
+    pub fn get_tasks(&self, user_id: UserId) -> impl Stream<Item = Result<TaskResult, Error>> + '_ {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -496,13 +489,10 @@ impl Database {
             RECURRENCE_MAX
         )
         .fetch(self)
-        .map(|i| {
-            i.or(Err(Status::internal("unexpected error loading tasks")))?
-                .try_into()
-        })
+        .map(|v| v.context("Error loading tasks")?.try_into())
     }
 
-    pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Status> {
+    pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 tx.validate_responsible_and_group(
@@ -528,18 +518,14 @@ impl Database {
 
                 tx.get_task_unchecked(task_id)
                     .await
-                    .map_err(|e| {
-                        let e = e.to_string();
-                        error!("Failed to load task after create: {e}");
-                        Status::internal("Failed to load task after create")
-                    })?
+                    .context("Failed to load task after create")?
                     .try_into()
             })
         })
         .await
     }
 
-    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Status> {
+    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 tx.validate_responsible_and_group(
@@ -552,10 +538,10 @@ impl Database {
                 let task = tx
                     .get_task_unchecked(params.task_id)
                     .await
-                    .map_err(|_| Status::not_found("Task not found"))?;
+                    .map_err(|_| Error::NotFound("Task not found"))?;
 
                 if !task.can_update() {
-                    return Err(Status::permission_denied(
+                    return Err(Error::PermissionDenied(
                         "You are not allowed to update this item",
                     ));
                 }
@@ -602,11 +588,7 @@ impl Database {
 
                 tx.get_task_unchecked(task_id)
                     .await
-                    .map_err(|e| {
-                        let e = e.to_string();
-                        error!("Failed to load task after update: {e}");
-                        Status::internal("Failed to load task after update")
-                    })?
+                    .context("Failed to load task after update")?
                     .try_into()
             })
         })
@@ -618,13 +600,13 @@ impl Database {
         user_id: UserId,
         task_id: TaskId,
         is_completed: bool,
-    ) -> Result<ToggleResult, Status> {
+    ) -> Result<ToggleResult, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
                     .get_task_unchecked(task_id)
                     .await
-                    .map_err(|_| Status::not_found("Task not found"))?;
+                    .map_err(|_| Error::NotFound("Task not found"))?;
 
                 if task.completed_at.is_some() == is_completed {
                     return Ok(ToggleResult {
@@ -640,7 +622,7 @@ impl Database {
                 }
 
                 if !task.can_toggle()? {
-                    return Err(Status::permission_denied(
+                    return Err(Error::PermissionDenied(
                         "You are not allowed to toggle this item",
                     ));
                 }
@@ -655,11 +637,10 @@ impl Database {
                 ) {
                     // Non-recurring task - just set completed
                     (None, None) => {
-                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
-                            let e = e.to_string();
-                            error!("Failed to load task after toggle: {e}");
-                            Status::internal("Failed to load task after toggle")
-                        })?;
+                        let task = tx
+                            .get_task_unchecked(TaskId(task.id))
+                            .await
+                            .context("Failed to load task after toggle")?;
 
                         Ok(ToggleResult {
                             id: task_id,
@@ -679,32 +660,26 @@ impl Database {
                             .create_next_recurrence_internal(TaskId(current_task_id))
                             .await?;
 
-                        let next_task = tx.get_task_unchecked(next_task_id).await.map_err(|e| {
-                            let e = e.to_string();
-                            error!("Failed to load task after create: {e}");
-                            Status::internal("Failed to load task after create")
-                        })?;
+                        let next_task = tx
+                            .get_task_unchecked(next_task_id)
+                            .await
+                            .context("Failed to load task after create")?;
 
                         let previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
                                 tx.get_task_unchecked(TaskId(previous_task_id))
                                     .await
                                     .map(Some)
-                                    .map_err(|e| {
-                                        let e = e.to_string();
-                                        error!("Failed to load previous task: {e}");
-                                        Status::internal("Failed to load previous task")
-                                    })?
+                                    .context("Failed to load previous task")?
                             } else {
                                 None
                             }
                         };
 
-                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
-                            let e = e.to_string();
-                            error!("Failed to load task after toggle: {e}");
-                            Status::internal("Failed to load task after toggle")
-                        })?;
+                        let task = tx
+                            .get_task_unchecked(TaskId(task.id))
+                            .await
+                            .context("Failed to load task after toggle")?;
 
                         Ok(ToggleResult {
                             id: task_id,
@@ -734,22 +709,17 @@ impl Database {
                         tx.delete_task_internal(user_id, TaskId(current_task_id))
                             .await?;
 
-                        let task = tx.get_task_unchecked(TaskId(task.id)).await.map_err(|e| {
-                            let e = e.to_string();
-                            error!("Failed to load task after toggle: {e}");
-                            Status::internal("Failed to load task after toggle")
-                        })?;
+                        let task = tx
+                            .get_task_unchecked(TaskId(task.id))
+                            .await
+                            .context("Failed to load task after toggle")?;
 
                         let new_current_previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
                                 tx.get_task_unchecked(TaskId(previous_task_id))
                                     .await
                                     .map(Some)
-                                    .map_err(|e| {
-                                        let e = e.to_string();
-                                        error!("Failed to load previous task: {e}");
-                                        Status::internal("Failed to load previous task")
-                                    })?
+                                    .context("Failed to load previous task")?
                             } else {
                                 None
                             }
@@ -770,23 +740,23 @@ impl Database {
                         })
                     }
 
-                    _ => Err(Status::internal("Unexpected task state")),
+                    _ => Err(Error::InternalState("Unexpected task state")),
                 }
             })
         })
         .await
     }
 
-    pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId, Status> {
+    pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
                     .get_task_unchecked(task_id)
                     .await
-                    .map_err(|_| Status::not_found("Task not found"))?;
+                    .map_err(|_| Error::NotFound("Task not found"))?;
 
                 if !task.can_delete() {
-                    return Err(Status::permission_denied(
+                    return Err(Error::PermissionDenied(
                         "You are not allowed to delete this item",
                     ));
                 }
@@ -918,7 +888,7 @@ impl<'c> Transaction<'c> {
         user_id: UserId,
         responsible_id: UserId,
         group_id: Option<GroupId>,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         if let Some(group_id) = group_id {
             let is_valid = sqlx::query_scalar!(
                 r#"
@@ -948,30 +918,26 @@ impl<'c> Transaction<'c> {
             )
             .fetch_one(self)
             .await
-            .map_err(|e| {
-                let e = e.to_string();
-                error!("Failed to validate responsible and group: {e}");
-                Status::internal("Failed to validate responsible and group")
-            })?;
+            .context("Failed to validate responsible and group")?;
 
             if let Some(is_valid) = is_valid {
                 if !is_valid {
-                    return Err(Status::invalid_argument("Invalid responsible and/or group"));
+                    return Err(Error::InvalidArgument("Invalid responsible and/or group"));
                 }
             } else {
-                return Err(Status::internal(
+                return Err(Error::InternalState(
                     "Failed to fetch responsible and group validation",
                 ));
             }
         } else if user_id != responsible_id {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Responsible must be self when no group",
             ));
         }
         Ok(())
     }
 
-    async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId, Status> {
+    async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId, Error> {
         sqlx::query_scalar!(
             r#"
                 INSERT INTO tasks (
@@ -1002,14 +968,11 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to create task: {e}");
-            Status::internal("Failed to create task")
-        })
+        .context("Failed to create task")
+        .map_err(Into::into)
     }
 
-    async fn update_task_internal(&mut self, params: &UpdateTaskParams) -> Result<TaskId, Status> {
+    async fn update_task_internal(&mut self, params: &UpdateTaskParams) -> Result<TaskId, Error> {
         sqlx::query_scalar!(
             r#"
                 UPDATE
@@ -1051,7 +1014,7 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::permission_denied("You are not allowed to update this item"))
+        .map_err(|_| Error::PermissionDenied("You are not allowed to update this item"))
     }
 
     async fn toggle_task_completed_internal(
@@ -1059,7 +1022,7 @@ impl<'c> Transaction<'c> {
         user_id: UserId,
         task_id: TaskId,
         is_completed: bool,
-    ) -> Result<Option<PrimitiveDateTime>, Status> {
+    ) -> Result<Option<PrimitiveDateTime>, Error> {
         sqlx::query_scalar!(
             r#"
                 UPDATE
@@ -1094,7 +1057,7 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::permission_denied("You are not allowed to toggle this item"))
+        .map_err(|_| Error::PermissionDenied("You are not allowed to toggle this item"))
     }
 
     async fn create_recurrence_internal(
@@ -1102,7 +1065,7 @@ impl<'c> Transaction<'c> {
         task_id: TaskId,
         frequency: TaskRecurrenceFrequency,
         is_every: bool,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 WITH
@@ -1135,11 +1098,7 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to insert recurrence: {e}");
-            Status::internal("Failed to insert recurrence")
-        })?;
+        .context("Failed to insert recurrence")?;
         Ok(())
     }
 
@@ -1148,7 +1107,7 @@ impl<'c> Transaction<'c> {
         recurrence_id: RecurrenceId,
         frequency: TaskRecurrenceFrequency,
         is_every: bool,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1165,18 +1124,14 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to update recurrence: {e}");
-            Status::internal("Failed to update recurrence")
-        })?;
+        .context("Failed to update recurrence")?;
         Ok(())
     }
 
     async fn unset_recurrence_internal(
         &mut self,
         recurrence_id: RecurrenceId,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1191,18 +1146,14 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to unset recurrence: {e}");
-            Status::internal("Failed to unset recurrence")
-        })?;
+        .context("Failed to unset recurrence")?;
         Ok(())
     }
 
     async fn delete_recurrence_internal(
         &mut self,
         recurrence_id: RecurrenceId,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -1214,15 +1165,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to delete recurrence: {e}");
-            Status::internal("Failed to delete recurrence")
-        })?;
+        .context("Failed to delete recurrence")?;
         Ok(())
     }
 
-    async fn create_next_recurrence_internal(&mut self, task_id: TaskId) -> Result<TaskId, Status> {
+    async fn create_next_recurrence_internal(&mut self, task_id: TaskId) -> Result<TaskId, Error> {
         // is_every: add frequency to start and end
         // !is_every: add frequency to start and end + (today - coalesce(start, end))
         sqlx::query_scalar!(
@@ -1292,18 +1239,15 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to create task: {e}");
-            Status::internal("Failed to create task")
-        })
+        .context("Failed to create task")
+        .map_err(Into::into)
     }
 
     async fn revert_recurrence_internal(
         &mut self,
         previous_task_id: TaskId,
         current_task_id: TaskId,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1318,11 +1262,7 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to update recurrence: {e}");
-            Status::internal("Failed to update recurrence")
-        })?;
+        .context("Failed to update recurrence")?;
         Ok(())
     }
 
@@ -1330,7 +1270,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         user_id: UserId,
         task_id: TaskId,
-    ) -> Result<TaskId, Status> {
+    ) -> Result<TaskId, Error> {
         sqlx::query_scalar!(
             r#"
                 DELETE FROM
@@ -1359,6 +1299,6 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::permission_denied("You are not allowed to delete this item"))
+        .map_err(|_| Error::PermissionDenied("You are not allowed to delete this item"))
     }
 }

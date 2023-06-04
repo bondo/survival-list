@@ -1,13 +1,11 @@
+use anyhow::Context;
 use futures_core::stream::Stream;
 use futures_util::stream::StreamExt;
-use log::error;
 use sqlx::types::Uuid;
 use std::fmt::Display;
 
-use anyhow::Result;
-use tonic::Status;
-
 use super::{Database, Transaction, UserId};
+use crate::error::Error;
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -47,7 +45,7 @@ impl Database {
     pub fn get_user_groups(
         &self,
         user_id: UserId,
-    ) -> impl Stream<Item = Result<GroupResult, Status>> + '_ {
+    ) -> impl Stream<Item = Result<GroupResult, Error>> + '_ {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -66,18 +64,14 @@ impl Database {
             user_id.0
         )
         .fetch(self)
-        .map(|i| {
-            i.or(Err(Status::internal(
-                "unexpected error loading user groups",
-            )))
-        })
+        .map(|v| v.context("Error loading user groups").map_err(Into::into))
     }
 
     pub async fn create_and_join_group(
         &self,
         user_id: UserId,
         title: &str,
-    ) -> Result<GroupResult, Status> {
+    ) -> Result<GroupResult, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let group = tx.create_group(title).await?;
@@ -94,7 +88,7 @@ impl Database {
         &self,
         user_id: UserId,
         uid: &Uuid,
-    ) -> Result<GroupResult, Status> {
+    ) -> Result<GroupResult, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let group = tx.get_group_by_uid(uid).await?;
@@ -112,7 +106,7 @@ impl Database {
         user_id: UserId,
         group_id: GroupId,
         title: &str,
-    ) -> Result<GroupResult, Status> {
+    ) -> Result<GroupResult, Error> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -141,14 +135,11 @@ impl Database {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to update group: {e}");
-            Status::internal("Failed to update group")
-        })
+        .context("Failed to update group")
+        .map_err(Into::into)
     }
 
-    pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Status> {
+    pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Error> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 // Unset task group where viewer is responsible
@@ -172,7 +163,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -186,11 +177,7 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to leave group: {e}");
-            Status::internal("Failed to leave group")
-        })?;
+        .context("Failed to leave group")?;
         Ok(())
     }
 
@@ -198,7 +185,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         group_id: GroupId,
         responsible_id: UserId,
-    ) -> Result<(), Status> {
+    ) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -214,15 +201,11 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to leave group: {e}");
-            Status::internal("Failed to leave group")
-        })?;
+        .context("Failed to leave group")?;
         Ok(())
     }
 
-    pub async fn create_group(&mut self, title: &str) -> Result<GroupResult, Status> {
+    pub async fn create_group(&mut self, title: &str) -> Result<GroupResult, Error> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -241,14 +224,11 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to create group: {e}");
-            Status::internal("Failed to create group")
-        })
+        .context("Failed to create group")
+        .map_err(Into::into)
     }
 
-    pub async fn get_group_by_uid(&mut self, uid: &Uuid) -> Result<GroupResult, Status> {
+    pub async fn get_group_by_uid(&mut self, uid: &Uuid) -> Result<GroupResult, Error> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -265,10 +245,10 @@ impl<'c> Transaction<'c> {
         )
         .fetch_one(self)
         .await
-        .map_err(|_| Status::not_found("Group not found"))
+        .map_err(|_| Error::NotFound("Group not found"))
     }
 
-    pub async fn join_group(&mut self, user_id: UserId, group_id: GroupId) -> Result<(), Status> {
+    pub async fn join_group(&mut self, user_id: UserId, group_id: GroupId) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 INSERT INTO users_groups (
@@ -285,16 +265,12 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to update group: {e}");
-            Status::internal("Failed to update group")
-        })?;
+        .context("Failed to update group")?;
 
         Ok(())
     }
 
-    pub async fn delete_group_if_empty(&mut self, group_id: GroupId) -> Result<(), Status> {
+    pub async fn delete_group_if_empty(&mut self, group_id: GroupId) -> Result<(), Error> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -313,11 +289,7 @@ impl<'c> Transaction<'c> {
         )
         .execute(self)
         .await
-        .map_err(|e| {
-            let e = e.to_string();
-            error!("Failed to delete group: {e}");
-            Status::internal("Failed to delete group")
-        })?;
+        .context("Failed to delete group")?;
 
         Ok(())
     }

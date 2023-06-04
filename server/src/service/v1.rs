@@ -12,6 +12,7 @@ use crate::{
         TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
         TaskResponsible, TaskResult, UpdateTaskParams, UserId,
     },
+    error::Error,
 };
 
 use super::proto::{api::v1::*, google::r#type::Date as ProtoDate};
@@ -27,15 +28,15 @@ impl Service {
 }
 
 impl Service {
-    fn get_user_uid<T>(&self, request: &Request<T>) -> Result<String, Status> {
+    fn get_user_uid<T>(&self, request: &Request<T>) -> Result<String, Error> {
         if let Some(auth) = request.extensions().get::<AuthExtension>() {
             Ok(auth.uid.clone())
         } else {
-            Err(Status::internal("failed to read user uid"))
+            Err(Error::InternalState("failed to read user uid"))
         }
     }
 
-    async fn get_user_id<T>(&self, request: &Request<T>) -> Result<UserId, Status> {
+    async fn get_user_id<T>(&self, request: &Request<T>) -> Result<UserId, Error> {
         let uid = self.get_user_uid(request)?;
         self.db.upsert_user_id(&uid).await
     }
@@ -206,27 +207,30 @@ impl api_server::Api for Service {
             pin_mut!(tasks);
 
             while let Some(res) = tasks.next().await {
-                tx.send(res.map(|task| GetTasksResponse {
-                    id: task.id.into(),
-                    title: task.title,
-                    is_completed: task.completed_at.is_some(),
-                    start_date: task.period.start().map(Into::into),
-                    end_date: task.period.end().map(Into::into),
-                    estimate: task.estimate.map(Into::into),
-                    responsible: Some(task.responsible.into()),
-                    group: task.group.map(Into::into),
-                    recurring: task.recurrence.map(|r| match r {
-                        TaskRecurrenceOutput::Every(every) => {
-                            get_tasks_response::Recurring::Every(every.into())
-                        }
-                        TaskRecurrenceOutput::Checked(frequency) => {
-                            get_tasks_response::Recurring::Checked(frequency.into())
-                        }
-                    }),
-                    can_update: task.can_update,
-                    can_toggle: task.can_toggle,
-                    can_delete: task.can_delete,
-                }))
+                tx.send(
+                    res.map(|task| GetTasksResponse {
+                        id: task.id.into(),
+                        title: task.title,
+                        is_completed: task.completed_at.is_some(),
+                        start_date: task.period.start().map(Into::into),
+                        end_date: task.period.end().map(Into::into),
+                        estimate: task.estimate.map(Into::into),
+                        responsible: Some(task.responsible.into()),
+                        group: task.group.map(Into::into),
+                        recurring: task.recurrence.map(|r| match r {
+                            TaskRecurrenceOutput::Every(every) => {
+                                get_tasks_response::Recurring::Every(every.into())
+                            }
+                            TaskRecurrenceOutput::Checked(frequency) => {
+                                get_tasks_response::Recurring::Checked(frequency.into())
+                            }
+                        }),
+                        can_update: task.can_update,
+                        can_toggle: task.can_toggle,
+                        can_delete: task.can_delete,
+                    })
+                    .map_err(Into::into),
+                )
                 .await
                 .unwrap();
             }
@@ -320,11 +324,14 @@ impl api_server::Api for Service {
             pin_mut!(groups);
 
             while let Some(res) = groups.next().await {
-                tx.send(res.map(|group| GetGroupsResponse {
-                    id: group.id.into(),
-                    title: group.title,
-                    uid: group.uid.to_string(),
-                }))
+                tx.send(
+                    res.map(|group| GetGroupsResponse {
+                        id: group.id.into(),
+                        title: group.title,
+                        uid: group.uid.to_string(),
+                    })
+                    .map_err(Into::into),
+                )
                 .await
                 .unwrap();
             }
@@ -338,7 +345,7 @@ impl api_server::Api for Service {
         &self,
         request: Request<GetGroupParticipantsRequest>,
     ) -> Result<Response<Self::GetGroupParticipantsStream>, Status> {
-        let user_id = self.get_user_id(&request).await?;
+        let user_id = self.get_user_id(&request).await.map_err(Status::from)?;
         let request = request.into_inner();
         let (tx, rx) = mpsc::channel(10);
 
@@ -348,13 +355,16 @@ impl api_server::Api for Service {
             pin_mut!(participants);
 
             while let Some(res) = participants.next().await {
-                tx.send(res.map(|user| GetGroupParticipantsResponse {
-                    user: Some(User {
-                        id: user.id.into(),
-                        name: user.name,
-                        picture_url: user.picture_url.unwrap_or_default(),
-                    }),
-                }))
+                tx.send(
+                    res.map(|user| GetGroupParticipantsResponse {
+                        user: Some(User {
+                            id: user.id.into(),
+                            name: user.name,
+                            picture_url: user.picture_url.unwrap_or_default(),
+                        }),
+                    })
+                    .map_err(Into::into),
+                )
                 .await
                 .unwrap();
             }
@@ -365,17 +375,17 @@ impl api_server::Api for Service {
 }
 
 impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
-    type Error = Status;
+    type Error = Error;
 
     fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self, Self::Error> {
-        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Status> {
+        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Error> {
             date.map(TryInto::try_into)
                 .transpose()
-                .map_err(Status::invalid_argument)
+                .map_err(Error::InvalidArgument)
         }
         let start = convert(start)?;
         let end = convert(end)?;
-        (start, end).try_into().map_err(Status::invalid_argument)
+        (start, end).try_into()
     }
 }
 
@@ -390,11 +400,11 @@ impl From<TaskEstimate> for Duration {
 }
 
 impl TryFrom<Duration> for TaskEstimate {
-    type Error = Status;
+    type Error = Error;
 
     fn try_from(value: Duration) -> Result<Self, Self::Error> {
         if value.days < 0 || value.hours < 0 || value.minutes < 0 {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Negative days, hours or minutes in estimate not supported",
             ));
         }

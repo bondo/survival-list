@@ -3,6 +3,7 @@ use log::info;
 
 mod auth;
 mod db;
+mod error;
 mod server;
 mod service;
 

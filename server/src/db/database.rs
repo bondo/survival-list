@@ -1,10 +1,10 @@
 use std::{env, fs};
 
-use anyhow::Result;
 use dotenvy::dotenv;
 use futures_core::future::BoxFuture;
 use sqlx::{self, migrate::MigrateError, postgres::PgPoolOptions, PgPool, Postgres};
-use tonic::Status;
+
+use crate::error::Error;
 
 use super::Transaction;
 
@@ -31,9 +31,9 @@ impl Database {
         sqlx::migrate!().run(&self.pool).await
     }
 
-    pub async fn in_transaction<'c, R, F>(&'c self, f: F) -> Result<R, Status>
+    pub async fn in_transaction<'c, R, F>(&'c self, f: F) -> Result<R, Error>
     where
-        F: for<'t> FnOnce(&'t mut Transaction<'c>) -> BoxFuture<'t, Result<R, Status>>,
+        F: for<'t> FnOnce(&'t mut Transaction<'c>) -> BoxFuture<'t, Result<R, Error>>,
     {
         let mut tx = Transaction::begin(&self.pool).await?;
         let result = f(&mut tx).await;
