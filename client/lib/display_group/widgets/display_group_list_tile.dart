@@ -12,15 +12,19 @@ class DisplayGroupListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListTile(
-        title: Text(
-          participant.name,
-          maxLines: 1,
-          style: const TextStyle(overflow: TextOverflow.ellipsis),
-        ),
-        leading: Avatar(photo: participant.pictureUrl),
+    return ListTile(
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              participant.name,
+              maxLines: 1,
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ],
       ),
+      leading: Avatar(photo: participant.pictureUrl),
     );
   }
 }
