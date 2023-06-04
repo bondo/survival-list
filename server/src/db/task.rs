@@ -137,10 +137,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
             period: (value.start_date, value.end_date)
                 .try_into()
                 .map_err(Status::internal)?,
-            estimate: match value.estimate {
-                None => Ok(None),
-                Some(v) => v.try_into().map(Some),
-            }?,
+            estimate: value.estimate.map(TryInto::try_into).transpose()?,
             responsible: TaskResponsible {
                 id: UserId(value.responsible_id),
                 name: value.responsible_name,

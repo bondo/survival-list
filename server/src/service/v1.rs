@@ -92,21 +92,18 @@ impl api_server::Api for Service {
                 } else {
                     Some(GroupId::new(request.group_id))
                 },
-                estimate: match request.estimate {
-                    None => Ok(None),
-                    Some(estimate) => estimate.try_into().map(Some),
-                }?,
-                recurrence: match request.recurring {
-                    None => Ok(None),
-                    Some(create_task_request::Recurring::Every(frequency)) => frequency
-                        .try_into()
-                        .map(TaskRecurrenceInput::Every)
-                        .map(Some),
-                    Some(create_task_request::Recurring::Checked(frequency)) => frequency
-                        .try_into()
-                        .map(TaskRecurrenceInput::Checked)
-                        .map(Some),
-                }?,
+                estimate: request.estimate.map(TryInto::try_into).transpose()?,
+                recurrence: request
+                    .recurring
+                    .map(|r| match r {
+                        create_task_request::Recurring::Every(frequency) => {
+                            frequency.try_into().map(TaskRecurrenceInput::Every)
+                        }
+                        create_task_request::Recurring::Checked(frequency) => {
+                            frequency.try_into().map(TaskRecurrenceInput::Checked)
+                        }
+                    })
+                    .transpose()?,
             })
             .await?;
 
@@ -137,21 +134,18 @@ impl api_server::Api for Service {
                 } else {
                     Some(GroupId::new(request.group_id))
                 },
-                estimate: match request.estimate {
-                    None => Ok(None),
-                    Some(estimate) => estimate.try_into().map(Some),
-                }?,
-                recurrence: match request.recurring {
-                    None => Ok(None),
-                    Some(update_task_request::Recurring::Every(frequency)) => frequency
-                        .try_into()
-                        .map(TaskRecurrenceInput::Every)
-                        .map(Some),
-                    Some(update_task_request::Recurring::Checked(frequency)) => frequency
-                        .try_into()
-                        .map(TaskRecurrenceInput::Checked)
-                        .map(Some),
-                }?,
+                estimate: request.estimate.map(TryInto::try_into).transpose()?,
+                recurrence: request
+                    .recurring
+                    .map(|r| match r {
+                        update_task_request::Recurring::Every(frequency) => {
+                            frequency.try_into().map(TaskRecurrenceInput::Every)
+                        }
+                        update_task_request::Recurring::Checked(frequency) => {
+                            frequency.try_into().map(TaskRecurrenceInput::Checked)
+                        }
+                    })
+                    .transpose()?,
             })
             .await?;
 
@@ -375,10 +369,9 @@ impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
 
     fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self, Self::Error> {
         fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Status> {
-            match date {
-                None => Ok(None),
-                Some(date) => date.try_into().map(Some).map_err(Status::invalid_argument),
-            }
+            date.map(TryInto::try_into)
+                .transpose()
+                .map_err(Status::invalid_argument)
         }
         let start = convert(start)?;
         let end = convert(end)?;
