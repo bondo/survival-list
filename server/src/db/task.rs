@@ -91,10 +91,8 @@ impl TaskRawResult {
         }
     }
 
-    // Allow delete
-    // - if not recurrence
     fn can_delete(&self) -> bool {
-        self.recurrence_current_task_id.is_none()
+        self.can_update()
     }
 
     fn is_visible(&self) -> bool {
@@ -794,6 +792,14 @@ impl Database {
                     return Err(Status::permission_denied(
                         "You are not allowed to delete this item",
                     ));
+                }
+
+                if let Some(recurrence_id) = task.recurrence_id {
+                    tx.unset_recurrence_internal(RecurrenceId(recurrence_id))
+                        .await?;
+
+                    tx.delete_recurrence_internal(RecurrenceId(recurrence_id))
+                        .await?;
                 }
 
                 tx.delete_task_internal(user_id, task_id).await
