@@ -98,7 +98,13 @@ impl TaskRawResult {
     }
 
     fn is_visible(&self) -> bool {
-        !self.is_old.is_some_and(|v| v)
+        // For Rust 1.70: !self.is_old.is_some_and(|v| v)
+
+        if let Some(is_old) = self.is_old {
+            !is_old
+        } else {
+            true
+        }
     }
 }
 
