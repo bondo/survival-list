@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
+import 'package:survival_list/l10n/l10n.dart';
 import 'package:survival_list/login/login.dart';
 
 class LoginForm extends StatelessWidget {
@@ -9,6 +10,9 @@ class LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state.status.isFailure) {
@@ -27,9 +31,17 @@ class LoginForm extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/flutter_logo.png',
-                height: 120,
+              Text(
+                l10n.appTitle,
+                style: TextStyle(
+                  color: theme.primaryColorDark.withOpacity(0.5),
+                  fontSize: 32,
+                ),
+              ),
+              Icon(
+                Icons.check_box,
+                size: 128,
+                color: theme.primaryColorDark.withOpacity(0.5),
               ),
               const SizedBox(height: 16),
               _GoogleLoginButton(),
