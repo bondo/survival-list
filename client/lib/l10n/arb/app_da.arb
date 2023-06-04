@@ -1,11 +1,10 @@
 {
   "appTitle": "Overlevelsesliste",
-  "@appTitle": {
-    "description": "The title of the application"
-  },
+
   "bottomNavigationIconLabelSurvival": "Overlevelse",
   "bottomNavigationIconLabelTodo": "Todo",
   "bottomNavigationIconLabelSchedule": "Plan",
+
   "pageSettingsTitle": "Indstillinger",
   "pageSettingsThemeSystem": "Systemtema",
   "pageSettingsThemeLight": "Lyst tema",
@@ -13,14 +12,84 @@
   "pageSettingsLanguageDefault": "Standardsprog",
   "pageSettingsLanguageEnglish": "Engelsk",
   "pageSettingsLanguageDanish": "Dansk",
-  "pageSurvivalTitle": "Overlevelse",
-  "pageSurvivalItemTitle": "Ting nr {i}",
-  "@pageSurvivalItemTitle": {
-    "placeholders": {
-      "i": {}
-    }
-  },
-  "pageItemCreateTitle": "Opret ny todo",
+
+  "scheduleAppBarTitle": "Overlevelsesliste",
+  "scheduleFilterTooltip": "Filter",
+  "scheduleFilterAll": "Alle",
+  "scheduleFilterUnchecked": "Mangler",
+  "scheduleFilterResponsible": "Ansvarlig",
+  "scheduleEmptyText": "Ingen opgaver fundet med det valgte filter.",
+  "scheduleItemDeletedSnackbarText": "Opgave \"{todoTitle}\" slettet.",
+  "scheduleUndoDeletionButtonText": "Fortryd",
+  "scheduleErrorSnackbarText": "Kunne ikke hente opgaver.",
+  "scheduleUpdateNotAllowedSnackbarText": "Du kan ikke redigere denne opgave.",
+  "scheduleOptionsTooltip": "Muligheder",
+
+  "createItemAppBarTitle": "Tilføj opgave",
+  "createItemTitleLabel": "Navn",
+  "createItemStartDateLabel": "Startdato",
+  "createItemStartDateHelperText": "Skjul på todo liste indtil denne dato",
+  "createItemEndDateLabel": "Deadline",
+  "createItemEndDateHelperText": "Vis på overlevelsesliste fra denne dato",
+  "createItemGroupLabel": "Gruppe",
+  "createItemSaveButtonTooltip": "Opret opgave",
+
+  "editItemAppBarTitle": "Rediger opgave",
+  "editItemTitleLabel": "Navn",
+  "editItemStartDateLabel": "Startdato",
+  "editItemStartDateHelperText": "Skjul på todo liste indtil denne dato",
+  "editItemEndDateLabel": "Deadline",
+  "editItemEndDateHelperText": "Vis på overlevelsesliste fra denne dato",
+  "editItemGroupLabel": "Gruppe",
+  "editItemSaveButtonTooltip": "Gem ændringer",
+
   "scheduleOptionsLogOut": "Log ud",
-  "scheduleOptionsGroups": "Grupper"
+  "scheduleOptionsGroups": "Grupper",
+
+  "createGroupAppBarTitle": "Opret gruppe",
+  "createGroupSaveButtonTooltip": "Opret gruppe",
+  "createGroupTitleLabel": "Navn",
+
+  "editGroupAppBarTitle": "Rediger gruppe",
+  "editGroupSaveButtonTooltip": "Gem ændringer",
+  "editGroupTitleLabel": "Navn",
+
+  "displayGroupOptionsEditTooltip": "Rediger gruppe",
+  "displayGroupOptionsLeaveTooltip": "Forlad gruppe",
+  "displayGroupOptionsLeaveDialogTitle": "Forlad gruppe?",
+  "displayGroupOptionsLeaveDialogContent": "Er du sikker på at du vil forlade gruppen \"{groupTitle}\"?",
+  "displayGroupOptionsLeaveDialogCancel": "Ikke alligevel",
+  "displayGroupOptionsLeaveDialogConfirm": "Jeg er sikker",
+  "displayGroupErrorSnackbarText": "Kunne ikke hente medlemmer.",
+  "displayGroupEmptyText": "Der er ingen medlemmer i denne gruppe",
+
+  "groupsAppBarTitle": "Grupper",
+  "groupsErrorSnackbarText": "Kunne ikke hente grupper.",
+  "groupsEmptyText": "Du er ikke i nogle grupper",
+
+  "inviteGroupAppBarTitle": "Inviter andre til gruppen",
+  "inviteGroupDescription": "Lad andre blive medlem af \"{groupTitle}\" ved at skanne QR koden med denne app",
+
+  "groupsOptionsTooltip": "Tilføj gruppe",
+  "groupsOptionsCreate": "Opret ny gruppe",
+  "groupsOptionsJoin": "Bliv medlem af gruppe",
+
+  "joinGroupAppBarTitle": "Bliv medlem",
+  "joinGroupHelpText": "Skan en invitation fra en anden bruger\nfor at blive medlem af deres gruppe",
+
+  "widgetGroupEmptyValueTitle": "Ingen",
+  "widgetDurationMonthsLabel": "Måneder",
+  "widgetDurationDaysLabel": "Dage",
+  "widgetDurationHoursLabel": "Timer",
+  "widgetDurationMinutesLabel": "Minutter",
+
+  "createItemResponsibleLabel": "Ansvarlig",
+  "editItemResponsibleLabel": "Ansvarlig",
+
+  "createItemRecurrenceKindLabel": "Gentag",
+  "editItemRecurrenceKindLabel": "Gentag",
+
+  "widgetRecurrenceKindNever": "Aldrig",
+  "widgetRecurrenceKindChecked": "Efter krydset af",
+  "widgetRecurrenceKindEvery": "Hver"
 }

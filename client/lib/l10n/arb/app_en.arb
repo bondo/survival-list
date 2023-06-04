@@ -12,30 +12,14 @@
   "pageSettingsLanguageDefault": "Default Language",
   "pageSettingsLanguageEnglish": "English",
   "pageSettingsLanguageDanish": "Danish",
-  "pageSurvivalTitle": "Survival Items",
-  "pageSurvivalItemTitle": "Survival Item {i}",
-  "@pageSurvivalItemTitle": {
-    "placeholders": {
-      "i": {}
-    }
-  },
-  "pageItemCreateTitle": "Create new todo",
 
   "scheduleAppBarTitle": "Survival List",
   "scheduleFilterTooltip": "Filter",
   "scheduleFilterAll": "All",
   "scheduleFilterUnchecked": "Unchecked",
   "scheduleFilterResponsible": "Responsible",
-  "scheduleMarkAllCompleteButtonText": "Mark all complete",
-  "scheduleClearCompletedButtonText": "Clear completed",
-  "scheduleEmptyText": "No todos found with the selected filters.",
+  "scheduleEmptyText": "No todos found with the selected filter.",
   "scheduleItemDeletedSnackbarText": "Item \"{todoTitle}\" deleted.",
-  "@scheduleItemDeletedSnackbarText": {
-    "description": "Snackbar text shown when a todo is deleted from the Items Overview Page",
-    "placeholders": {
-      "todoTitle": {}
-    }
-  },
   "scheduleUndoDeletionButtonText": "Undo",
   "scheduleErrorSnackbarText": "An error occurred while loading todos.",
   "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",
