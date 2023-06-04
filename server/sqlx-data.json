@@ -1,6 +1,6 @@
 {
   "db": "PostgreSQL",
-  "09fc532228732d6a182abf13cb1808f9c37f010718a2c6b475ede3455833a377": {
+  "04d01ec200ad990c8550d6e3398b62f55761ed61a986666f4dcc8a296c78bbc7": {
     "describe": {
       "columns": [
         {
@@ -19,83 +19,88 @@
           "type_info": "Timestamp"
         },
         {
-          "name": "start_date",
+          "name": "is_old",
           "ordinal": 3,
-          "type_info": "Date"
+          "type_info": "Bool"
         },
         {
-          "name": "end_date",
+          "name": "start_date",
           "ordinal": 4,
           "type_info": "Date"
         },
         {
-          "name": "estimate",
+          "name": "end_date",
           "ordinal": 5,
+          "type_info": "Date"
+        },
+        {
+          "name": "estimate",
+          "ordinal": 6,
           "type_info": "Interval"
         },
         {
           "name": "responsible_id",
-          "ordinal": 6,
+          "ordinal": 7,
           "type_info": "Int4"
         },
         {
           "name": "responsible_name",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "responsible_picture_url",
           "ordinal": 8,
           "type_info": "Text"
         },
         {
-          "name": "group_id: Option<i32>",
+          "name": "responsible_picture_url",
           "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_id: Option<i32>",
+          "ordinal": 10,
           "type_info": "Int4"
         },
         {
           "name": "group_title: Option<String>",
-          "ordinal": 10,
+          "ordinal": 11,
           "type_info": "Text"
         },
         {
           "name": "group_uid: Option<Uuid>",
-          "ordinal": 11,
+          "ordinal": 12,
           "type_info": "Uuid"
         },
         {
           "name": "recurrence_id: Option<i32>",
-          "ordinal": 12,
+          "ordinal": 13,
           "type_info": "Int4"
         },
         {
           "name": "recurrence_frequency: Option<PgInterval>",
-          "ordinal": 13,
+          "ordinal": 14,
           "type_info": "Interval"
         },
         {
           "name": "recurrence_is_every: Option<bool>",
-          "ordinal": 14,
+          "ordinal": 15,
           "type_info": "Bool"
         },
         {
           "name": "recurrence_current_task_id: Option<i32>",
-          "ordinal": 15,
-          "type_info": "Int4"
-        },
-        {
-          "name": "recurrence_previous_task_id",
           "ordinal": 16,
           "type_info": "Int4"
         },
         {
-          "name": "recurrence_num_ready_to_start",
+          "name": "recurrence_previous_task_id",
           "ordinal": 17,
           "type_info": "Int4"
         },
         {
-          "name": "recurrence_num_reached_deadline",
+          "name": "recurrence_num_ready_to_start",
           "ordinal": 18,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_reached_deadline",
+          "ordinal": 19,
           "type_info": "Int4"
         }
       ],
@@ -103,6 +108,7 @@
         false,
         false,
         true,
+        null,
         true,
         true,
         true,
@@ -127,7 +133,7 @@
         ]
       }
     },
-    "query": "\n                WITH RECURSIVE\n                    base_task AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            t.id = $1\n                    ),\n                    every_task AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_task bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_task et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_task bt\n            "
+    "query": "\n                WITH RECURSIVE\n                    base_task AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            t.id = $1\n                    ),\n                    every_task AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_task bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_task et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    bt.completed_at < CURRENT_TIMESTAMP - INTERVAL '1 day' as is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_task bt\n            "
   },
   "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a": {
     "describe": {
@@ -414,135 +420,6 @@
     },
     "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    frequency = $1,\n                    is_every = $2\n                WHERE\n                    r.id = $3\n            "
   },
-  "8935531f6a26a8e467f0a1c483cce1aeb7f5606685a2492bd0d5fc4416c45323": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "title",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "completed_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 3,
-          "type_info": "Date"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 4,
-          "type_info": "Date"
-        },
-        {
-          "name": "estimate",
-          "ordinal": 5,
-          "type_info": "Interval"
-        },
-        {
-          "name": "responsible_id",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "responsible_name",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "responsible_picture_url",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "group_id: Option<i32>",
-          "ordinal": 9,
-          "type_info": "Int4"
-        },
-        {
-          "name": "group_title: Option<String>",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "group_uid: Option<Uuid>",
-          "ordinal": 11,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "recurrence_id: Option<i32>",
-          "ordinal": 12,
-          "type_info": "Int4"
-        },
-        {
-          "name": "recurrence_frequency: Option<PgInterval>",
-          "ordinal": 13,
-          "type_info": "Interval"
-        },
-        {
-          "name": "recurrence_is_every: Option<bool>",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "recurrence_current_task_id: Option<i32>",
-          "ordinal": 15,
-          "type_info": "Int4"
-        },
-        {
-          "name": "recurrence_previous_task_id",
-          "ordinal": 16,
-          "type_info": "Int4"
-        },
-        {
-          "name": "recurrence_num_ready_to_start",
-          "ordinal": 17,
-          "type_info": "Int4"
-        },
-        {
-          "name": "recurrence_num_reached_deadline",
-          "ordinal": 18,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n                WITH RECURSIVE\n                    base_tasks AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            -- Hide old items\n                            (\n                                t.completed_at IS NULL OR\n                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                            ) AND\n                            -- Permission check\n                            (\n                                -- Viewer is responsible\n                                t.responsible_user_id = $1 OR\n                                -- Viewer is in task group\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups ug\n                                    WHERE\n                                        ug.group_id = t.group_id AND\n                                        ug.user_id = $1\n                                )\n                            )\n                    ),\n                    every_tasks AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_tasks bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_tasks et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_tasks bt\n            "
-  },
   "89634b2042189f891057f5fd5072eb4d6ca3067ec863fca212aca81df06880bf": {
     "describe": {
       "columns": [
@@ -719,6 +596,141 @@
       }
     },
     "query": "\n                INSERT INTO users_groups (\n                    user_id,\n                    group_id\n                )\n                VALUES (\n                    $1,\n                    $2\n                )\n            "
+  },
+  "cf23cf2e2f5802ddd96e34787e3c19953abfd0b7799cc8ac74f16b920511e31e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "completed_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "is_old",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 5,
+          "type_info": "Date"
+        },
+        {
+          "name": "estimate",
+          "ordinal": 6,
+          "type_info": "Interval"
+        },
+        {
+          "name": "responsible_id",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "responsible_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "responsible_picture_url",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_id: Option<i32>",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "group_title: Option<String>",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "group_uid: Option<Uuid>",
+          "ordinal": 12,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "recurrence_id: Option<i32>",
+          "ordinal": 13,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_frequency: Option<PgInterval>",
+          "ordinal": 14,
+          "type_info": "Interval"
+        },
+        {
+          "name": "recurrence_is_every: Option<bool>",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "recurrence_current_task_id: Option<i32>",
+          "ordinal": 16,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_previous_task_id",
+          "ordinal": 17,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_ready_to_start",
+          "ordinal": 18,
+          "type_info": "Int4"
+        },
+        {
+          "name": "recurrence_num_reached_deadline",
+          "ordinal": 19,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        null,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                WITH RECURSIVE\n                    base_tasks AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        WHERE\n                            -- Hide old items\n                            (\n                                t.completed_at IS NULL OR\n                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                            ) AND\n                            -- Permission check\n                            (\n                                -- Viewer is responsible\n                                t.responsible_user_id = $1 OR\n                                -- Viewer is in task group\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups ug\n                                    WHERE\n                                        ug.group_id = t.group_id AND\n                                        ug.user_id = $1\n                                )\n                            )\n                    ),\n                    every_tasks AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_tasks bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_tasks et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.completed_at,\n                    false is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_tasks bt\n            "
   },
   "fb96380621e3048061609e3559381bbd403769f8caa2b0afa4235ce2d791936d": {
     "describe": {

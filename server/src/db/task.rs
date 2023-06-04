@@ -44,6 +44,7 @@ struct RecurrenceId(i32);
 struct TaskRawResult {
     pub id: i32,
     pub title: String,
+    pub is_old: Option<bool>,
     pub completed_at: Option<PrimitiveDateTime>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
@@ -94,6 +95,10 @@ impl TaskRawResult {
     // - if not recurrence
     fn can_delete(&self) -> bool {
         self.recurrence_current_task_id.is_none()
+    }
+
+    fn is_visible(&self) -> bool {
+        !self.is_old.is_some_and(|v| v)
     }
 }
 
@@ -466,6 +471,7 @@ impl Database {
                     bt.id,
                     bt.title,
                     bt.completed_at,
+                    false is_old,
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
@@ -707,7 +713,10 @@ impl Database {
                             completed_at,
                             task_created: Some(next_task.try_into()?),
                             task_deleted: None,
-                            task_updated: previous_task.map(TryInto::try_into).transpose()?,
+                            task_updated: previous_task
+                                .filter(|t| t.is_visible())
+                                .map(TryInto::try_into)
+                                .transpose()?,
                         })
                     }
 
@@ -754,6 +763,7 @@ impl Database {
                             task_created: None,
                             task_deleted: Some(TaskId(current_task_id)),
                             task_updated: new_current_previous_task
+                                .filter(|t| t.is_visible())
                                 .map(TryInto::try_into)
                                 .transpose()?,
                         })
@@ -867,6 +877,7 @@ impl<'c> Transaction<'c> {
                     bt.id,
                     bt.title,
                     bt.completed_at,
+                    bt.completed_at < CURRENT_TIMESTAMP - INTERVAL '1 day' as is_old,
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
