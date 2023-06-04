@@ -7,6 +7,7 @@ class DateFormField extends StatelessWidget {
     required String locale,
     required this.onChanged,
     required this.label,
+    required this.helperText,
     super.key,
     this.firstDate,
     this.lastDate,
@@ -22,6 +23,7 @@ class DateFormField extends StatelessWidget {
   final DateTime? lastDate;
   final void Function(DateTime?) onChanged;
   final String label;
+  final String helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class DateFormField extends StatelessWidget {
       decoration: InputDecoration(
         icon: const Icon(Icons.calendar_today),
         labelText: label,
+        helperText: helperText,
       ),
       readOnly: true,
       onTap: () async {

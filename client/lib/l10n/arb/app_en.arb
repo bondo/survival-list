@@ -44,14 +44,18 @@
   "createItemAppBarTitle": "Add Item",
   "createItemTitleLabel": "Title",
   "createItemStartDateLabel": "Start date",
+  "createItemStartDateHelperText": "Hide on todo list until this date",
   "createItemEndDateLabel": "Deadline",
+  "createItemEndDateHelperText": "Display on survival list when this date is reached",
   "createItemGroupLabel": "Group",
   "createItemSaveButtonTooltip": "Save item",
 
   "editItemAppBarTitle": "Edit Item",
   "editItemTitleLabel": "Title",
   "editItemStartDateLabel": "Start date",
+  "editItemStartDateHelperText": "Hide on todo list until this date",
   "editItemEndDateLabel": "Deadline",
+  "editItemEndDateHelperText": "Display on survival list when this date is reached",
   "editItemGroupLabel": "Group",
   "editItemSaveButtonTooltip": "Save changes",
 
