@@ -72,3 +72,10 @@ flutter build apk
 ~/Android/Sdk/build-tools/33.0.1/apksigner sign -verbose -ks ~/upload-keystore.jks --out app-release-signed.apk app-release-aligned.apk
 adb install app-release-signed.apk
 ```
+
+## Update icon
+
+- Make changes to `assets/icon/icon.png`
+- Upload new icon to play console
+- If background color changed, update `adaptive_icon_background` in pubspec.yaml
+- Run `flutter pub run flutter_launcher_icons`
