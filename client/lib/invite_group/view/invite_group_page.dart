@@ -32,12 +32,26 @@ class InviteGroupView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.inviteGroupAppBarTitle(group.title)),
+        title: Text(l10n.inviteGroupAppBarTitle),
       ),
-      body: Center(
-        child: QrImageView(
-          data: 'survival-list:${group.uid}',
-          errorCorrectionLevel: QrErrorCorrectLevel.H,
+      body: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                l10n.inviteGroupDescription(group.title),
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            QrImageView(
+              data: 'survival-list:${group.uid}',
+              errorCorrectionLevel: QrErrorCorrectLevel.H,
+            ),
+          ],
         ),
       ),
     );

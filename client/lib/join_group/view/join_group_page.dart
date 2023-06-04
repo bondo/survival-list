@@ -47,20 +47,51 @@ class JoinGroupView extends StatelessWidget {
       ),
       body: status.isLoadingOrSuccess
           ? const Center(child: CupertinoActivityIndicator())
-          : MobileScanner(
-              onDetect: (capture) {
-                for (final barcode in capture.barcodes) {
-                  if (barcode.rawValue != null) {
-                    final res = RegExp(r'^survival-list:(.*)$')
-                        .firstMatch(barcode.rawValue!);
-                    if (res != null) {
-                      context
-                          .read<JoinGroupBloc>()
-                          .add(JoinGroupQrCodeScanned(res[1]!));
+          : Stack(
+              children: [
+                MobileScanner(
+                  onDetect: (capture) {
+                    for (final barcode in capture.barcodes) {
+                      if (barcode.rawValue != null) {
+                        final res = RegExp(r'^survival-list:(.*)$')
+                            .firstMatch(barcode.rawValue!);
+                        if (res != null) {
+                          context
+                              .read<JoinGroupBloc>()
+                              .add(JoinGroupQrCodeScanned(res[1]!));
+                        }
+                      }
                     }
-                  }
-                }
-              },
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: DecoratedBox(
+                          decoration: const BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            backgroundBlendMode: BlendMode.overlay,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                              l10n.joinGroupHelpText,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
     );
   }
