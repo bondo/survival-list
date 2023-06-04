@@ -18,4 +18,4 @@ dependencies:
   rxdart: ^0.27.7
 
 dev_dependencies:
-  very_good_analysis: ^4.0.0
+  very_good_analysis: ^5.0.0+1

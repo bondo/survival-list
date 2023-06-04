@@ -35,7 +35,10 @@ class InviteGroupView extends StatelessWidget {
         title: Text(l10n.inviteGroupAppBarTitle(group.title)),
       ),
       body: Center(
-        child: QrImage(data: 'survival-list:${group.uid}'),
+        child: QrImageView(
+          data: 'survival-list:${group.uid}',
+          errorCorrectionLevel: QrErrorCorrectLevel.H,
+        ),
       ),
     );
   }
