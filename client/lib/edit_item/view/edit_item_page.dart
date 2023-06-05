@@ -193,6 +193,7 @@ class _GroupField extends StatelessWidget {
                   .add(EditItemGroupChanged(pickedGroup));
             },
             label: l10n.editItemGroupLabel,
+            viewerPerson: state.viewerPerson,
           );
   }
 }

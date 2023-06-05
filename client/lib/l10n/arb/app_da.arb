@@ -77,7 +77,7 @@
   "joinGroupAppBarTitle": "Bliv medlem",
   "joinGroupHelpText": "Skan en invitation fra en anden bruger\nfor at blive medlem af deres gruppe",
 
-  "widgetGroupEmptyValueTitle": "Ingen",
+  "widgetGroupHelperText": "Alle personer i gruppen kan se og redigere opgaven",
   "widgetDurationMonthsLabel": "Måneder",
   "widgetDurationDaysLabel": "Dage",
   "widgetDurationHoursLabel": "Timer",

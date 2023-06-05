@@ -8,6 +8,7 @@ class GroupFormField extends StatelessWidget {
     required this.options,
     required this.onChanged,
     required this.label,
+    required this.viewerPerson,
     super.key,
   });
 
@@ -15,17 +16,12 @@ class GroupFormField extends StatelessWidget {
   final List<Group>? options;
   final void Function(Group?) onChanged;
   final String label;
+  final Person? viewerPerson;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    final empty = DropdownMenuItem<Group?>(
-      child: Text(
-        l10n.widgetGroupEmptyValueTitle,
-        style: const TextStyle(fontStyle: FontStyle.italic),
-      ),
-    );
     final items = ((options?.isEmpty ?? true) && value != null
             ? [value!]
             : options)
@@ -34,8 +30,17 @@ class GroupFormField extends StatelessWidget {
               DropdownMenuItem<Group?>(value: group, child: Text(group.title)),
         )
         .toList();
-    if (items != null && options != null && value != null) {
-      items.insert(0, empty);
+
+    if (items != null) {
+      items.insert(
+        0,
+        DropdownMenuItem<Group?>(
+          child: Text(
+            viewerPerson?.name ?? '',
+            style: const TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
     }
 
     return DropdownButtonFormField<Group?>(
@@ -45,6 +50,7 @@ class GroupFormField extends StatelessWidget {
       decoration: InputDecoration(
         icon: const Icon(Icons.group),
         labelText: label,
+        helperText: l10n.widgetGroupHelperText,
       ),
     );
   }

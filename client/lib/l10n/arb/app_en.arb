@@ -77,7 +77,7 @@
   "joinGroupAppBarTitle": "Join group",
   "joinGroupHelpText": "Scan an invitation from another\nuser to join their group",
 
-  "widgetGroupEmptyValueTitle": "None",
+  "widgetGroupHelperText": "Everyone in the group can see and edit the task",
   "widgetDurationMonthsLabel": "Months",
   "widgetDurationDaysLabel": "Days",
   "widgetDurationHoursLabel": "Hours",
