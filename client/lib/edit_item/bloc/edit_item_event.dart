@@ -7,6 +7,10 @@ abstract class EditItemEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class DeleteItem extends EditItemEvent {
+  const DeleteItem();
+}
+
 class EditItemTitleChanged extends EditItemEvent {
   const EditItemTitleChanged(this.title);
 

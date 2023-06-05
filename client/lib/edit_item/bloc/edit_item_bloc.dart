@@ -24,6 +24,7 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
             recurrenceFrequency: item.recurrence.frequency,
           ),
         ) {
+    on<DeleteItem>(_onDeleteItem);
     on<EditItemTitleChanged>(_onTitleChanged);
     on<EditItemStartDateChanged>(_onStartDateChanged);
     on<EditItemEndDateChanged>(_onEndDateChanged);
@@ -40,6 +41,13 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
   }
 
   final SurvivalListRepository _survivalListRepository;
+
+  Future<void> _onDeleteItem(
+    DeleteItem event,
+    Emitter<EditItemState> emit,
+  ) async {
+    await _survivalListRepository.deleteItem(state.item);
+  }
 
   void _onTitleChanged(
     EditItemTitleChanged event,

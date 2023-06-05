@@ -24,19 +24,6 @@ class ScheduleItemCompletionToggled extends ScheduleEvent {
   List<Object> get props => [item, isCompleted];
 }
 
-class ScheduleItemDeleted extends ScheduleEvent {
-  const ScheduleItemDeleted(this.item);
-
-  final Item item;
-
-  @override
-  List<Object> get props => [item];
-}
-
-class ScheduleUndoDeletionRequested extends ScheduleEvent {
-  const ScheduleUndoDeletionRequested();
-}
-
 class ScheduleFilterChanged extends ScheduleEvent {
   const ScheduleFilterChanged(this.filter);
 

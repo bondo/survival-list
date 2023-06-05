@@ -57,35 +57,6 @@ class ScheduleView extends StatelessWidget {
               }
             },
           ),
-          BlocListener<ScheduleBloc, ScheduleState>(
-            listenWhen: (previous, current) =>
-                previous.lastDeletedItem != current.lastDeletedItem &&
-                current.lastDeletedItem != null,
-            listener: (context, state) {
-              final deletedItem = state.lastDeletedItem!;
-              final messenger = ScaffoldMessenger.of(context);
-              messenger
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      l10n.scheduleItemDeletedSnackbarText(
-                        deletedItem.title,
-                      ),
-                    ),
-                    action: SnackBarAction(
-                      label: l10n.scheduleUndoDeletionButtonText,
-                      onPressed: () {
-                        messenger.hideCurrentSnackBar();
-                        context
-                            .read<ScheduleBloc>()
-                            .add(const ScheduleUndoDeletionRequested());
-                      },
-                    ),
-                  ),
-                );
-            },
-          ),
         ],
         child: BlocBuilder<ScheduleBloc, ScheduleState>(
           builder: (context, state) {
@@ -126,11 +97,6 @@ class ScheduleView extends StatelessWidget {
                                 isCompleted: isCompleted,
                               ),
                             );
-                      },
-                      onDismissed: (_) {
-                        context
-                            .read<ScheduleBloc>()
-                            .add(ScheduleItemDeleted(item));
                       },
                       onTap: () {
                         if (item.canUpdate) {

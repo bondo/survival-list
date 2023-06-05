@@ -10,13 +10,11 @@ class ItemListTile extends StatelessWidget {
     required this.viewerPerson,
     super.key,
     this.onToggleCompleted,
-    this.onDismissed,
     this.onTap,
   });
 
   final Item item;
   final ValueChanged<bool>? onToggleCompleted;
-  final DismissDirectionCallback? onDismissed;
   final VoidCallback? onTap;
   final Person? viewerPerson;
 
@@ -29,7 +27,7 @@ class ItemListTile extends StatelessWidget {
       photo: (item.responsible ?? viewerPerson)?.pictureUrl,
     );
 
-    final tile = ListTile(
+    return ListTile(
       onTap: onTap,
       title: Row(
         children: [
@@ -85,25 +83,5 @@ class ItemListTile extends StatelessWidget {
               ),
             ),
     );
-
-    if (item.canDelete) {
-      return Dismissible(
-        key: Key('todoListTile_dismissible_${item.id}'),
-        onDismissed: onDismissed,
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          color: theme.colorScheme.error,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: const Icon(
-            Icons.delete,
-            color: Color(0xAAFFFFFF),
-          ),
-        ),
-        child: tile,
-      );
-    } else {
-      return tile;
-    }
   }
 }

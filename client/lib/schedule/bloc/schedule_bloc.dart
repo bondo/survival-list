@@ -18,10 +18,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         super(ScheduleState(variant: variant)) {
     on<ScheduleFilterChanged>(_onFilterChanged);
     on<ScheduleItemCompletionToggled>(_onItemCompletionToggled);
-    on<ScheduleItemDeleted>(_onItemDeleted);
     on<ScheduleLogoutRequested>(_onLogoutRequested);
     on<ScheduleSubscriptionRequested>(_onSubscriptionRequested);
-    on<ScheduleUndoDeletionRequested>(_onUndoDeletionRequested);
     on<ScheduleRefreshRequested>(_onRefreshRequested);
   }
 
@@ -76,41 +74,11 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     );
   }
 
-  Future<void> _onItemDeleted(
-    ScheduleItemDeleted event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    emit(state.copyWith(lastDeletedItem: () => event.item));
-    await _survivalListRepository.deleteItem(event.item);
-  }
-
   Future<void> _onLogoutRequested(
     ScheduleLogoutRequested event,
     Emitter<ScheduleState> emit,
   ) async {
     await _authenticationRepository.logOut();
-  }
-
-  Future<void> _onUndoDeletionRequested(
-    ScheduleUndoDeletionRequested event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    assert(
-      state.lastDeletedItem != null,
-      'Last deleted item can not be null.',
-    );
-
-    final item = state.lastDeletedItem!;
-    emit(state.copyWith(lastDeletedItem: () => null));
-    await _survivalListRepository.createItem(
-      title: item.title,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      estimate: item.estimate,
-      group: item.group,
-      recurrence: item.recurrence,
-      responsible: item.responsible,
-    );
   }
 
   void _onFilterChanged(

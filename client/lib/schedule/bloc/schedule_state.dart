@@ -8,7 +8,6 @@ class ScheduleState extends Equatable {
     this.status = ScheduleStatus.initial,
     this.todos = const [],
     this.filter = ScheduleViewFilter.all,
-    this.lastDeletedItem,
     this.userPhotoUrl,
     this.viewerPerson,
   });
@@ -17,7 +16,6 @@ class ScheduleState extends Equatable {
   final List<Item> todos;
   final ScheduleViewFilter filter;
   final ScheduleViewVariant variant;
-  final Item? lastDeletedItem;
   final String? userPhotoUrl;
   final Person? viewerPerson;
 
@@ -28,7 +26,6 @@ class ScheduleState extends Equatable {
     ScheduleStatus Function()? status,
     List<Item> Function()? todos,
     ScheduleViewFilter Function()? filter,
-    Item? Function()? lastDeletedItem,
     String? Function()? userPhotoUrl,
     Person? Function()? viewerPerson,
   }) {
@@ -37,8 +34,6 @@ class ScheduleState extends Equatable {
       status: status != null ? status() : this.status,
       todos: todos != null ? todos() : this.todos,
       filter: filter != null ? filter() : this.filter,
-      lastDeletedItem:
-          lastDeletedItem != null ? lastDeletedItem() : this.lastDeletedItem,
       userPhotoUrl: userPhotoUrl != null ? userPhotoUrl() : this.userPhotoUrl,
       viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
@@ -49,7 +44,6 @@ class ScheduleState extends Equatable {
         status,
         todos,
         filter,
-        lastDeletedItem,
         userPhotoUrl,
         viewerPerson,
       ];

@@ -19,8 +19,6 @@
   "scheduleFilterUnchecked": "Unchecked",
   "scheduleFilterResponsible": "Responsible",
   "scheduleEmptyText": "No todos found with the selected filter.",
-  "scheduleItemDeletedSnackbarText": "Item \"{todoTitle}\" deleted.",
-  "scheduleUndoDeletionButtonText": "Undo",
   "scheduleErrorSnackbarText": "An error occurred while loading todos.",
   "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",
   "scheduleOptionsTooltip": "Options",
@@ -91,5 +89,11 @@
 
   "widgetRecurrenceKindNever": "Never",
   "widgetRecurrenceKindChecked": "When checked",
-  "widgetRecurrenceKindEvery": "Every"
+  "widgetRecurrenceKindEvery": "Every",
+
+  "editItemOptionsDeleteTooltip": "Delete task",
+  "editItemOptionsDeleteDialogTitle": "Delete task?",
+  "editItemOptionsDeleteDialogContent": "Are you sure you want to leave the task \"{itemTitle}\"?",
+  "editItemOptionsDeleteDialogCancel": "Cancel",
+  "editItemOptionsDeleteDialogConfirm": "I am sure"
 }

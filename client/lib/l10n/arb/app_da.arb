@@ -19,8 +19,6 @@
   "scheduleFilterUnchecked": "Mangler",
   "scheduleFilterResponsible": "Ansvarlig",
   "scheduleEmptyText": "Ingen opgaver fundet med det valgte filter.",
-  "scheduleItemDeletedSnackbarText": "Opgave \"{todoTitle}\" slettet.",
-  "scheduleUndoDeletionButtonText": "Fortryd",
   "scheduleErrorSnackbarText": "Kunne ikke hente opgaver.",
   "scheduleUpdateNotAllowedSnackbarText": "Du kan ikke redigere denne opgave.",
   "scheduleOptionsTooltip": "Muligheder",
@@ -91,5 +89,11 @@
 
   "widgetRecurrenceKindNever": "Aldrig",
   "widgetRecurrenceKindChecked": "Efter krydset af",
-  "widgetRecurrenceKindEvery": "Periodisk"
+  "widgetRecurrenceKindEvery": "Periodisk",
+
+  "editItemOptionsDeleteTooltip": "Slet opgave",
+  "editItemOptionsDeleteDialogTitle": "Slet opgave?",
+  "editItemOptionsDeleteDialogContent": "Er du sikker på at du vil slette opgaven \"{itemTitle}\"?",
+  "editItemOptionsDeleteDialogCancel": "Ikke alligevel",
+  "editItemOptionsDeleteDialogConfirm": "Jeg er sikker"
 }

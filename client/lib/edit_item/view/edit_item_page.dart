@@ -57,6 +57,7 @@ class EditItemView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.editItemAppBarTitle),
+        actions: const [EditItemDeleteButton()],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: l10n.editItemSaveButtonTooltip,
