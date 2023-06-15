@@ -43,6 +43,8 @@ struct TaskRawResult {
     pub id: i32,
     pub title: String,
     pub is_old: Option<bool>,
+    pub is_responsible: Option<bool>,
+    pub is_in_group: Option<bool>,
     pub completed_at: Option<PrimitiveDateTime>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
@@ -63,12 +65,27 @@ struct TaskRawResult {
 }
 
 impl TaskRawResult {
+    fn is_friend_task(&self) -> Result<bool, Error> {
+        let Some(is_responsible) = self.is_responsible else {
+            return Err(Error::InternalState("Unexpected null value"));
+        };
+        let Some(is_in_group) = self.is_in_group else {
+            return Err(Error::InternalState("Unexpected null value"));
+        };
+        return Ok(!is_responsible && !is_in_group);
+    }
+
     // Allow update
     // - if not recurrence
     // - if this is the current task
-    fn can_update(&self) -> bool {
-        self.recurrence_current_task_id
-            .map_or(true, |v| v == self.id)
+    fn can_update(&self) -> Result<bool, Error> {
+        if self.is_friend_task()? {
+            Ok(false)
+        } else {
+            Ok(self
+                .recurrence_current_task_id
+                .map_or(true, |v| v == self.id))
+        }
     }
 
     // Allow toggle
@@ -77,6 +94,9 @@ impl TaskRawResult {
     // - if this is the current task
     // - if this is the previous task
     fn can_toggle(&self) -> Result<bool, Error> {
+        if self.is_friend_task()? {
+            return Ok(false);
+        }
         match (
             self.recurrence_previous_task_id,
             self.recurrence_current_task_id,
@@ -89,7 +109,7 @@ impl TaskRawResult {
         }
     }
 
-    fn can_delete(&self) -> bool {
+    fn can_delete(&self) -> Result<bool, Error> {
         self.can_update()
     }
 
@@ -117,6 +137,7 @@ pub struct TaskResult {
     pub can_update: bool,
     pub can_toggle: bool,
     pub can_delete: bool,
+    pub is_friend_task: bool,
 }
 
 static RECURRENCE_MAX: i32 = 5;
@@ -125,9 +146,10 @@ impl TryFrom<TaskRawResult> for TaskResult {
     type Error = Error;
 
     fn try_from(value: TaskRawResult) -> Result<Self, Self::Error> {
-        let can_update = value.can_update();
+        let can_update = value.can_update()?;
         let can_toggle = value.can_toggle()?;
-        let can_delete = value.can_delete();
+        let can_delete = value.can_delete()?;
+        let is_friend_task = value.is_friend_task()?;
         Ok(Self {
             id: TaskId(value.id),
             title: value.title,
@@ -177,6 +199,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
             can_update,
             can_toggle,
             can_delete,
+            is_friend_task,
         })
     }
 }
@@ -377,6 +400,17 @@ impl Database {
                         SELECT
                             t.id,
                             t.title,
+                            (
+                                t.responsible_user_id = $1
+                            ) is_responsible,
+                            EXISTS (
+                                SELECT
+                                FROM
+                                    users_groups ug
+                                WHERE
+                                    ug.group_id = t.group_id AND
+                                    ug.user_id = $1
+                            ) is_in_group,
                             t.completed_at,
                             t.start_date,
                             t.end_date,
@@ -424,6 +458,18 @@ impl Database {
                                     WHERE
                                         ug.group_id = t.group_id AND
                                         ug.user_id = $1
+                                ) OR
+                                -- Is friend responsible
+                                EXISTS (
+                                    SELECT
+                                    FROM
+                                        users_groups viewer_group
+                                    INNER JOIN
+                                        users_groups friend_group ON
+                                            friend_group.group_id = viewer_group.group_id
+                                    WHERE
+                                        viewer_group.user_id = $1 AND
+                                        friend_group.user_id = t.responsible_user_id
                                 )
                             )
                     ),
@@ -439,6 +485,8 @@ impl Database {
                         SELECT
                             et.id,
                             et.title,
+                            et.is_responsible,
+                            et.is_in_group,
                             et.completed_at,
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
@@ -464,6 +512,8 @@ impl Database {
                 SELECT
                     bt.id,
                     bt.title,
+                    bt.is_responsible,
+                    bt.is_in_group,
                     bt.completed_at,
                     false is_old,
                     bt.start_date,
@@ -516,7 +566,7 @@ impl Database {
                     }
                 }
 
-                tx.get_task_unchecked(task_id)
+                tx.get_task_unchecked(params.user_id, task_id)
                     .await
                     .context("Failed to load task after create")?
                     .try_into()
@@ -536,11 +586,11 @@ impl Database {
                 .await?;
 
                 let task = tx
-                    .get_task_unchecked(params.task_id)
+                    .get_task_unchecked(params.user_id, params.task_id)
                     .await
                     .map_err(|_| Error::NotFound("Task not found"))?;
 
-                if !task.can_update() {
+                if !task.can_update()? {
                     return Err(Error::PermissionDenied(
                         "You are not allowed to update this item",
                     ));
@@ -586,7 +636,7 @@ impl Database {
                     }
                 }
 
-                tx.get_task_unchecked(task_id)
+                tx.get_task_unchecked(params.user_id, task_id)
                     .await
                     .context("Failed to load task after update")?
                     .try_into()
@@ -604,16 +654,16 @@ impl Database {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
-                    .get_task_unchecked(task_id)
+                    .get_task_unchecked(user_id, task_id)
                     .await
                     .map_err(|_| Error::NotFound("Task not found"))?;
 
                 if task.completed_at.is_some() == is_completed {
                     return Ok(ToggleResult {
                         id: task_id,
-                        can_update: task.can_update(),
+                        can_update: task.can_update()?,
                         can_toggle: task.can_toggle()?,
-                        can_delete: task.can_delete(),
+                        can_delete: task.can_delete()?,
                         completed_at: task.completed_at,
                         task_created: None,
                         task_deleted: None,
@@ -638,15 +688,15 @@ impl Database {
                     // Non-recurring task - just set completed
                     (None, None) => {
                         let task = tx
-                            .get_task_unchecked(TaskId(task.id))
+                            .get_task_unchecked(user_id, TaskId(task.id))
                             .await
                             .context("Failed to load task after toggle")?;
 
                         Ok(ToggleResult {
                             id: task_id,
-                            can_update: task.can_update(),
+                            can_update: task.can_update()?,
                             can_toggle: task.can_toggle()?,
-                            can_delete: task.can_delete(),
+                            can_delete: task.can_delete()?,
                             completed_at,
                             task_created: None,
                             task_deleted: None,
@@ -661,13 +711,13 @@ impl Database {
                             .await?;
 
                         let next_task = tx
-                            .get_task_unchecked(next_task_id)
+                            .get_task_unchecked(user_id, next_task_id)
                             .await
                             .context("Failed to load task after create")?;
 
                         let previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
-                                tx.get_task_unchecked(TaskId(previous_task_id))
+                                tx.get_task_unchecked(user_id, TaskId(previous_task_id))
                                     .await
                                     .map(Some)
                                     .context("Failed to load previous task")?
@@ -677,15 +727,15 @@ impl Database {
                         };
 
                         let task = tx
-                            .get_task_unchecked(TaskId(task.id))
+                            .get_task_unchecked(user_id, TaskId(task.id))
                             .await
                             .context("Failed to load task after toggle")?;
 
                         Ok(ToggleResult {
                             id: task_id,
-                            can_update: task.can_update(),
+                            can_update: task.can_update()?,
                             can_toggle: task.can_toggle()?,
-                            can_delete: task.can_delete(),
+                            can_delete: task.can_delete()?,
                             completed_at,
                             task_created: Some(next_task.try_into()?),
                             task_deleted: None,
@@ -710,13 +760,13 @@ impl Database {
                             .await?;
 
                         let task = tx
-                            .get_task_unchecked(TaskId(task.id))
+                            .get_task_unchecked(user_id, TaskId(task.id))
                             .await
                             .context("Failed to load task after toggle")?;
 
                         let new_current_previous_task = {
                             if let Some(previous_task_id) = task.recurrence_previous_task_id {
-                                tx.get_task_unchecked(TaskId(previous_task_id))
+                                tx.get_task_unchecked(user_id, TaskId(previous_task_id))
                                     .await
                                     .map(Some)
                                     .context("Failed to load previous task")?
@@ -727,9 +777,9 @@ impl Database {
 
                         Ok(ToggleResult {
                             id: task_id,
-                            can_update: task.can_update(),
+                            can_update: task.can_update()?,
                             can_toggle: task.can_toggle()?,
-                            can_delete: task.can_delete(),
+                            can_delete: task.can_delete()?,
                             completed_at,
                             task_created: None,
                             task_deleted: Some(TaskId(current_task_id)),
@@ -751,11 +801,11 @@ impl Database {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
-                    .get_task_unchecked(task_id)
+                    .get_task_unchecked(user_id, task_id)
                     .await
                     .map_err(|_| Error::NotFound("Task not found"))?;
 
-                if !task.can_delete() {
+                if !task.can_delete()? {
                     return Err(Error::PermissionDenied(
                         "You are not allowed to delete this item",
                     ));
@@ -777,7 +827,11 @@ impl Database {
 }
 
 impl<'c> Transaction<'c> {
-    async fn get_task_unchecked(&mut self, task_id: TaskId) -> Result<TaskRawResult, sqlx::Error> {
+    async fn get_task_unchecked(
+        &mut self,
+        user_id: UserId,
+        task_id: TaskId,
+    ) -> Result<TaskRawResult, sqlx::Error> {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -786,6 +840,17 @@ impl<'c> Transaction<'c> {
                         SELECT
                             t.id,
                             t.title,
+                            (
+                                t.responsible_user_id = $1
+                            ) is_responsible,
+                            EXISTS (
+                                SELECT
+                                FROM
+                                    users_groups ug
+                                WHERE
+                                    ug.group_id = t.group_id AND
+                                    ug.user_id = $1
+                            ) is_in_group,
                             t.completed_at,
                             t.start_date,
                             t.end_date,
@@ -816,7 +881,7 @@ impl<'c> Transaction<'c> {
                             tasks c ON
                                 c.id = r.current_task_id
                         WHERE
-                            t.id = $1
+                            t.id = $2
                     ),
                     every_task AS (
                         SELECT
@@ -830,6 +895,8 @@ impl<'c> Transaction<'c> {
                         SELECT
                             et.id,
                             et.title,
+                            et.is_responsible,
+                            et.is_in_group,
                             et.completed_at,
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
@@ -849,12 +916,14 @@ impl<'c> Transaction<'c> {
                         FROM
                             every_task et
                         WHERE
-                            et.depth < $2 AND
+                            et.depth < $3 AND
                             COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP
                     )
                 SELECT
                     bt.id,
                     bt.title,
+                    bt.is_responsible,
+                    bt.is_in_group,
                     bt.completed_at,
                     bt.completed_at < CURRENT_TIMESTAMP - INTERVAL '1 day' as is_old,
                     bt.start_date,
@@ -876,6 +945,7 @@ impl<'c> Transaction<'c> {
                 FROM
                     base_task bt
             "#,
+            user_id.0,
             task_id.0,
             RECURRENCE_MAX
         )
