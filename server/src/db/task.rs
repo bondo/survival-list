@@ -72,7 +72,7 @@ impl TaskRawResult {
         let Some(is_in_group) = self.is_in_group else {
             return Err(Error::InternalState("Unexpected null value"));
         };
-        return Ok(!is_responsible && !is_in_group);
+        Ok(!is_responsible && !is_in_group)
     }
 
     // Allow update
