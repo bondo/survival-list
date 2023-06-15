@@ -193,6 +193,7 @@ const GetTasksResponse$json = const {
     const {'1': 'can_update', '3': 11, '4': 1, '5': 8, '10': 'canUpdate'},
     const {'1': 'can_toggle', '3': 12, '4': 1, '5': 8, '10': 'canToggle'},
     const {'1': 'can_delete', '3': 13, '4': 1, '5': 8, '10': 'canDelete'},
+    const {'1': 'is_friend_task', '3': 14, '4': 1, '5': 8, '10': 'isFriendTask'},
   ],
   '8': const [
     const {'1': 'recurring'},
@@ -200,7 +201,7 @@ const GetTasksResponse$json = const {
 };
 
 /// Descriptor for `GetTasksResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgHIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYCCABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCSABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAogASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgLIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYDCABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGA0gASgIUgljYW5EZWxldGVCCwoJcmVjdXJyaW5n');
+final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgHIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYCCABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCSABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAogASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgLIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYDCABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGA0gASgIUgljYW5EZWxldGUSJAoOaXNfZnJpZW5kX3Rhc2sYDiABKAhSDGlzRnJpZW5kVGFza0ILCglyZWN1cnJpbmc=');
 @$core.Deprecated('Use createGroupRequestDescriptor instead')
 const CreateGroupRequest$json = const {
   '1': 'CreateGroupRequest',

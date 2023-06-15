@@ -4,6 +4,9 @@ enum ScheduleViewFilter { all, unchecked, responsible }
 
 extension ScheduleViewFilterX on ScheduleViewFilter {
   bool _filter(Item item, Person? viewer) {
+    if (item.isFriendTask) {
+      return false;
+    }
     switch (this) {
       case ScheduleViewFilter.all:
         return true;

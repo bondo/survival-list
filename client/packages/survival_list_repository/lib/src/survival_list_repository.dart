@@ -146,6 +146,7 @@ class SurvivalListRepository {
         canUpdate: response.canUpdate,
         canToggle: response.canToggle,
         canDelete: response.canDelete,
+        isFriendTask: response.isFriendTask,
       ),
     )
         .listen(
@@ -596,6 +597,7 @@ class SurvivalListRepository {
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,
+      isFriendTask: false,
     );
   }
 
@@ -626,6 +628,7 @@ class SurvivalListRepository {
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,
+      isFriendTask: false,
     );
   }
 }

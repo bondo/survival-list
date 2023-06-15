@@ -17,6 +17,7 @@ class Item extends Equatable {
     required this.canUpdate,
     required this.canToggle,
     required this.canDelete,
+    required this.isFriendTask,
   });
 
   final int id;
@@ -31,6 +32,7 @@ class Item extends Equatable {
   final bool canUpdate;
   final bool canToggle;
   final bool canDelete;
+  final bool isFriendTask;
 
   Item copyWith({
     int Function()? id,
@@ -45,6 +47,7 @@ class Item extends Equatable {
     bool Function()? canUpdate,
     bool Function()? canToggle,
     bool Function()? canDelete,
+    bool Function()? isFriendTask,
   }) {
     return Item(
       id: id != null ? id() : this.id,
@@ -59,6 +62,7 @@ class Item extends Equatable {
       canUpdate: canUpdate != null ? canUpdate() : this.canUpdate,
       canToggle: canToggle != null ? canToggle() : this.canToggle,
       canDelete: canDelete != null ? canDelete() : this.canDelete,
+      isFriendTask: isFriendTask != null ? isFriendTask() : this.isFriendTask,
     );
   }
 
@@ -76,5 +80,6 @@ class Item extends Equatable {
         canUpdate,
         canToggle,
         canDelete,
+        isFriendTask,
       ];
 }

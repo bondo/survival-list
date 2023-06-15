@@ -1312,6 +1312,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
+    ..aOB(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isFriendTask')
     ..hasRequiredFields = false
   ;
 
@@ -1330,6 +1331,7 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.bool? canUpdate,
     $core.bool? canToggle,
     $core.bool? canDelete,
+    $core.bool? isFriendTask,
   }) {
     final _result = create();
     if (id != null) {
@@ -1370,6 +1372,9 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     }
     if (canDelete != null) {
       _result.canDelete = canDelete;
+    }
+    if (isFriendTask != null) {
+      _result.isFriendTask = isFriendTask;
     }
     return _result;
   }
@@ -1527,6 +1532,15 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   $core.bool hasCanDelete() => $_has(12);
   @$pb.TagNumber(13)
   void clearCanDelete() => clearField(13);
+
+  @$pb.TagNumber(14)
+  $core.bool get isFriendTask => $_getBF(13);
+  @$pb.TagNumber(14)
+  set isFriendTask($core.bool v) { $_setBool(13, v); }
+  @$pb.TagNumber(14)
+  $core.bool hasIsFriendTask() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearIsFriendTask() => clearField(14);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
