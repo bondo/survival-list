@@ -1,19 +1,18 @@
 import 'package:survival_list_repository/survival_list_repository.dart';
 
-enum ScheduleViewFilter { all, unchecked, responsible }
+enum ScheduleViewFilter { all, unchecked, responsible, friends }
 
 extension ScheduleViewFilterX on ScheduleViewFilter {
   bool _filter(Item item, Person? viewer) {
-    if (item.isFriendTask) {
-      return false;
-    }
     switch (this) {
       case ScheduleViewFilter.all:
-        return true;
+        return !item.isFriendTask;
       case ScheduleViewFilter.unchecked:
-        return !item.isCompleted;
+        return !item.isFriendTask && !item.isCompleted;
       case ScheduleViewFilter.responsible:
-        return item.responsible == viewer;
+        return !item.isFriendTask && item.responsible == viewer;
+      case ScheduleViewFilter.friends:
+        return item.isFriendTask && !item.isCompleted;
     }
   }
 

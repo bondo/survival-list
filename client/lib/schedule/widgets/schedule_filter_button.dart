@@ -36,6 +36,10 @@ class ScheduleFilterButton extends StatelessWidget {
             value: ScheduleViewFilter.responsible,
             child: Text(l10n.scheduleFilterResponsible),
           ),
+          PopupMenuItem(
+            value: ScheduleViewFilter.friends,
+            child: Text(l10n.scheduleFilterFriends),
+          ),
         ];
       },
       icon: const Icon(Icons.filter_list_rounded),

@@ -18,6 +18,7 @@
   "scheduleFilterAll": "All",
   "scheduleFilterUnchecked": "Unchecked",
   "scheduleFilterResponsible": "Responsible",
+  "scheduleFilterFriends": "Friends",
   "scheduleEmptyText": "No todos found with the selected filter.",
   "scheduleErrorSnackbarText": "An error occurred while loading todos.",
   "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",

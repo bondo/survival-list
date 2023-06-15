@@ -18,6 +18,7 @@
   "scheduleFilterAll": "Alle",
   "scheduleFilterUnchecked": "Mangler",
   "scheduleFilterResponsible": "Ansvarlig",
+  "scheduleFilterFriends": "Venner",
   "scheduleEmptyText": "Ingen opgaver fundet med det valgte filter.",
   "scheduleErrorSnackbarText": "Kunne ikke hente opgaver.",
   "scheduleUpdateNotAllowedSnackbarText": "Du kan ikke redigere denne opgave.",
