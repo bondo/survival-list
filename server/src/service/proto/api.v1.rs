@@ -216,6 +216,8 @@ pub struct GetTasksResponse {
     pub can_toggle: bool,
     #[prost(bool, tag = "13")]
     pub can_delete: bool,
+    #[prost(bool, tag = "14")]
+    pub is_friend_task: bool,
     #[prost(oneof = "get_tasks_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<get_tasks_response::Recurring>,
 }

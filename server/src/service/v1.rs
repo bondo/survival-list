@@ -228,6 +228,7 @@ impl api_server::Api for Service {
                         can_update: task.can_update,
                         can_toggle: task.can_toggle,
                         can_delete: task.can_delete,
+                        is_friend_task: false,
                     })
                     .map_err(Into::into),
                 )

@@ -133,6 +133,7 @@ message GetTasksResponse {
     bool can_update = 11;
     bool can_toggle = 12;
     bool can_delete = 13;
+    bool is_friend_task = 14;
 }
 
 message CreateGroupRequest {
