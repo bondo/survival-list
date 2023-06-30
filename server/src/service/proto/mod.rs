@@ -28,6 +28,9 @@ pub mod google {
 }
 
 pub mod api {
+    pub mod ping {
+        include!("api.ping.rs");
+    }
     pub mod v1 {
         include!("api.v1.rs");
     }

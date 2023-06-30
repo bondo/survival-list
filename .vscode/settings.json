@@ -17,6 +17,7 @@
     "cupertino",
     "digestalg",
     "DOCKERHUB",
+    "dockertest",
     "dotenvy",
     "Dwarnings",
     "endtemplate",
@@ -56,6 +57,7 @@
     "tcpip",
     "thiserror",
     "unawaited",
+    "waitfor",
     "whatsnew",
     "zipalign"
   ]

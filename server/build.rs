@@ -15,10 +15,10 @@ async fn main() -> Result<(), Error> {
     let database_url = env::var("DATABASE_URL").expect("Environment variable DATABASE_URL missing");
 
     tonic_build::configure()
-        .build_client(false)
         .out_dir("src/service/proto")
         .compile(
             &[
+                "../proto/api/ping/api.proto",
                 "../proto/api/v1/api.proto",
                 "../proto/google/type/date.proto",
             ],

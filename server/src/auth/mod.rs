@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use log::info;
 use tonic::{service::Interceptor, Request, Status};
+use tracing::info;
 
 use self::jwk_auth::JwkAuth;
 

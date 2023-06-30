@@ -1,5 +1,5 @@
-use log::error;
 use tonic::Status;
+use tracing::error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

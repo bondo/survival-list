@@ -3,7 +3,6 @@ use std::{sync::Arc, time::Duration};
 use anyhow::Context;
 use futures_core::Future;
 use jsonwebtoken::TokenData;
-use log::info;
 use tokio::{
     runtime::Handle,
     sync::{
@@ -12,6 +11,7 @@ use tokio::{
     },
     task, time,
 };
+use tracing::info;
 
 use super::{
     fetch_keys::fetch_keys,

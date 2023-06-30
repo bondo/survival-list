@@ -1,11 +1,17 @@
+use std::{env, fs};
+
 use anyhow::{Context, Result};
-use log::info;
+use dotenvy::dotenv;
+use tracing::info;
 
 mod auth;
 mod db;
 mod error;
 mod server;
 mod service;
+
+#[cfg(test)]
+mod tests;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -19,5 +25,15 @@ async fn main() -> Result<()> {
 
     info!("Listening on http://{addr}");
 
-    server::start(addr).await.context("server startup error")
+    let database_url =
+        fs::read_to_string("/secrets/POSTGRES_CONNECTION/latest").unwrap_or_else(|_| {
+            dotenv().ok();
+            env::var("DATABASE_URL").expect(
+            "File /secrets/POSTGRES_CONNECTION/latest or environment variable DATABASE_URL missing",
+        )
+        });
+
+    server::start(addr, &database_url)
+        .await
+        .context("server startup error")
 }
