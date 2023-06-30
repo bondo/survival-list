@@ -1,9 +1,11 @@
 use std::{
     future::Future,
+    panic::UnwindSafe,
     time::{Duration, Instant},
 };
 
 use dockertest::{waitfor::RunningWait, Composition, DockerTest, Image};
+use futures_util::FutureExt;
 use sqlx::postgres::PgPoolOptions;
 use tokio::{runtime::Handle, task, time::sleep};
 
@@ -11,8 +13,8 @@ const POSTGRES_PASSWORD: &str = "postgres";
 
 pub fn with_postgres_ready<T, Fut>(f: T)
 where
-    T: FnOnce(String) -> Fut,
-    Fut: Future<Output = ()> + Send + 'static,
+    T: FnOnce(String) -> Fut + UnwindSafe,
+    Fut: Future<Output = ()> + Send + UnwindSafe + 'static,
 {
     let timeout = Duration::from_secs(10);
     let start = Instant::now();
@@ -49,11 +51,15 @@ where
                 _ = wait_for_connection(&url) => (),
                 _ = sleep(timeout - start.elapsed()) => panic!("Connection timeout after {:?}", start.elapsed()),
             }
-
         });
 
-        f(url)
+        let res = block_on(
+            async {
+                f(url).await;
+            }.catch_unwind()
+        );
 
+        async {res.unwrap()}
     });
 }
 

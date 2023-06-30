@@ -1,5 +1,6 @@
 use std::{
     net::{SocketAddr, TcpListener},
+    panic::UnwindSafe,
     time::{Duration, Instant},
 };
 
@@ -17,7 +18,7 @@ use super::with_postgres_ready;
 
 pub fn with_server_ready<T, Fut>(f: T)
 where
-    T: FnOnce() -> Fut,
+    T: FnOnce(Uri) -> Fut + UnwindSafe,
     Fut: Future<Output = ()> + Send + 'static,
 {
     let timeout = Duration::from_secs(10);
@@ -25,6 +26,7 @@ where
 
     with_postgres_ready(|url| {
         let addr = get_available_address().unwrap();
+        let uri = format!("http://{}", addr).parse().unwrap();
         let token = CancellationToken::new();
 
         let cloned_token = token.clone();
@@ -37,13 +39,13 @@ where
 
         block_on(async {
             tokio::select! {
-                _ = wait_for_connection(addr) => (),
+                _ = wait_for_connection(&uri) => (),
                 _ = sleep(timeout - start.elapsed()) => panic!("Connection timeout after {:?}", start.elapsed()),
             }
         });
 
         block_on(async {
-            f().await;
+            f(uri).await;
             token.cancel();
         });
 
@@ -63,15 +65,14 @@ fn get_available_address() -> Option<SocketAddr> {
         .find(|addr| TcpListener::bind(addr).is_ok())
 }
 
-async fn wait_for_connection(addr: SocketAddr) {
-    while !is_server_ready(addr).await {
+async fn wait_for_connection(uri: &Uri) {
+    while !is_server_ready(uri).await {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     }
 }
 
-async fn is_server_ready(addr: SocketAddr) -> bool {
-    let uri = format!("http://{}", addr).parse::<Uri>().unwrap();
-    let Ok(channel) = Channel::builder(uri)
+async fn is_server_ready(uri: &Uri) -> bool {
+    let Ok(channel) = Channel::builder(uri.clone())
         .connect()
         .await else {
             return false;
