@@ -1613,6 +1613,7 @@ dependencies = [
  "jsonwebtoken",
  "pretty_env_logger",
  "prost",
+ "rand",
  "reqwest",
  "serde",
  "sqlx",

@@ -5,6 +5,7 @@ use std::{
 };
 
 use futures_core::Future;
+use rand::{thread_rng, Rng};
 use tokio::{runtime::Handle, task, time::sleep};
 use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
@@ -12,7 +13,7 @@ use tonic::transport::{Channel, Uri};
 use crate::{
     auth::Auth,
     server,
-    service::grpc::ping::{api_client::ApiClient as PingClient, PingRequest},
+    service::api::ping::{api_client::ApiClient as PingClient, PingRequest},
 };
 
 use super::with_postgres_ready;
@@ -27,7 +28,7 @@ where
     let start = Instant::now();
 
     with_postgres_ready(|database_url| {
-        let addr = get_available_address().unwrap();
+        let addr = get_available_address();
         let uri = format!("http://{}", addr).parse().unwrap();
         let token = CancellationToken::new();
 
@@ -69,10 +70,15 @@ fn block_on<F: Future>(future: F) -> F::Output {
     task::block_in_place(|| Handle::current().block_on(future))
 }
 
-fn get_available_address() -> Option<SocketAddr> {
-    (8081..65535)
-        .map(|port| SocketAddr::from(([0, 0, 0, 0], port)))
-        .find(|addr| TcpListener::bind(addr).is_ok())
+fn get_available_address() -> SocketAddr {
+    let mut rng = thread_rng();
+    loop {
+        let port = rng.gen_range(8081..65535);
+        let addr = SocketAddr::from(([0, 0, 0, 0], port));
+        if TcpListener::bind(addr).is_ok() {
+            return addr;
+        }
+    }
 }
 
 async fn wait_for_connection(uri: &Uri) {

@@ -12,7 +12,7 @@ use crate::auth::Auth;
 use crate::db::Database;
 
 #[cfg(test)]
-pub(crate) use self::proto::api as grpc;
+pub(crate) use proto::*;
 
 pub fn build_v1_service<A: Auth>(
     auth: A,
