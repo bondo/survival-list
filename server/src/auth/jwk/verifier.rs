@@ -4,8 +4,8 @@ use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, TokenData, Val
 use serde::Deserialize;
 
 use super::{
+    config::{self, JwkConfiguration},
     fetch_keys::JwkKey,
-    jwk::{self, JwkConfiguration},
 };
 
 #[derive(Debug, Deserialize)]
@@ -46,7 +46,7 @@ impl JwkVerifier {
     pub fn new(keys: Vec<JwkKey>) -> JwkVerifier {
         JwkVerifier {
             keys: keys_to_map(keys),
-            config: jwk::get_configuration(),
+            config: config::get_configuration(),
         }
     }
 

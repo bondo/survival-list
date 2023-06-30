@@ -4,8 +4,8 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 
 use super::{
+    config::{self, JwkConfiguration},
     get_max_age::get_max_age,
-    jwk::{self, JwkConfiguration},
 };
 
 #[derive(Debug, Deserialize)]
@@ -51,5 +51,5 @@ pub async fn fetch_keys_for_config(config: &JwkConfiguration) -> Result<JwkKeys>
 }
 
 pub async fn fetch_keys() -> Result<JwkKeys> {
-    fetch_keys_for_config(&jwk::get_configuration()).await
+    fetch_keys_for_config(&config::get_configuration()).await
 }

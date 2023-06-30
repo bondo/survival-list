@@ -11,9 +11,15 @@ use crate::{
     service::{build_ping_service, build_v1_service},
 };
 
-pub async fn start(addr: SocketAddr, database_url: &str) -> Result<()> {
+pub struct Options<A: Auth> {
+    pub addr: SocketAddr,
+    pub auth: A,
+    pub database_url: String,
+}
+
+pub async fn start<A: Auth>(options: Options<A>) -> Result<()> {
     info!("Creating database connection");
-    let database = Database::new(database_url)
+    let database = Database::new(&options.database_url)
         .await
         .context("should be able to connect to database")?;
 
@@ -23,11 +29,8 @@ pub async fn start(addr: SocketAddr, database_url: &str) -> Result<()> {
         .await
         .context("should be able to migrate database")?;
 
-    info!("Creating auth instance");
-    let auth = Auth::new().await;
-
     info!("Creating v1 service");
-    let v1_service = build_v1_service(&auth, &database);
+    let v1_service = build_v1_service(options.auth, &database);
 
     info!("Creating ping service");
     let ping_service = build_ping_service();
@@ -36,7 +39,7 @@ pub async fn start(addr: SocketAddr, database_url: &str) -> Result<()> {
     Server::builder()
         .add_service(v1_service)
         .add_service(ping_service)
-        .serve_with_shutdown(addr, create_signal())
+        .serve_with_shutdown(options.addr, create_signal())
         .await?;
 
     Ok(())

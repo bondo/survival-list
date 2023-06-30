@@ -1,3 +1,4 @@
+mod auth;
 mod postgres;
 mod server;
 mod v1;

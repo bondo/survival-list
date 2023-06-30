@@ -10,29 +10,37 @@ use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
 
 use crate::{
+    auth::Auth,
     server,
     service::grpc::ping::{api_client::ApiClient as PingClient, PingRequest},
 };
 
 use super::with_postgres_ready;
 
-pub fn with_server_ready<T, Fut>(f: T)
+pub fn with_server_ready<A, T, Fut>(auth: A, f: T)
 where
+    A: Auth + UnwindSafe,
     T: FnOnce(Uri) -> Fut + UnwindSafe,
     Fut: Future<Output = ()> + Send + 'static,
 {
     let timeout = Duration::from_secs(10);
     let start = Instant::now();
 
-    with_postgres_ready(|url| {
+    with_postgres_ready(|database_url| {
         let addr = get_available_address().unwrap();
         let uri = format!("http://{}", addr).parse().unwrap();
         let token = CancellationToken::new();
 
         let cloned_token = token.clone();
         let server_handle = tokio::spawn(async move {
+            let options = server::Options {
+                addr,
+                auth,
+                database_url,
+            };
+
             tokio::select! {
-                res = server::start(addr, &url) => res.unwrap(),
+                res = server::start(options) => res.unwrap(),
                 _ = cloned_token.cancelled() => (),
             }
         });
@@ -42,10 +50,12 @@ where
                 _ = wait_for_connection(&uri) => (),
                 _ = sleep(timeout - start.elapsed()) => panic!("Connection timeout after {:?}", start.elapsed()),
             }
-        });
 
-        block_on(async {
-            f(uri).await;
+            tokio::select! {
+                _ = f(uri) => (),
+                _ = sleep(timeout - start.elapsed()) => panic!("Test timeout after {:?}", start.elapsed()),
+            }
+
             token.cancel();
         });
 

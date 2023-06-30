@@ -4,6 +4,8 @@ use anyhow::{Context, Result};
 use dotenvy::dotenv;
 use tracing::info;
 
+use crate::{auth::AuthImpl, server::Options};
+
 mod auth;
 mod db;
 mod error;
@@ -33,7 +35,14 @@ async fn main() -> Result<()> {
         )
         });
 
-    server::start(addr, &database_url)
-        .await
-        .context("server startup error")
+    info!("Creating auth instance");
+    let auth = AuthImpl::new().await;
+
+    let options = Options {
+        addr,
+        auth,
+        database_url,
+    };
+
+    server::start(options).await.context("server startup error")
 }

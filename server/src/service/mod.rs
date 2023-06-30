@@ -14,14 +14,14 @@ use crate::db::Database;
 #[cfg(test)]
 pub(crate) use self::proto::api as grpc;
 
-pub fn build_v1_service(
-    auth: &Auth,
+pub fn build_v1_service<A: Auth>(
+    auth: A,
     database: &Database,
-) -> InterceptedService<ApiServerV1<ServiceV1>, Auth> {
+) -> InterceptedService<ApiServerV1<ServiceV1>, A> {
     let server = ApiServerV1::new(ServiceV1::new(database.to_owned()))
         .accept_compressed(CompressionEncoding::Gzip)
         .send_compressed(CompressionEncoding::Gzip);
-    InterceptedService::new(server, auth.to_owned())
+    InterceptedService::new(server, auth)
 }
 
 pub fn build_ping_service() -> ApiServerPing<ServicePing> {
