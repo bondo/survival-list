@@ -7,6 +7,14 @@ pub struct AuthStub {
     uid: Option<String>,
 }
 
+pub fn authenticated() -> AuthStub {
+    AuthStub::new(Some("abcdefg".to_owned()))
+}
+
+pub fn unauthenticated() -> AuthStub {
+    AuthStub::new(None)
+}
+
 impl AuthStub {
     pub fn new(uid: Option<String>) -> Self {
         Self { uid }
