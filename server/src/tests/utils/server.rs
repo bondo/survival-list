@@ -6,7 +6,7 @@ use std::{
 
 use futures_core::Future;
 use rand::{thread_rng, Rng};
-use tokio::{runtime::Handle, task, time::sleep};
+use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
 
@@ -16,7 +16,7 @@ use crate::{
     service::api::ping::{api_client::ApiClient as PingClient, PingRequest},
 };
 
-use super::with_postgres_ready;
+use super::{block_on, with_postgres_ready};
 
 pub fn with_server_ready<A, T, Fut>(auth: A, f: T)
 where
@@ -56,18 +56,13 @@ where
                 _ = f(uri) => (),
                 _ = sleep(timeout - start.elapsed()) => panic!("Test timeout after {:?}", start.elapsed()),
             }
-
-            token.cancel();
         });
 
+        token.cancel();
         async {
             server_handle.await.unwrap();
         }
     });
-}
-
-fn block_on<F: Future>(future: F) -> F::Output {
-    task::block_in_place(|| Handle::current().block_on(future))
 }
 
 fn get_available_address() -> SocketAddr {

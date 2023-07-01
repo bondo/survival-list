@@ -7,11 +7,13 @@ use std::{
 use dockertest::{waitfor::RunningWait, Composition, DockerTest, Image};
 use futures_util::FutureExt;
 use sqlx::postgres::PgPoolOptions;
-use tokio::{runtime::Handle, task, time::sleep};
+use tokio::time::sleep;
+
+use super::block_on;
 
 const POSTGRES_PASSWORD: &str = "postgres";
 
-pub fn with_postgres_ready<T, Fut>(f: T)
+pub(super) fn with_postgres_ready<T, Fut>(f: T)
 where
     T: FnOnce(String) -> Fut + UnwindSafe,
     Fut: Future<Output = ()> + Send + UnwindSafe + 'static,
@@ -61,10 +63,6 @@ where
 
         async {res.unwrap()}
     });
-}
-
-fn block_on<F: Future>(future: F) -> F::Output {
-    task::block_in_place(|| Handle::current().block_on(future))
 }
 
 async fn wait_for_connection(url: &str) {
