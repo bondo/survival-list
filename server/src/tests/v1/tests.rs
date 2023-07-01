@@ -1,6 +1,6 @@
 use test_log::test;
 
-use super::SuccessClient;
+use super::AuthenticatedClient;
 use crate::{
     service::{
         api::v1::{api_client::ApiClient, *},
@@ -28,7 +28,7 @@ fn it_requires_authentication() {
 #[test]
 fn it_can_handle_tasks() {
     with_server_ready(|uri| async {
-        let mut client = SuccessClient::connect(uri, "user uid").await;
+        let mut client = AuthenticatedClient::connect(uri).await;
 
         assert_eq!(client.get_tasks().await, vec![]);
 
@@ -128,7 +128,7 @@ fn it_can_handle_tasks() {
 #[test]
 fn it_can_handle_groups() {
     with_server_ready(|uri| async {
-        let mut client = SuccessClient::connect(uri, "user uid").await;
+        let mut client = AuthenticatedClient::connect(uri).await;
 
         assert_eq!(client.get_groups().await, vec![]);
 
@@ -186,7 +186,9 @@ fn it_can_handle_groups() {
 #[test]
 fn it_can_have_multiple_users() {
     with_server_ready(|uri| async {
-        let mut client = SuccessClient::connect(uri, "alice uid").await;
+        let mut client = AuthenticatedClient::connect(uri).await;
+
+        client.set_current_user_uid("alice uid");
 
         let alice = client
             .login(LoginRequest {
@@ -247,7 +249,8 @@ fn it_can_have_multiple_users() {
             }]
         );
 
-        client.set_authenticated_uid("bob uid");
+        client.set_current_user_uid("bob uid");
+
         let bob = client
             .login(LoginRequest {
                 name: "Bob".to_string(),

@@ -1,4 +1,4 @@
-mod success_client;
+mod authenticated_client;
 mod tests;
 
-pub(self) use success_client::SuccessClient;
+pub(self) use authenticated_client::AuthenticatedClient;
