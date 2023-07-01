@@ -399,6 +399,7 @@ impl Database {
                     base_tasks AS (
                         SELECT
                             t.id,
+                            t.created_at,
                             t.title,
                             (
                                 t.responsible_user_id = $1
@@ -484,6 +485,7 @@ impl Database {
                         UNION ALL
                         SELECT
                             et.id,
+                            et.created_at,
                             et.title,
                             et.is_responsible,
                             et.is_in_group,
@@ -534,6 +536,8 @@ impl Database {
                     (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
                     base_tasks bt
+                ORDER BY
+                    bt.created_at
             "#,
             user_id.0,
             RECURRENCE_MAX

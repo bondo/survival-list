@@ -60,6 +60,8 @@ impl Database {
                         ug.group_id = g.id
                 WHERE
                     ug.user_id = $1
+                ORDER BY
+                    g.created_at
             "#,
             user_id.0
         )

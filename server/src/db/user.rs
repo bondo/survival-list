@@ -65,6 +65,8 @@ impl Database {
                             viewer_groups.user_id = $1 AND
                             viewer_groups.group_id = $2
                     )
+                ORDER BY
+                    u.created_at
             "#,
             user_id.0,
             group_id.0

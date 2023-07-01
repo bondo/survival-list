@@ -11,16 +11,15 @@ use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
 
 use crate::{
-    auth::Auth,
     server,
     service::api::ping::{api_client::ApiClient as PingClient, PingRequest},
+    tests::utils::AuthStub,
 };
 
 use super::{block_on, with_postgres_ready};
 
-pub fn with_server_ready<A, T, Fut>(auth: A, f: T)
+pub(crate) fn with_server_ready<T, Fut>(f: T)
 where
-    A: Auth + UnwindSafe,
     T: FnOnce(Uri) -> Fut + UnwindSafe,
     Fut: Future<Output = ()> + Send + 'static,
 {
@@ -36,7 +35,7 @@ where
         let server_handle = tokio::spawn(async move {
             let options = server::Options {
                 addr,
-                auth,
+                auth: AuthStub,
                 database_url,
             };
 
