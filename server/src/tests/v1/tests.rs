@@ -365,3 +365,126 @@ fn it_can_have_multiple_users() {
         );
     });
 }
+
+#[test]
+fn it_can_change_between_recurrence_types() {
+    with_server_ready(|uri| async {
+        let mut client = AuthenticatedClient::connect(uri).await;
+        let user = client.login(LoginRequest::default()).await.user.unwrap();
+
+        let CreateTaskResponse { id: task_id, .. } = client
+            .create_task(CreateTaskRequest {
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: None,
+                ..Default::default()
+            })
+            .await;
+
+        assert_eq!(
+            client.get_tasks().await,
+            vec![GetTasksResponse {
+                id: task_id,
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: None,
+                responsible: Some(user.clone()),
+                can_update: true,
+                can_toggle: true,
+                can_delete: true,
+                ..Default::default()
+            }]
+        );
+
+        client
+            .update_task(UpdateTaskRequest {
+                id: task_id,
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: Some(update_task_request::Recurring::Checked(RecurringChecked {
+                    days: 1,
+                    months: 0,
+                })),
+                ..Default::default()
+            })
+            .await;
+
+        assert_eq!(
+            client.get_tasks().await,
+            vec![GetTasksResponse {
+                id: task_id,
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: Some(get_tasks_response::Recurring::Checked(RecurringChecked {
+                    days: 1,
+                    months: 0,
+                })),
+                responsible: Some(user.clone()),
+                can_update: true,
+                can_toggle: true,
+                can_delete: true,
+                ..Default::default()
+            }]
+        );
+
+        client
+            .update_task(UpdateTaskRequest {
+                id: task_id,
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: Some(update_task_request::Recurring::Every(
+                    RecurringEveryRequest { days: 1, months: 0 },
+                )),
+                ..Default::default()
+            })
+            .await;
+
+        assert_eq!(
+            client.get_tasks().await,
+            vec![GetTasksResponse {
+                id: task_id,
+                title: "My task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                recurring: Some(get_tasks_response::Recurring::Every(
+                    RecurringEveryResponse {
+                        days: 1,
+                        months: 0,
+                        num_reached_deadline: 0,
+                        num_ready_to_start: 6,
+                        num_reached_deadline_is_lower_bound: false,
+                        num_ready_to_start_is_lower_bound: true,
+                    }
+                )),
+                responsible: Some(user.clone()),
+                can_update: true,
+                can_toggle: true,
+                can_delete: true,
+                ..Default::default()
+            }]
+        );
+    });
+}
