@@ -1,13 +1,12 @@
 use test_log::test;
 
-use super::AuthenticatedClient;
-use crate::{
-    service::proto::{
-        api::v1::{api_client::ApiClient, *},
-        google::r#type::Date,
-    },
-    tests::utils::with_server_ready,
+use server::proto::{
+    api::v1::{api_client::ApiClient, *},
+    google::r#type::Date,
 };
+
+use super::AuthenticatedClient;
+use crate::utils::with_server_ready;
 
 #[test]
 fn it_requires_authentication() {

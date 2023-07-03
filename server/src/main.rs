@@ -4,19 +4,6 @@ use anyhow::Context;
 use dotenvy::dotenv;
 use tracing::info;
 
-pub(crate) use auth::{Auth, AuthExtension, AuthImpl};
-pub(crate) use db::Database;
-pub(crate) use error::{Error, Result};
-
-mod auth;
-mod db;
-mod error;
-mod server;
-mod service;
-
-#[cfg(test)]
-mod tests;
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     pretty_env_logger::init();
@@ -33,12 +20,12 @@ async fn main() -> anyhow::Result<()> {
         fs::read_to_string("/secrets/POSTGRES_CONNECTION/latest").unwrap_or_else(|_| {
             dotenv().ok();
             env::var("DATABASE_URL").expect(
-            "File /secrets/POSTGRES_CONNECTION/latest or environment variable DATABASE_URL missing",
-        )
+                "File /secrets/POSTGRES_CONNECTION/latest or environment variable DATABASE_URL missing",
+            )
         });
 
     info!("Creating auth instance");
-    let auth = AuthImpl::new().await;
+    let auth = server::AuthImpl::new().await;
 
     let options = server::Options {
         addr,

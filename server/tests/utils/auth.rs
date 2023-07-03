@@ -1,6 +1,6 @@
 use tonic::{service::Interceptor, Request, Status};
 
-use crate::{Auth, AuthExtension};
+use server::{Auth, AuthExtension};
 
 #[derive(Clone)]
 pub(crate) struct AuthStub;

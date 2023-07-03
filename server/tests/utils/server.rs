@@ -10,11 +10,8 @@ use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
 
-use crate::{
-    server,
-    service::proto::ping::v1::{ping_api_client::PingApiClient, PingRequest},
-    tests::utils::AuthStub,
-};
+use crate::utils::AuthStub;
+use server::proto::ping::v1::{ping_api_client::PingApiClient, PingRequest};
 
 use super::{block_on, with_postgres_ready};
 

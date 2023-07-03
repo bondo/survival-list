@@ -1,5 +1,5 @@
 mod ping;
-pub(crate) mod proto;
+pub mod proto;
 mod v1;
 
 use tonic::codegen::{CompressionEncoding, InterceptedService};
