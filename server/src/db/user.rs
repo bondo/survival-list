@@ -4,7 +4,7 @@ use futures_util::StreamExt;
 use std::fmt::Display;
 
 use super::{Database, GroupId};
-use crate::error::Error;
+use crate::Result;
 
 #[derive(Clone, Copy, Debug, sqlx::Type, PartialEq, Eq)]
 #[sqlx(transparent)]
@@ -41,7 +41,7 @@ impl Database {
         &self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> impl Stream<Item = Result<UserResult, Error>> + '_ {
+    ) -> impl Stream<Item = Result<UserResult>> + '_ {
         sqlx::query_as!(
             UserResult,
             r#"
@@ -78,7 +78,7 @@ impl Database {
         })
     }
 
-    pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId, Error> {
+    pub async fn upsert_user_id(&self, uid: &str) -> Result<UserId> {
         sqlx::query_scalar!(
             r#"
                 INSERT INTO users (
@@ -108,7 +108,7 @@ impl Database {
         uid: &str,
         name: &str,
         picture_url: Option<&str>,
-    ) -> Result<UserResult, Error> {
+    ) -> Result<UserResult> {
         sqlx::query_as!(
             UserResult,
             r#"

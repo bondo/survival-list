@@ -19,6 +19,8 @@ pub enum Error {
     PermissionDenied(&'static str),
 }
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 impl From<Error> for Status {
     fn from(value: Error) -> Self {
         match &value {

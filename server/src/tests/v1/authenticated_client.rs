@@ -1,7 +1,7 @@
 use tokio_stream::StreamExt;
 use tonic::{
     transport::{Channel, Uri},
-    IntoRequest, Request,
+    IntoRequest, Request, Status,
 };
 
 use crate::service::api::v1::{api_client::ApiClient, *};
@@ -73,7 +73,7 @@ impl AuthenticatedClient {
             .await
             .unwrap()
             .into_inner()
-            .collect::<Result<Vec<GetTasksResponse>, tonic::Status>>()
+            .collect::<std::result::Result<Vec<GetTasksResponse>, Status>>()
             .await
             .unwrap()
     }
@@ -114,7 +114,7 @@ impl AuthenticatedClient {
             .await
             .unwrap()
             .into_inner()
-            .collect::<Result<Vec<GetGroupsResponse>, tonic::Status>>()
+            .collect::<std::result::Result<Vec<GetGroupsResponse>, Status>>()
             .await
             .unwrap()
     }
@@ -129,7 +129,7 @@ impl AuthenticatedClient {
             .await
             .unwrap()
             .into_inner()
-            .collect::<Result<Vec<GetGroupParticipantsResponse>, tonic::Status>>()
+            .collect::<std::result::Result<Vec<GetGroupParticipantsResponse>, Status>>()
             .await
             .unwrap()
     }

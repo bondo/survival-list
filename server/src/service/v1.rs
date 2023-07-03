@@ -6,13 +6,12 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
 use crate::{
-    auth::AuthExtension,
     db::{
         CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
         TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
         TaskResponsible, TaskResult, UpdateTaskParams, UserId,
     },
-    error::Error,
+    AuthExtension, Error, Result,
 };
 
 use super::proto::{api::v1::*, google::r#type::Date as ProtoDate};
@@ -28,7 +27,7 @@ impl Service {
 }
 
 impl Service {
-    fn get_user_uid<T>(&self, request: &Request<T>) -> Result<String, Error> {
+    fn get_user_uid<T>(&self, request: &Request<T>) -> Result<String> {
         if let Some(auth) = request.extensions().get::<AuthExtension>() {
             Ok(auth.uid.clone())
         } else {
@@ -36,7 +35,7 @@ impl Service {
         }
     }
 
-    async fn get_user_id<T>(&self, request: &Request<T>) -> Result<UserId, Error> {
+    async fn get_user_id<T>(&self, request: &Request<T>) -> Result<UserId> {
         let uid = self.get_user_uid(request)?;
         self.db.upsert_user_id(&uid).await
     }
@@ -47,7 +46,7 @@ impl api_server::Api for Service {
     async fn login(
         &self,
         request: Request<LoginRequest>,
-    ) -> Result<Response<LoginResponse>, Status> {
+    ) -> std::result::Result<Response<LoginResponse>, Status> {
         let uid = self.get_user_uid(&request)?;
         let request = request.into_inner();
         let picture_url: Option<&str> = if request.picture_url.is_empty() {
@@ -73,7 +72,7 @@ impl api_server::Api for Service {
     async fn create_task(
         &self,
         request: Request<CreateTaskRequest>,
-    ) -> Result<Response<CreateTaskResponse>, Status> {
+    ) -> std::result::Result<Response<CreateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -114,7 +113,7 @@ impl api_server::Api for Service {
     async fn update_task(
         &self,
         request: Request<UpdateTaskRequest>,
-    ) -> Result<Response<UpdateTaskResponse>, Status> {
+    ) -> std::result::Result<Response<UpdateTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -156,7 +155,7 @@ impl api_server::Api for Service {
     async fn toggle_task_completed(
         &self,
         request: Request<ToggleTaskCompletedRequest>,
-    ) -> Result<Response<ToggleTaskCompletedResponse>, Status> {
+    ) -> std::result::Result<Response<ToggleTaskCompletedResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -181,7 +180,7 @@ impl api_server::Api for Service {
     async fn delete_task(
         &self,
         request: Request<DeleteTaskRequest>,
-    ) -> Result<Response<DeleteTaskResponse>, Status> {
+    ) -> std::result::Result<Response<DeleteTaskResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -193,11 +192,11 @@ impl api_server::Api for Service {
         Ok(Response::new(DeleteTaskResponse { id: id.into() }))
     }
 
-    type GetTasksStream = ReceiverStream<Result<GetTasksResponse, Status>>;
+    type GetTasksStream = ReceiverStream<std::result::Result<GetTasksResponse, Status>>;
     async fn get_tasks(
         &self,
         request: Request<GetTasksRequest>,
-    ) -> Result<Response<Self::GetTasksStream>, Status> {
+    ) -> std::result::Result<Response<Self::GetTasksStream>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let (tx, rx) = mpsc::channel(10);
 
@@ -243,7 +242,7 @@ impl api_server::Api for Service {
     async fn create_group(
         &self,
         request: Request<CreateGroupRequest>,
-    ) -> Result<Response<CreateGroupResponse>, Status> {
+    ) -> std::result::Result<Response<CreateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -262,11 +261,11 @@ impl api_server::Api for Service {
     async fn join_group(
         &self,
         request: Request<JoinGroupRequest>,
-    ) -> Result<Response<JoinGroupResponse>, Status> {
+    ) -> std::result::Result<Response<JoinGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
         let uid =
-            Uuid::parse_str(&request.uid).map_err(|_| Status::invalid_argument("Invalid uid"))?;
+            Uuid::parse_str(&request.uid).map_err(|_| Error::InvalidArgument("Invalid uid"))?;
 
         let group = self.db.join_group_by_uid(user_id, &uid).await?;
 
@@ -280,7 +279,7 @@ impl api_server::Api for Service {
     async fn update_group(
         &self,
         request: Request<UpdateGroupRequest>,
-    ) -> Result<Response<UpdateGroupResponse>, Status> {
+    ) -> std::result::Result<Response<UpdateGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -299,7 +298,7 @@ impl api_server::Api for Service {
     async fn leave_group(
         &self,
         request: Request<LeaveGroupRequest>,
-    ) -> Result<Response<LeaveGroupResponse>, Status> {
+    ) -> std::result::Result<Response<LeaveGroupResponse>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
 
@@ -311,11 +310,11 @@ impl api_server::Api for Service {
         Ok(Response::new(LeaveGroupResponse { id: id.into() }))
     }
 
-    type GetGroupsStream = ReceiverStream<Result<GetGroupsResponse, Status>>;
+    type GetGroupsStream = ReceiverStream<std::result::Result<GetGroupsResponse, Status>>;
     async fn get_groups(
         &self,
         request: Request<GetGroupsRequest>,
-    ) -> Result<Response<Self::GetGroupsStream>, Status> {
+    ) -> std::result::Result<Response<Self::GetGroupsStream>, Status> {
         let user_id = self.get_user_id(&request).await?;
         let (tx, rx) = mpsc::channel(10);
 
@@ -341,12 +340,13 @@ impl api_server::Api for Service {
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
-    type GetGroupParticipantsStream = ReceiverStream<Result<GetGroupParticipantsResponse, Status>>;
+    type GetGroupParticipantsStream =
+        ReceiverStream<std::result::Result<GetGroupParticipantsResponse, Status>>;
     async fn get_group_participants(
         &self,
         request: Request<GetGroupParticipantsRequest>,
-    ) -> Result<Response<Self::GetGroupParticipantsStream>, Status> {
-        let user_id = self.get_user_id(&request).await.map_err(Status::from)?;
+    ) -> std::result::Result<Response<Self::GetGroupParticipantsStream>, Status> {
+        let user_id = self.get_user_id(&request).await?;
         let request = request.into_inner();
         let (tx, rx) = mpsc::channel(10);
 
@@ -378,11 +378,9 @@ impl api_server::Api for Service {
 impl TryFrom<(Option<ProtoDate>, Option<ProtoDate>)> for TaskPeriod {
     type Error = Error;
 
-    fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self, Self::Error> {
-        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>, Error> {
-            date.map(TryInto::try_into)
-                .transpose()
-                .map_err(Error::InvalidArgument)
+    fn try_from((start, end): (Option<ProtoDate>, Option<ProtoDate>)) -> Result<Self> {
+        fn convert(date: Option<ProtoDate>) -> Result<Option<Date>> {
+            date.map(TryInto::try_into).transpose()
         }
         let start = convert(start)?;
         let end = convert(end)?;
@@ -403,7 +401,7 @@ impl From<TaskEstimate> for Duration {
 impl TryFrom<Duration> for TaskEstimate {
     type Error = Error;
 
-    fn try_from(value: Duration) -> Result<Self, Self::Error> {
+    fn try_from(value: Duration) -> Result<Self> {
         if value.days < 0 || value.hours < 0 || value.minutes < 0 {
             return Err(Error::InvalidArgument(
                 "Negative days, hours or minutes in estimate not supported",
@@ -457,16 +455,16 @@ impl From<TaskRecurrenceEvery> for RecurringEveryResponse {
 }
 
 impl TryFrom<RecurringEveryRequest> for TaskRecurrenceFrequency {
-    type Error = Status;
+    type Error = Error;
 
-    fn try_from(value: RecurringEveryRequest) -> Result<Self, Self::Error> {
+    fn try_from(value: RecurringEveryRequest) -> Result<Self> {
         if value.days < 0 || value.months < 0 {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Negative days or months in RecurringEveryRequest not supported",
             ));
         }
         if value.days == 0 && value.months == 0 {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Either days or months must be greater in 0 in RecurringEveryRequest",
             ));
         }
@@ -487,16 +485,16 @@ impl From<TaskRecurrenceFrequency> for RecurringChecked {
 }
 
 impl TryFrom<RecurringChecked> for TaskRecurrenceFrequency {
-    type Error = Status;
+    type Error = Error;
 
-    fn try_from(value: RecurringChecked) -> Result<Self, Self::Error> {
+    fn try_from(value: RecurringChecked) -> Result<Self> {
         if value.days < 0 || value.months < 0 {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Negative days or months in RecurringChecked not supported",
             ));
         }
         if value.days == 0 && value.months == 0 {
-            return Err(Status::invalid_argument(
+            return Err(Error::InvalidArgument(
                 "Either days or months must be greater in 0 in RecurringChecked",
             ));
         }

@@ -1,7 +1,7 @@
 use futures_core::future::BoxFuture;
-use sqlx::{self, migrate::MigrateError, postgres::PgPoolOptions, PgPool, Postgres};
+use sqlx::{self, postgres::PgPoolOptions, PgPool, Postgres};
 
-use crate::error::Error;
+use crate::Result;
 
 use super::Transaction;
 
@@ -11,18 +11,19 @@ pub struct Database {
 }
 
 impl Database {
-    pub async fn new(url: &str) -> Result<Self, sqlx::Error> {
+    pub async fn new(url: &str) -> anyhow::Result<Self> {
         let pool = PgPoolOptions::new().connect(url).await?;
         Ok(Database { pool })
     }
 
-    pub async fn migrate(&self) -> Result<(), MigrateError> {
-        sqlx::migrate!().run(&self.pool).await
+    pub async fn migrate(&self) -> anyhow::Result<()> {
+        sqlx::migrate!().run(&self.pool).await?;
+        Ok(())
     }
 
-    pub async fn in_transaction<'c, R, F>(&'c self, f: F) -> Result<R, Error>
+    pub async fn in_transaction<'c, R, F>(&'c self, f: F) -> Result<R>
     where
-        F: for<'t> FnOnce(&'t mut Transaction<'c>) -> BoxFuture<'t, Result<R, Error>>,
+        F: for<'t> FnOnce(&'t mut Transaction<'c>) -> BoxFuture<'t, Result<R>>,
     {
         let mut tx = Transaction::begin(&self.pool).await?;
         let result = f(&mut tx).await;
@@ -38,12 +39,11 @@ impl<'c> sqlx::Executor<'c> for &Database {
         query: E,
     ) -> futures_core::stream::BoxStream<
         'e,
-        std::result::Result<
+        sqlx::Result<
             sqlx::Either<
                 <Self::Database as sqlx::Database>::QueryResult,
                 <Self::Database as sqlx::Database>::Row,
             >,
-            sqlx::Error,
         >,
     >
     where
@@ -56,10 +56,7 @@ impl<'c> sqlx::Executor<'c> for &Database {
     fn fetch_optional<'e, 'q: 'e, E: 'q>(
         self,
         query: E,
-    ) -> BoxFuture<
-        'e,
-        std::result::Result<Option<<Self::Database as sqlx::Database>::Row>, sqlx::Error>,
-    >
+    ) -> BoxFuture<'e, sqlx::Result<Option<<Self::Database as sqlx::Database>::Row>>>
     where
         'c: 'e,
         E: sqlx::Execute<'q, Self::Database>,
@@ -71,13 +68,7 @@ impl<'c> sqlx::Executor<'c> for &Database {
         self,
         sql: &'q str,
         parameters: &'e [<Self::Database as sqlx::Database>::TypeInfo],
-    ) -> BoxFuture<
-        'e,
-        std::result::Result<
-            <Self::Database as sqlx::database::HasStatement<'q>>::Statement,
-            sqlx::Error,
-        >,
-    >
+    ) -> BoxFuture<'e, sqlx::Result<<Self::Database as sqlx::database::HasStatement<'q>>::Statement>>
     where
         'c: 'e,
     {
@@ -87,7 +78,7 @@ impl<'c> sqlx::Executor<'c> for &Database {
     fn describe<'e, 'q: 'e>(
         self,
         sql: &'q str,
-    ) -> BoxFuture<'e, std::result::Result<sqlx::Describe<Self::Database>, sqlx::Error>>
+    ) -> BoxFuture<'e, sqlx::Result<sqlx::Describe<Self::Database>>>
     where
         'c: 'e,
     {

@@ -12,7 +12,7 @@ use sqlx::{
 use std::{cmp::Ordering, fmt::Display};
 
 use super::{Database, GroupId, Transaction, UserId};
-use crate::error::Error;
+use crate::{Error, Result};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -65,7 +65,7 @@ struct TaskRawResult {
 }
 
 impl TaskRawResult {
-    fn is_friend_task(&self) -> Result<bool, Error> {
+    fn is_friend_task(&self) -> Result<bool> {
         let Some(is_responsible) = self.is_responsible else {
             return Err(Error::InternalState("Unexpected null value"));
         };
@@ -78,7 +78,7 @@ impl TaskRawResult {
     // Allow update
     // - if not recurrence
     // - if this is the current task
-    fn can_update(&self) -> Result<bool, Error> {
+    fn can_update(&self) -> Result<bool> {
         if self.is_friend_task()? {
             Ok(false)
         } else {
@@ -93,7 +93,7 @@ impl TaskRawResult {
     // - if this is the first recurrence
     // - if this is the current task
     // - if this is the previous task
-    fn can_toggle(&self) -> Result<bool, Error> {
+    fn can_toggle(&self) -> Result<bool> {
         if self.is_friend_task()? {
             return Ok(false);
         }
@@ -109,7 +109,7 @@ impl TaskRawResult {
         }
     }
 
-    fn can_delete(&self) -> Result<bool, Error> {
+    fn can_delete(&self) -> Result<bool> {
         self.can_update()
     }
 
@@ -145,7 +145,7 @@ static RECURRENCE_MAX: i32 = 5;
 impl TryFrom<TaskRawResult> for TaskResult {
     type Error = Error;
 
-    fn try_from(value: TaskRawResult) -> Result<Self, Self::Error> {
+    fn try_from(value: TaskRawResult) -> Result<Self> {
         let can_update = value.can_update()?;
         let can_toggle = value.can_toggle()?;
         let can_delete = value.can_delete()?;
@@ -249,7 +249,7 @@ impl TaskPeriod {
 impl TryFrom<(Option<Date>, Option<Date>)> for TaskPeriod {
     type Error = Error;
 
-    fn try_from(value: (Option<Date>, Option<Date>)) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: (Option<Date>, Option<Date>)) -> Result<Self> {
         match value {
             (Some(start), None) => Ok(TaskPeriod::OnlyStart(start)),
             (None, Some(end)) => Ok(TaskPeriod::OnlyEnd(end)),
@@ -289,7 +289,7 @@ pub struct TaskEstimate {
 impl TryFrom<PgInterval> for TaskEstimate {
     type Error = Error;
 
-    fn try_from(value: PgInterval) -> Result<Self, Self::Error> {
+    fn try_from(value: PgInterval) -> Result<Self> {
         if value.months != 0 {
             return Err(Error::InternalState("Unexpected month value in estimate"));
         }
@@ -391,7 +391,7 @@ pub struct UpdateTaskParams {
 }
 
 impl Database {
-    pub fn get_tasks(&self, user_id: UserId) -> impl Stream<Item = Result<TaskResult, Error>> + '_ {
+    pub fn get_tasks(&self, user_id: UserId) -> impl Stream<Item = Result<TaskResult>> + '_ {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -546,7 +546,7 @@ impl Database {
         .map(|v| v.context("Error loading tasks")?.try_into())
     }
 
-    pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult, Error> {
+    pub async fn create_task(&self, params: CreateTaskParams) -> Result<TaskResult> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 tx.validate_responsible_and_group(
@@ -579,7 +579,7 @@ impl Database {
         .await
     }
 
-    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult, Error> {
+    pub async fn update_task(&self, params: UpdateTaskParams) -> Result<TaskResult> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 tx.validate_responsible_and_group(
@@ -654,7 +654,7 @@ impl Database {
         user_id: UserId,
         task_id: TaskId,
         is_completed: bool,
-    ) -> Result<ToggleResult, Error> {
+    ) -> Result<ToggleResult> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
@@ -801,7 +801,7 @@ impl Database {
         .await
     }
 
-    pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId, Error> {
+    pub async fn delete_task(&self, user_id: UserId, task_id: TaskId) -> Result<TaskId> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let task = tx
@@ -835,7 +835,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         user_id: UserId,
         task_id: TaskId,
-    ) -> Result<TaskRawResult, sqlx::Error> {
+    ) -> sqlx::Result<TaskRawResult> {
         sqlx::query_as!(
             TaskRawResult,
             r#"
@@ -962,7 +962,7 @@ impl<'c> Transaction<'c> {
         user_id: UserId,
         responsible_id: UserId,
         group_id: Option<GroupId>,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         if let Some(group_id) = group_id {
             let is_valid = sqlx::query_scalar!(
                 r#"
@@ -1011,7 +1011,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId, Error> {
+    async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId> {
         sqlx::query_scalar!(
             r#"
                 INSERT INTO tasks (
@@ -1046,7 +1046,7 @@ impl<'c> Transaction<'c> {
         .map_err(Into::into)
     }
 
-    async fn update_task_internal(&mut self, params: &UpdateTaskParams) -> Result<TaskId, Error> {
+    async fn update_task_internal(&mut self, params: &UpdateTaskParams) -> Result<TaskId> {
         sqlx::query_scalar!(
             r#"
                 UPDATE
@@ -1096,7 +1096,7 @@ impl<'c> Transaction<'c> {
         user_id: UserId,
         task_id: TaskId,
         is_completed: bool,
-    ) -> Result<Option<PrimitiveDateTime>, Error> {
+    ) -> Result<Option<PrimitiveDateTime>> {
         sqlx::query_scalar!(
             r#"
                 UPDATE
@@ -1139,7 +1139,7 @@ impl<'c> Transaction<'c> {
         task_id: TaskId,
         frequency: TaskRecurrenceFrequency,
         is_every: bool,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         sqlx::query!(
             r#"
                 WITH
@@ -1181,7 +1181,7 @@ impl<'c> Transaction<'c> {
         recurrence_id: RecurrenceId,
         frequency: TaskRecurrenceFrequency,
         is_every: bool,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1202,10 +1202,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    async fn unset_recurrence_internal(
-        &mut self,
-        recurrence_id: RecurrenceId,
-    ) -> Result<(), Error> {
+    async fn unset_recurrence_internal(&mut self, recurrence_id: RecurrenceId) -> Result<()> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1224,10 +1221,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    async fn delete_recurrence_internal(
-        &mut self,
-        recurrence_id: RecurrenceId,
-    ) -> Result<(), Error> {
+    async fn delete_recurrence_internal(&mut self, recurrence_id: RecurrenceId) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -1243,7 +1237,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    async fn create_next_recurrence_internal(&mut self, task_id: TaskId) -> Result<TaskId, Error> {
+    async fn create_next_recurrence_internal(&mut self, task_id: TaskId) -> Result<TaskId> {
         // is_every: add frequency to start and end
         // !is_every: add frequency to start and end + (today - coalesce(start, end))
         sqlx::query_scalar!(
@@ -1321,7 +1315,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         previous_task_id: TaskId,
         current_task_id: TaskId,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -1340,11 +1334,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    async fn delete_task_internal(
-        &mut self,
-        user_id: UserId,
-        task_id: TaskId,
-    ) -> Result<TaskId, Error> {
+    async fn delete_task_internal(&mut self, user_id: UserId, task_id: TaskId) -> Result<TaskId> {
         sqlx::query_scalar!(
             r#"
                 DELETE FROM

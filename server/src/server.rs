@@ -1,14 +1,13 @@
 use std::net::SocketAddr;
 
-use anyhow::{Context, Result};
+use anyhow::Context;
 use tokio::signal;
 use tonic::transport::Server;
 use tracing::info;
 
 use crate::{
-    auth::Auth,
-    db::Database,
     service::{build_ping_service, build_v1_service},
+    Auth, Database,
 };
 
 pub struct Options<A: Auth> {
@@ -17,7 +16,7 @@ pub struct Options<A: Auth> {
     pub database_url: String,
 }
 
-pub async fn start<A: Auth>(options: Options<A>) -> Result<()> {
+pub async fn start<A: Auth>(options: Options<A>) -> anyhow::Result<()> {
     info!("Creating database connection");
     let database = Database::new(&options.database_url)
         .await

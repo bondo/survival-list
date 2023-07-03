@@ -5,7 +5,7 @@ use sqlx::types::Uuid;
 use std::fmt::Display;
 
 use super::{Database, Transaction, UserId};
-use crate::error::Error;
+use crate::{Error, Result};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
 #[sqlx(transparent)]
@@ -42,10 +42,7 @@ pub struct DeleteResult {
 }
 
 impl Database {
-    pub fn get_user_groups(
-        &self,
-        user_id: UserId,
-    ) -> impl Stream<Item = Result<GroupResult, Error>> + '_ {
+    pub fn get_user_groups(&self, user_id: UserId) -> impl Stream<Item = Result<GroupResult>> + '_ {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -69,11 +66,7 @@ impl Database {
         .map(|v| v.context("Error loading user groups").map_err(Into::into))
     }
 
-    pub async fn create_and_join_group(
-        &self,
-        user_id: UserId,
-        title: &str,
-    ) -> Result<GroupResult, Error> {
+    pub async fn create_and_join_group(&self, user_id: UserId, title: &str) -> Result<GroupResult> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let group = tx.create_group(title).await?;
@@ -86,11 +79,7 @@ impl Database {
         .await
     }
 
-    pub async fn join_group_by_uid(
-        &self,
-        user_id: UserId,
-        uid: &Uuid,
-    ) -> Result<GroupResult, Error> {
+    pub async fn join_group_by_uid(&self, user_id: UserId, uid: &Uuid) -> Result<GroupResult> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 let group = tx.get_group_by_uid(uid).await?;
@@ -108,7 +97,7 @@ impl Database {
         user_id: UserId,
         group_id: GroupId,
         title: &str,
-    ) -> Result<GroupResult, Error> {
+    ) -> Result<GroupResult> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -141,7 +130,7 @@ impl Database {
         .map_err(Into::into)
     }
 
-    pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId, Error> {
+    pub async fn leave_group(&self, user_id: UserId, group_id: GroupId) -> Result<GroupId> {
         self.in_transaction(|tx| {
             Box::pin(async {
                 // Unset task group where viewer is responsible
@@ -165,7 +154,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM
@@ -187,7 +176,7 @@ impl<'c> Transaction<'c> {
         &mut self,
         group_id: GroupId,
         responsible_id: UserId,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         sqlx::query!(
             r#"
                 UPDATE
@@ -207,7 +196,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    pub async fn create_group(&mut self, title: &str) -> Result<GroupResult, Error> {
+    pub async fn create_group(&mut self, title: &str) -> Result<GroupResult> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -230,7 +219,7 @@ impl<'c> Transaction<'c> {
         .map_err(Into::into)
     }
 
-    pub async fn get_group_by_uid(&mut self, uid: &Uuid) -> Result<GroupResult, Error> {
+    pub async fn get_group_by_uid(&mut self, uid: &Uuid) -> Result<GroupResult> {
         sqlx::query_as!(
             GroupResult,
             r#"
@@ -250,7 +239,7 @@ impl<'c> Transaction<'c> {
         .map_err(|_| Error::NotFound("Group not found"))
     }
 
-    pub async fn join_group(&mut self, user_id: UserId, group_id: GroupId) -> Result<(), Error> {
+    pub async fn join_group(&mut self, user_id: UserId, group_id: GroupId) -> Result<()> {
         sqlx::query!(
             r#"
                 INSERT INTO users_groups (
@@ -272,7 +261,7 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
-    pub async fn delete_group_if_empty(&mut self, group_id: GroupId) -> Result<(), Error> {
+    pub async fn delete_group_if_empty(&mut self, group_id: GroupId) -> Result<()> {
         sqlx::query!(
             r#"
                 DELETE FROM

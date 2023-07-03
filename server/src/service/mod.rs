@@ -8,8 +8,7 @@ use self::ping::Service as ServicePing;
 use self::proto::api::ping::api_server::ApiServer as ApiServerPing;
 use self::proto::api::v1::api_server::ApiServer as ApiServerV1;
 use self::v1::Service as ServiceV1;
-use crate::auth::Auth;
-use crate::db::Database;
+use crate::{Auth, Database};
 
 #[cfg(test)]
 pub(crate) use proto::*;

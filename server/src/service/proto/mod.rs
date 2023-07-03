@@ -2,6 +2,8 @@ pub mod google {
     pub mod r#type {
         include!("google.r#type.rs");
 
+        use crate::{Error, Result};
+
         impl From<sqlx::types::time::Date> for Date {
             fn from(value: sqlx::types::time::Date) -> Self {
                 Self {
@@ -13,15 +15,24 @@ pub mod google {
         }
 
         impl TryFrom<Date> for sqlx::types::time::Date {
-            type Error = &'static str;
+            type Error = Error;
 
-            fn try_from(value: Date) -> Result<Self, Self::Error> {
-                let month: u8 = value.month.try_into().or(Err("Month value out of range"))?;
-                let month = month.try_into().or(Err("Month value out of range"))?;
+            fn try_from(value: Date) -> Result<Self> {
+                let month: u8 = value
+                    .month
+                    .try_into()
+                    .or(Err(Error::InvalidArgument("Month value out of range")))?;
+                let month = month
+                    .try_into()
+                    .or(Err(Error::InvalidArgument("Month value out of range")))?;
 
-                let day = value.day.try_into().or(Err("Day value out of range"))?;
+                let day = value
+                    .day
+                    .try_into()
+                    .or(Err(Error::InvalidArgument("Day value out of range")))?;
 
-                Self::from_calendar_date(value.year, month, day).or(Err("Invalid date"))
+                Self::from_calendar_date(value.year, month, day)
+                    .or(Err(Error::InvalidArgument("Invalid date")))
             }
         }
     }

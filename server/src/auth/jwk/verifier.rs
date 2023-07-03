@@ -5,6 +5,7 @@ use serde::Deserialize;
 
 use super::{
     config::{self, JwkConfiguration},
+    error::{JwkResult, JwkVerificationError},
     fetch_keys::JwkKey,
 };
 
@@ -20,12 +21,6 @@ pub struct Claims {
     pub sub: String,
     // Issued at -- as epoch seconds
     pub iat: i64,
-}
-
-enum VerificationError {
-    InvalidSignature,
-    KeyDecodeError,
-    UnknownKeyAlgorithm,
 }
 
 #[derive(Debug)]
@@ -75,25 +70,20 @@ impl JwkVerifier {
         self.keys.get(&key_id)
     }
 
-    fn decode_token_with_key(
-        &self,
-        key: &JwkKey,
-        token: &str,
-    ) -> Result<TokenData<Claims>, VerificationError> {
-        let algorithm = match Algorithm::from_str(&key.alg) {
-            Ok(alg) => alg,
-            Err(_error) => return Err(VerificationError::UnknownKeyAlgorithm),
-        };
+    fn decode_token_with_key(&self, key: &JwkKey, token: &str) -> JwkResult<TokenData<Claims>> {
+        let algorithm =
+            Algorithm::from_str(&key.alg).map_err(|_| JwkVerificationError::UnknownKeyAlgorithm)?;
 
         let mut validation = Validation::new(algorithm);
         validation.set_audience(&[self.config.audience]);
         validation.set_issuer(&[self.config.issuer]);
 
-        let key = match DecodingKey::from_rsa_components(&key.n, &key.e) {
-            Ok(key) => key,
-            Err(_) => return Err(VerificationError::KeyDecodeError),
-        };
+        let key = DecodingKey::from_rsa_components(&key.n, &key.e)
+            .map_err(|_| JwkVerificationError::KeyDecodeError)?;
 
-        decode::<Claims>(token, &key, &validation).map_err(|_| VerificationError::InvalidSignature)
+        let data = decode::<Claims>(token, &key, &validation)
+            .map_err(|_| JwkVerificationError::InvalidSignature)?;
+
+        Ok(data)
     }
 }

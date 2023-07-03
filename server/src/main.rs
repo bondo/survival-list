@@ -1,10 +1,12 @@
 use std::{env, fs};
 
-use anyhow::{Context, Result};
+use anyhow::Context;
 use dotenvy::dotenv;
 use tracing::info;
 
-use crate::{auth::AuthImpl, server::Options};
+pub(crate) use auth::{Auth, AuthExtension, AuthImpl};
+pub(crate) use db::Database;
+pub(crate) use error::{Error, Result};
 
 mod auth;
 mod db;
@@ -16,7 +18,7 @@ mod service;
 mod tests;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> anyhow::Result<()> {
     pretty_env_logger::init();
 
     let port = std::env::var("PORT")
@@ -38,7 +40,7 @@ async fn main() -> Result<()> {
     info!("Creating auth instance");
     let auth = AuthImpl::new().await;
 
-    let options = Options {
+    let options = server::Options {
         addr,
         auth,
         database_url,
