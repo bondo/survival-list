@@ -10,4 +10,4 @@ See [server/README.md](./server/README.md)
 
 ## Proto
 
-To lint, `cd proto && npx buf lint`
+To lint, `cd proto && yarn buf lint`

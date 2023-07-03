@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package api.ping;
+package ping.v1;
 
-service API {
+service PingAPI {
     rpc Ping (PingRequest) returns (PingResponse);
 }
 

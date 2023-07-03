@@ -1,17 +1,14 @@
 mod ping;
-mod proto;
+pub(crate) mod proto;
 mod v1;
 
 use tonic::codegen::{CompressionEncoding, InterceptedService};
 
 use self::ping::Service as ServicePing;
-use self::proto::api::ping::api_server::ApiServer as ApiServerPing;
 use self::proto::api::v1::api_server::ApiServer as ApiServerV1;
+use self::proto::ping::v1::ping_api_server::PingApiServer;
 use self::v1::Service as ServiceV1;
 use crate::{Auth, Database};
-
-#[cfg(test)]
-pub(crate) use proto::*;
 
 pub fn build_v1_service<A: Auth>(
     auth: A,
@@ -23,8 +20,8 @@ pub fn build_v1_service<A: Auth>(
     InterceptedService::new(server, auth)
 }
 
-pub fn build_ping_service() -> ApiServerPing<ServicePing> {
-    ApiServerPing::new(ServicePing {})
+pub fn build_ping_service() -> PingApiServer<ServicePing> {
+    PingApiServer::new(ServicePing {})
         .accept_compressed(CompressionEncoding::Gzip)
         .send_compressed(CompressionEncoding::Gzip)
 }

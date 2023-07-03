@@ -2,7 +2,7 @@ use test_log::test;
 
 use super::AuthenticatedClient;
 use crate::{
-    service::{
+    service::proto::{
         api::v1::{api_client::ApiClient, *},
         google::r#type::Date,
     },

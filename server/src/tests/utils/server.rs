@@ -12,7 +12,7 @@ use tonic::transport::{Channel, Uri};
 
 use crate::{
     server,
-    service::api::ping::{api_client::ApiClient as PingClient, PingRequest},
+    service::proto::ping::v1::{ping_api_client::PingApiClient, PingRequest},
     tests::utils::AuthStub,
 };
 
@@ -88,7 +88,7 @@ async fn is_server_ready(uri: &Uri) -> bool {
             return false;
     };
 
-    PingClient::new(channel)
+    PingApiClient::new(channel)
         .ping(PingRequest {})
         .await
         .is_ok_and(|res| res.into_inner().message == "pong")

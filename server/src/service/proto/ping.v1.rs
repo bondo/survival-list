@@ -8,15 +8,15 @@ pub struct PingResponse {
     pub message: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
-pub mod api_client {
+pub mod ping_api_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct ApiClient<T> {
+    pub struct PingApiClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl ApiClient<tonic::transport::Channel> {
+    impl PingApiClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -27,7 +27,7 @@ pub mod api_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> ApiClient<T>
+    impl<T> PingApiClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -45,7 +45,7 @@ pub mod api_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> ApiClient<InterceptedService<T, F>>
+        ) -> PingApiClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -59,7 +59,7 @@ pub mod api_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            ApiClient::new(InterceptedService::new(inner, interceptor))
+            PingApiClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -106,27 +106,27 @@ pub mod api_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/api.ping.API/Ping");
+            let path = http::uri::PathAndQuery::from_static("/ping.v1.PingAPI/Ping");
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("api.ping.API", "Ping"));
+            req.extensions_mut().insert(GrpcMethod::new("ping.v1.PingAPI", "Ping"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod api_server {
+pub mod ping_api_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with ApiServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with PingApiServer.
     #[async_trait]
-    pub trait Api: Send + Sync + 'static {
+    pub trait PingApi: Send + Sync + 'static {
         async fn ping(
             &self,
             request: tonic::Request<super::PingRequest>,
         ) -> std::result::Result<tonic::Response<super::PingResponse>, tonic::Status>;
     }
     #[derive(Debug)]
-    pub struct ApiServer<T: Api> {
+    pub struct PingApiServer<T: PingApi> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
@@ -134,7 +134,7 @@ pub mod api_server {
         max_encoding_message_size: Option<usize>,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: Api> ApiServer<T> {
+    impl<T: PingApi> PingApiServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -186,9 +186,9 @@ pub mod api_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for ApiServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for PingApiServer<T>
     where
-        T: Api,
+        T: PingApi,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -204,10 +204,10 @@ pub mod api_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/api.ping.API/Ping" => {
+                "/ping.v1.PingAPI/Ping" => {
                     #[allow(non_camel_case_types)]
-                    struct PingSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::PingRequest>
+                    struct PingSvc<T: PingApi>(pub Arc<T>);
+                    impl<T: PingApi> tonic::server::UnaryService<super::PingRequest>
                     for PingSvc<T> {
                         type Response = super::PingResponse;
                         type Future = BoxFuture<
@@ -261,7 +261,7 @@ pub mod api_server {
             }
         }
     }
-    impl<T: Api> Clone for ApiServer<T> {
+    impl<T: PingApi> Clone for PingApiServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -273,7 +273,7 @@ pub mod api_server {
             }
         }
     }
-    impl<T: Api> Clone for _Inner<T> {
+    impl<T: PingApi> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(Arc::clone(&self.0))
         }
@@ -283,7 +283,7 @@ pub mod api_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: Api> tonic::server::NamedService for ApiServer<T> {
-        const NAME: &'static str = "api.ping.API";
+    impl<T: PingApi> tonic::server::NamedService for PingApiServer<T> {
+        const NAME: &'static str = "ping.v1.PingAPI";
     }
 }

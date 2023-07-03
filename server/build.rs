@@ -18,9 +18,9 @@ async fn main() -> Result<(), Error> {
         .out_dir("src/service/proto")
         .compile(
             &[
-                "../proto/api/ping/api.proto",
                 "../proto/api/v1/api.proto",
                 "../proto/google/type/date.proto",
+                "../proto/ping/v1/ping.proto",
             ],
             &["../proto/"],
         )?;

@@ -4,7 +4,7 @@ use tonic::{
     IntoRequest, Request, Status,
 };
 
-use crate::service::api::v1::{api_client::ApiClient, *};
+use crate::service::proto::api::v1::{api_client::ApiClient, *};
 
 pub(super) struct AuthenticatedClient {
     client: ApiClient<Channel>,
