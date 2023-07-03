@@ -1,6 +1,6 @@
 # Use the official Rust image.
 # https://hub.docker.com/_/rust
-FROM rust:1.69.0-alpine3.17 as build
+FROM rust:1.70.0-alpine3.18 as build
 
 RUN apk add --no-cache musl-dev
 
@@ -18,7 +18,7 @@ RUN cargo clippy --all-targets --all-features
 # Install production dependencies and build a release artifact.
 RUN cargo build --release
 
-FROM alpine:3.17
+FROM alpine:3.18
 
 WORKDIR /usr/local/bin
 COPY --from=build /usr/src/app/target/release/server .
