@@ -31,6 +31,16 @@ class ShortDuration extends Equatable {
     );
   }
 
+  int compareTo(ShortDuration other) {
+    if (days != other.days) {
+      return days.compareTo(other.days);
+    } else if (hours != other.hours) {
+      return hours.compareTo(other.hours);
+    } else {
+      return minutes.compareTo(other.minutes);
+    }
+  }
+
   bool get isEmpty => days == 0 && hours == 0 && minutes == 0;
 
   @override

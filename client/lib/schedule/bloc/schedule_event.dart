@@ -33,6 +33,15 @@ class ScheduleFilterChanged extends ScheduleEvent {
   List<Object> get props => [filter];
 }
 
+class ScheduleOrderChanged extends ScheduleEvent {
+  const ScheduleOrderChanged(this.order);
+
+  final ScheduleViewOrder order;
+
+  @override
+  List<Object> get props => [order];
+}
+
 class ScheduleLogoutRequested extends ScheduleEvent {
   const ScheduleLogoutRequested();
 }

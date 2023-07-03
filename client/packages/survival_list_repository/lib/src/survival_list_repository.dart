@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:generated_grpc_api/api/v1/api.pbgrpc.dart' as api;
@@ -118,6 +119,7 @@ class SurvivalListRepository {
 
     _pendingItemsResponse = _client.getTasks(api.GetTasksRequest());
     final result = HashMap<int, Item>();
+    final random = Random();
     _pendingItemsResponse!
         .map(
       (response) => Item(
@@ -147,6 +149,7 @@ class SurvivalListRepository {
         canToggle: response.canToggle,
         canDelete: response.canDelete,
         isFriendTask: response.isFriendTask,
+        randSortValue: random.nextDouble(),
       ),
     )
         .listen(
@@ -254,7 +257,9 @@ class SurvivalListRepository {
               : null,
         ),
       );
-      _upsertItem(_parseUpdateTaskResponse(response));
+      _upsertItem(
+        _parseUpdateTaskResponse(response, oldItem.randSortValue),
+      );
     } catch (e) {
       _upsertItem(oldItem);
       rethrow;
@@ -292,7 +297,9 @@ class SurvivalListRepository {
         _itemsStreamController.add(newValue);
       }
       if (response.hasTaskUpdated()) {
-        _upsertItem(_parseUpdateTaskResponse(response.taskUpdated));
+        _upsertItem(
+          _parseUpdateTaskResponse(response.taskUpdated, item.randSortValue),
+        );
       }
     } catch (e) {
       _upsertItem(item);
@@ -598,10 +605,14 @@ class SurvivalListRepository {
       canToggle: task.canToggle,
       canDelete: task.canDelete,
       isFriendTask: false,
+      randSortValue: Random().nextDouble(),
     );
   }
 
-  Item _parseUpdateTaskResponse(api.UpdateTaskResponse task) {
+  Item _parseUpdateTaskResponse(
+    api.UpdateTaskResponse task,
+    double randSortValue,
+  ) {
     return Item(
       id: task.id,
       title: task.title,
@@ -629,6 +640,7 @@ class SurvivalListRepository {
       canToggle: task.canToggle,
       canDelete: task.canDelete,
       isFriendTask: false,
+      randSortValue: randSortValue,
     );
   }
 }

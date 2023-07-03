@@ -18,6 +18,7 @@ class Item extends Equatable {
     required this.canToggle,
     required this.canDelete,
     required this.isFriendTask,
+    required this.randSortValue,
   });
 
   final int id;
@@ -33,6 +34,7 @@ class Item extends Equatable {
   final bool canToggle;
   final bool canDelete;
   final bool isFriendTask;
+  final double randSortValue;
 
   Item copyWith({
     int Function()? id,
@@ -48,6 +50,7 @@ class Item extends Equatable {
     bool Function()? canToggle,
     bool Function()? canDelete,
     bool Function()? isFriendTask,
+    double Function()? randSortValue,
   }) {
     return Item(
       id: id != null ? id() : this.id,
@@ -63,6 +66,8 @@ class Item extends Equatable {
       canToggle: canToggle != null ? canToggle() : this.canToggle,
       canDelete: canDelete != null ? canDelete() : this.canDelete,
       isFriendTask: isFriendTask != null ? isFriendTask() : this.isFriendTask,
+      randSortValue:
+          randSortValue != null ? randSortValue() : this.randSortValue,
     );
   }
 
@@ -81,5 +86,6 @@ class Item extends Equatable {
         canToggle,
         canDelete,
         isFriendTask,
+        randSortValue,
       ];
 }

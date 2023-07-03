@@ -36,6 +36,7 @@ class ScheduleView extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.scheduleAppBarTitle),
         actions: const [
+          ScheduleOrderButton(),
           ScheduleFilterButton(),
           ScheduleOptionsButton(),
         ],

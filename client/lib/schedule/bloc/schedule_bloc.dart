@@ -17,6 +17,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         _survivalListRepository = survivalListRepository,
         super(ScheduleState(variant: variant)) {
     on<ScheduleFilterChanged>(_onFilterChanged);
+    on<ScheduleOrderChanged>(_onOrderChanged);
     on<ScheduleItemCompletionToggled>(_onItemCompletionToggled);
     on<ScheduleLogoutRequested>(_onLogoutRequested);
     on<ScheduleSubscriptionRequested>(_onSubscriptionRequested);
@@ -86,6 +87,13 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) {
     emit(state.copyWith(filter: () => event.filter));
+  }
+
+  void _onOrderChanged(
+    ScheduleOrderChanged event,
+    Emitter<ScheduleState> emit,
+  ) {
+    emit(state.copyWith(order: () => event.order));
   }
 
   void _onRefreshRequested(

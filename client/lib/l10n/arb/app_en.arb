@@ -24,6 +24,12 @@
   "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",
   "scheduleOptionsTooltip": "Options",
 
+  "scheduleOrderTooltip": "Order",
+  "scheduleOrderByDate": "By date",
+  "scheduleOrderByDuration": "By duration",
+  "scheduleOrderByTitle": "By title",
+  "scheduleOrderByRandom": "Random",
+
   "createItemAppBarTitle": "Add Item",
   "createItemTitleLabel": "Title",
   "createItemStartDateLabel": "Start date",

@@ -8,6 +8,7 @@ class ScheduleState extends Equatable {
     this.status = ScheduleStatus.initial,
     this.todos = const [],
     this.filter = ScheduleViewFilter.all,
+    this.order = ScheduleViewOrder.byDate,
     this.userPhotoUrl,
     this.viewerPerson,
   });
@@ -16,16 +17,18 @@ class ScheduleState extends Equatable {
   final List<Item> todos;
   final ScheduleViewFilter filter;
   final ScheduleViewVariant variant;
+  final ScheduleViewOrder order;
   final String? userPhotoUrl;
   final Person? viewerPerson;
 
   List<Item> get filteredItems =>
-      variant.apply(filter.apply(todos, viewerPerson));
+      variant.apply(filter.apply(todos, viewerPerson))..sort(order.compare);
 
   ScheduleState copyWith({
     ScheduleStatus Function()? status,
     List<Item> Function()? todos,
     ScheduleViewFilter Function()? filter,
+    ScheduleViewOrder Function()? order,
     String? Function()? userPhotoUrl,
     Person? Function()? viewerPerson,
   }) {
@@ -34,6 +37,7 @@ class ScheduleState extends Equatable {
       status: status != null ? status() : this.status,
       todos: todos != null ? todos() : this.todos,
       filter: filter != null ? filter() : this.filter,
+      order: order != null ? order() : this.order,
       userPhotoUrl: userPhotoUrl != null ? userPhotoUrl() : this.userPhotoUrl,
       viewerPerson: viewerPerson != null ? viewerPerson() : this.viewerPerson,
     );
@@ -44,6 +48,7 @@ class ScheduleState extends Equatable {
         status,
         todos,
         filter,
+        order,
         userPhotoUrl,
         viewerPerson,
       ];

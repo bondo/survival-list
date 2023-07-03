@@ -24,6 +24,12 @@
   "scheduleUpdateNotAllowedSnackbarText": "Du kan ikke redigere denne opgave.",
   "scheduleOptionsTooltip": "Muligheder",
 
+  "scheduleOrderTooltip": "Sorter",
+  "scheduleOrderByDate": "Efter dato",
+  "scheduleOrderByDuration": "Efter varighed",
+  "scheduleOrderByTitle": "Efter navn",
+  "scheduleOrderByRandom": "Tilfældig",
+
   "createItemAppBarTitle": "Tilføj opgave",
   "createItemTitleLabel": "Navn",
   "createItemStartDateLabel": "Startdato",
