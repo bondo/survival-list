@@ -28,8 +28,8 @@ class ScheduleOrderButton extends StatelessWidget {
             child: Text(l10n.scheduleOrderByDate),
           ),
           PopupMenuItem(
-            value: ScheduleViewOrder.byDuration,
-            child: Text(l10n.scheduleOrderByDuration),
+            value: ScheduleViewOrder.byEstimate,
+            child: Text(l10n.scheduleOrderByEstimate),
           ),
           PopupMenuItem(
             value: ScheduleViewOrder.byTitle,

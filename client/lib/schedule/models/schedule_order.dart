@@ -4,7 +4,7 @@ enum _NullIs { smallest, largest }
 
 enum ScheduleViewOrder {
   byDate,
-  byDuration,
+  byEstimate,
   byRandom,
   byTitle,
 }
@@ -42,7 +42,7 @@ extension ScheduleViewOrderX on ScheduleViewOrder {
         }
 
         return ScheduleViewOrder.byTitle.compare(a, b);
-      case ScheduleViewOrder.byDuration:
+      case ScheduleViewOrder.byEstimate:
         final estimateCmp = a.estimate.compareTo(b.estimate);
         if (estimateCmp != 0) {
           return estimateCmp;

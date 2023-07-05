@@ -23,10 +23,14 @@
   "scheduleErrorSnackbarText": "An error occurred while loading todos.",
   "scheduleUpdateNotAllowedSnackbarText": "You can't modify this item.",
   "scheduleOptionsTooltip": "Options",
+  "scheduleItemEstimateMissing": "No estimate",
+  "scheduleItemEstimateDays": "{days, plural, one{1 day} other{{days} days}}}",
+  "scheduleItemEstimateHours": "{hours, plural, one{1 hour} other{{hours} hours}}",
+  "scheduleItemEstimateMinutes": "{minutes, plural, one{1 minute} other{{minutes} minutes}}",
 
   "scheduleOrderTooltip": "Order",
   "scheduleOrderByDate": "By date",
-  "scheduleOrderByDuration": "By duration",
+  "scheduleOrderByEstimate": "By duration",
   "scheduleOrderByTitle": "By title",
   "scheduleOrderByRandom": "Random",
 
