@@ -7,12 +7,9 @@ use container::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    if Ok("release".to_string()) == env::var("PROFILE") {
+    if env::var("PROFILE").map(|s| s == "release").unwrap_or(false) {
         return Ok(());
     }
-
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("Environment variable DATABASE_URL missing");
 
     tonic_build::configure()
         .out_dir("src/service/proto")
@@ -26,6 +23,17 @@ async fn main() -> Result<(), Error> {
         )?;
 
     println!("cargo:rerun-if-changed=migrations");
+
+    dotenv().ok();
+
+    let offline = env::var("SQLX_OFFLINE")
+        .map(|s| s.eq_ignore_ascii_case("true") || s == "1")
+        .unwrap_or(false);
+    if offline {
+        return Ok(());
+    }
+
+    let database_url = env::var("DATABASE_URL").expect("Environment variable DATABASE_URL missing");
 
     container::cleanup()?;
     container::setup()?;

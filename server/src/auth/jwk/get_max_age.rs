@@ -22,7 +22,7 @@ fn parse_max_age_value(cache_control_value: &str) -> JwkResult<Duration> {
             continue;
         };
 
-        if String::from("max-age").eq(&key.to_lowercase()) {
+        if key.eq_ignore_ascii_case("max-age") {
             let value = key_value
                 .get(1)
                 .ok_or(JwkMaxAgeParseError::MaxAgeValueEmpty)?;
