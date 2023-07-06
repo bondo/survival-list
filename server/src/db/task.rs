@@ -11,7 +11,7 @@ use sqlx::{
 };
 use std::{cmp::Ordering, fmt::Display};
 
-use super::{Database, GroupId, Transaction, UserId};
+use super::{CategoryId, Database, GroupId, SubcategoryId, Transaction, UserId};
 use crate::{Error, Result};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
@@ -62,6 +62,8 @@ struct TaskRawResult {
     pub recurrence_previous_task_id: Option<i32>,
     pub recurrence_num_ready_to_start: Option<i32>,
     pub recurrence_num_reached_deadline: Option<i32>,
+    pub category_id: Option<i32>,
+    pub subcategory_id: i32,
 }
 
 impl TaskRawResult {
@@ -132,6 +134,8 @@ pub struct TaskResult {
     pub can_toggle: bool,
     pub can_delete: bool,
     pub is_friend_task: bool,
+    pub category_id: Option<CategoryId>,
+    pub subcategory_id: Option<SubcategoryId>,
 }
 
 static RECURRENCE_MAX: i32 = 5;
@@ -194,6 +198,8 @@ impl TryFrom<TaskRawResult> for TaskResult {
             can_toggle,
             can_delete,
             is_friend_task,
+            category_id: value.category_id.map(CategoryId),
+            subcategory_id: Some(SubcategoryId(value.subcategory_id)),
         })
     }
 }
@@ -410,6 +416,8 @@ impl Database {
                             t.start_date,
                             t.end_date,
                             t.estimate,
+                            t.category_id,
+                            ts.subcategory_id,
                             u.id as responsible_id,
                             u.name as responsible_name,
                             u.picture_url as responsible_picture_url,
@@ -435,6 +443,10 @@ impl Database {
                         LEFT JOIN
                             tasks c ON
                                 c.id = r.current_task_id
+                        LEFT JOIN
+                            tasks_subcategories ts ON
+                                ts.task_id = t.id AND
+                                ts.user_id = $1
                         WHERE
                             -- Hide old items
                             (
@@ -487,6 +499,8 @@ impl Database {
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
+                            et.category_id,
+                            et.subcategory_id,
                             et.responsible_id,
                             et.responsible_name,
                             et.responsible_picture_url,
@@ -515,6 +529,8 @@ impl Database {
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
+                    bt.category_id,
+                    bt.subcategory_id,
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,
@@ -853,6 +869,8 @@ impl<'c> Transaction<'c> {
                             t.start_date,
                             t.end_date,
                             t.estimate,
+                            t.category_id,
+                            ts.subcategory_id,
                             u.id as responsible_id,
                             u.name as responsible_name,
                             u.picture_url as responsible_picture_url,
@@ -878,6 +896,10 @@ impl<'c> Transaction<'c> {
                         LEFT JOIN
                             tasks c ON
                                 c.id = r.current_task_id
+                        LEFT JOIN
+                            tasks_subcategories ts ON
+                                ts.task_id = t.id AND
+                                ts.user_id = $1
                         WHERE
                             t.id = $2
                     ),
@@ -899,6 +921,8 @@ impl<'c> Transaction<'c> {
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
+                            et.category_id,
+                            et.subcategory_id,
                             et.responsible_id,
                             et.responsible_name,
                             et.responsible_picture_url,
@@ -927,6 +951,8 @@ impl<'c> Transaction<'c> {
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
+                    bt.category_id,
+                    bt.subcategory_id,
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,

@@ -1,9 +1,11 @@
+mod category;
 mod database;
 mod group;
 mod task;
 mod transaction;
 mod user;
 
+pub use category::{CategoryId, SubcategoryId, SubcategoryResult};
 pub use database::Database;
 pub use group::GroupId;
 pub use task::{

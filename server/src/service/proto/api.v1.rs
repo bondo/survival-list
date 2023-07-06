@@ -27,6 +27,10 @@ pub struct CreateTaskRequest {
     pub group_id: i32,
     #[prost(message, optional, tag = "6")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(int32, tag = "9")]
+    pub category_id: i32,
+    #[prost(int32, tag = "10")]
+    pub subcategory_id: i32,
     #[prost(oneof = "create_task_request::Recurring", tags = "7, 8")]
     pub recurring: ::core::option::Option<create_task_request::Recurring>,
 }
@@ -64,6 +68,10 @@ pub struct CreateTaskResponse {
     pub can_toggle: bool,
     #[prost(bool, tag = "12")]
     pub can_delete: bool,
+    #[prost(int32, tag = "13")]
+    pub category_id: i32,
+    #[prost(int32, tag = "14")]
+    pub subcategory_id: i32,
     #[prost(oneof = "create_task_response::Recurring", tags = "8, 9")]
     pub recurring: ::core::option::Option<create_task_response::Recurring>,
 }
@@ -95,6 +103,10 @@ pub struct UpdateTaskRequest {
     pub group_id: i32,
     #[prost(message, optional, tag = "7")]
     pub estimate: ::core::option::Option<Duration>,
+    #[prost(int32, tag = "10")]
+    pub category_id: i32,
+    #[prost(int32, tag = "11")]
+    pub subcategory_id: i32,
     #[prost(oneof = "update_task_request::Recurring", tags = "8, 9")]
     pub recurring: ::core::option::Option<update_task_request::Recurring>,
 }
@@ -134,6 +146,10 @@ pub struct UpdateTaskResponse {
     pub can_toggle: bool,
     #[prost(bool, tag = "13")]
     pub can_delete: bool,
+    #[prost(int32, tag = "14")]
+    pub category_id: i32,
+    #[prost(int32, tag = "15")]
+    pub subcategory_id: i32,
     #[prost(oneof = "update_task_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<update_task_response::Recurring>,
 }
@@ -218,6 +234,10 @@ pub struct GetTasksResponse {
     pub can_delete: bool,
     #[prost(bool, tag = "14")]
     pub is_friend_task: bool,
+    #[prost(int32, tag = "15")]
+    pub category_id: i32,
+    #[prost(int32, tag = "16")]
+    pub subcategory_id: i32,
     #[prost(oneof = "get_tasks_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<get_tasks_response::Recurring>,
 }
@@ -380,6 +400,33 @@ pub struct RecurringEveryResponse {
     pub num_reached_deadline: i32,
     #[prost(bool, tag = "6")]
     pub num_reached_deadline_is_lower_bound: bool,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetCategoriesRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetCategoriesResponse {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub raw_title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub color: ::prost::alloc::string::String,
+    #[prost(bool, tag = "4")]
+    pub is_enabled: bool,
+    #[prost(message, repeated, tag = "5")]
+    pub subcategories: ::prost::alloc::vec::Vec<Subcategory>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Subcategory {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub color: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod api_client {
@@ -735,6 +782,28 @@ pub mod api_client {
                 .insert(GrpcMethod::new("api.v1.API", "GetGroupParticipants"));
             self.inner.server_streaming(req, path, codec).await
         }
+        pub async fn get_categories(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetCategoriesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::GetCategoriesResponse>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/api.v1.API/GetCategories");
+            let mut req = request.into_request();
+            req.extensions_mut().insert(GrpcMethod::new("api.v1.API", "GetCategories"));
+            self.inner.server_streaming(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -838,6 +907,19 @@ pub mod api_server {
             request: tonic::Request<super::GetGroupParticipantsRequest>,
         ) -> std::result::Result<
             tonic::Response<Self::GetGroupParticipantsStream>,
+            tonic::Status,
+        >;
+        /// Server streaming response type for the GetCategories method.
+        type GetCategoriesStream: futures_core::Stream<
+                Item = std::result::Result<super::GetCategoriesResponse, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn get_categories(
+            &self,
+            request: tonic::Request<super::GetCategoriesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<Self::GetCategoriesStream>,
             tonic::Status,
         >;
     }
@@ -1429,6 +1511,53 @@ pub mod api_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetGroupParticipantsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/api.v1.API/GetCategories" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetCategoriesSvc<T: Api>(pub Arc<T>);
+                    impl<
+                        T: Api,
+                    > tonic::server::ServerStreamingService<super::GetCategoriesRequest>
+                    for GetCategoriesSvc<T> {
+                        type Response = super::GetCategoriesResponse;
+                        type ResponseStream = T::GetCategoriesStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetCategoriesRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                (*inner).get_categories(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetCategoriesSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

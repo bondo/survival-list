@@ -7,9 +7,9 @@ use tonic::{Request, Response, Status};
 
 use crate::{
     db::{
-        CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
-        TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
-        TaskResponsible, TaskResult, UpdateTaskParams, UserId,
+        CreateTaskParams, Database, GroupId, SubcategoryResult, TaskEstimate, TaskGroup, TaskId,
+        TaskPeriod, TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput,
+        TaskRecurrenceOutput, TaskResponsible, TaskResult, UpdateTaskParams, UserId,
     },
     AuthExtension, Error, Result,
 };
@@ -228,6 +228,8 @@ impl api_server::Api for Service {
                         can_toggle: task.can_toggle,
                         can_delete: task.can_delete,
                         is_friend_task: task.is_friend_task,
+                        category_id: task.category_id.map(Into::into).unwrap_or_default(),
+                        subcategory_id: task.subcategory_id.map(Into::into).unwrap_or_default(),
                     })
                     .map_err(Into::into),
                 )
@@ -363,6 +365,38 @@ impl api_server::Api for Service {
                             name: user.name,
                             picture_url: user.picture_url.unwrap_or_default(),
                         }),
+                    })
+                    .map_err(Into::into),
+                )
+                .await
+                .unwrap();
+            }
+        });
+
+        Ok(Response::new(ReceiverStream::new(rx)))
+    }
+
+    type GetCategoriesStream = ReceiverStream<std::result::Result<GetCategoriesResponse, Status>>;
+    async fn get_categories(
+        &self,
+        request: Request<GetCategoriesRequest>,
+    ) -> std::result::Result<Response<Self::GetCategoriesStream>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let (tx, rx) = mpsc::channel(10);
+
+        let db = self.db.clone();
+        tokio::spawn(async move {
+            let categories = db.get_user_categories(user_id);
+            pin_mut!(categories);
+
+            while let Some(res) = categories.next().await {
+                tx.send(
+                    res.map(|category| GetCategoriesResponse {
+                        id: category.id.into(),
+                        raw_title: category.raw_title,
+                        color: category.color.unwrap_or_default(),
+                        is_enabled: category.is_enabled,
+                        subcategories: category.subcategories.into_iter().map(Into::into).collect(),
                     })
                     .map_err(Into::into),
                 )
@@ -526,6 +560,8 @@ impl From<TaskResult> for CreateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
+            category_id: value.category_id.map(Into::into).unwrap_or_default(),
+            subcategory_id: value.subcategory_id.map(Into::into).unwrap_or_default(),
         }
     }
 }
@@ -552,6 +588,18 @@ impl From<TaskResult> for UpdateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
+            category_id: value.category_id.map(Into::into).unwrap_or_default(),
+            subcategory_id: value.subcategory_id.map(Into::into).unwrap_or_default(),
+        }
+    }
+}
+
+impl From<SubcategoryResult> for Subcategory {
+    fn from(value: SubcategoryResult) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            color: value.color.unwrap_or_default(),
         }
     }
 }

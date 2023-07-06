@@ -487,3 +487,8 @@ fn it_can_change_between_recurrence_types() {
         );
     });
 }
+
+// TODO: Test get categories, some with overrides, some with subcategories
+// TODO: Test read task with category and no subcategory
+// TODO: Test read task with category and subcategory
+// TODO: Test update task with category and subcategory fails if subcategory not in category

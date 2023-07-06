@@ -17,6 +17,7 @@ service API {
     rpc LeaveGroup (LeaveGroupRequest) returns (LeaveGroupResponse);
     rpc GetGroups (GetGroupsRequest) returns (stream GetGroupsResponse);
     rpc GetGroupParticipants (GetGroupParticipantsRequest) returns (stream GetGroupParticipantsResponse);
+    rpc GetCategories (GetCategoriesRequest) returns (stream GetCategoriesResponse);
 }
 
 message LoginRequest {
@@ -39,6 +40,8 @@ message CreateTaskRequest {
         RecurringChecked checked = 7;
         RecurringEveryRequest every = 8;
     }
+    int32 category_id = 9;
+    int32 subcategory_id = 10;
 }
 
 message CreateTaskResponse {
@@ -56,6 +59,8 @@ message CreateTaskResponse {
     bool can_update = 10;
     bool can_toggle = 11;
     bool can_delete = 12;
+    int32 category_id = 13;
+    int32 subcategory_id = 14;
 }
 
 message UpdateTaskRequest {
@@ -70,6 +75,8 @@ message UpdateTaskRequest {
         RecurringChecked checked = 8;
         RecurringEveryRequest every = 9;
     }
+    int32 category_id = 10;
+    int32 subcategory_id = 11;
 }
 
 message UpdateTaskResponse {
@@ -88,6 +95,8 @@ message UpdateTaskResponse {
     bool can_update = 11;
     bool can_toggle = 12;
     bool can_delete = 13;
+    int32 category_id = 14;
+    int32 subcategory_id = 15;
 }
 
 message ToggleTaskCompletedRequest {
@@ -134,6 +143,8 @@ message GetTasksResponse {
     bool can_toggle = 12;
     bool can_delete = 13;
     bool is_friend_task = 14;
+    int32 category_id = 15;
+    int32 subcategory_id = 16;
 }
 
 message CreateGroupRequest {
@@ -229,4 +240,21 @@ message RecurringEveryResponse {
 
     int32 num_reached_deadline = 5;
     bool num_reached_deadline_is_lower_bound = 6;
+}
+
+message GetCategoriesRequest {
+}
+
+message GetCategoriesResponse {
+    int32 id = 1;
+    string raw_title = 2;
+    string color = 3;
+    bool is_enabled = 4;
+    repeated Subcategory subcategories = 5;
+}
+
+message Subcategory {
+    int32 id = 1;
+    string title = 2;
+    string color = 3;
 }
