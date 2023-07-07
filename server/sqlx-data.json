@@ -359,16 +359,16 @@
     },
     "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = $1\n                WHERE\n                    r.current_task_id = $2\n            "
   },
-  "6a1a0abd8127bb9a96773c2abe4e1b0500efad43f3f7ad16f160a08452974729": {
+  "589777393d7233abd707617793c848b9817c6b226146c1227db83ab88628b08c": {
     "describe": {
       "columns": [
         {
-          "name": "id: CategoryId",
+          "name": "id: SubcategoryId",
           "ordinal": 0,
           "type_info": "Int4"
         },
         {
-          "name": "raw_title",
+          "name": "title",
           "ordinal": 1,
           "type_info": "Text"
         },
@@ -376,32 +376,58 @@
           "name": "color",
           "ordinal": 2,
           "type_info": "Text"
-        },
-        {
-          "name": "is_enabled",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "subcategories: Json<Vec<SubcategoryResult>>",
-          "ordinal": 4,
-          "type_info": "Json"
         }
       ],
       "nullable": [
         false,
         false,
-        true,
-        false,
-        null
+        true
       ],
       "parameters": {
         "Left": [
-          "Int4"
+          "Int4",
+          "Int4",
+          "Text",
+          "Text"
         ]
       }
     },
-    "query": "\n                SELECT\n                    c.id as \"id: CategoryId\",\n                    c.raw_title,\n                    co.color,\n                    co.is_enabled,\n                    (\n                        SELECT\n                            json_agg(json_build_object(\n                                'id', s.id,\n                                'title', s.title,\n                                'color', s.color\n                            ))\n                        FROM\n                            subcategories s\n                        WHERE\n                            s.category_id = c.id AND\n                            s.user_id = $1\n                    ) as \"subcategories: Json<Vec<SubcategoryResult>>\"\n                FROM\n                    categories c\n                LEFT JOIN\n                    categories_override co ON\n                        co.category_id = c.id\n                WHERE\n                    co.user_id = $1\n                ORDER BY\n                    c.created_at\n            "
+    "query": "\n                UPDATE\n                    subcategories\n                SET\n                    title = $3,\n                    color = $4\n                WHERE\n                    id = $2 AND\n                    user_id = $1\n                RETURNING\n                    id as \"id: SubcategoryId\",\n                    title,\n                    color\n            "
+  },
+  "67343a717492c0b43e38b452685c4d5abb43645fb403c685a3347f1f2a537d19": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: SubcategoryId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "color",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO subcategories (\n                    user_id,\n                    category_id,\n                    title,\n                    color\n                ) VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                )\n                RETURNING\n                    id as \"id: SubcategoryId\",\n                    title,\n                    color\n            "
   },
   "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523": {
     "describe": {
@@ -701,6 +727,27 @@
     },
     "query": "\n                UPDATE\n                    tasks t\n                SET\n                    previous_task_id = NULL,\n                    recurrence_id = NULL\n                WHERE\n                    t.recurrence_id = $1\n            "
   },
+  "9e73fabbb8d4aee1ebf4a1ad9c442c9e18ee096585fc71349664a46d9c3aac11": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: SubcategoryId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    subcategories\n                WHERE\n                    id = $2 AND\n                    user_id = $1\n                RETURNING\n                    id as \"id: SubcategoryId\"\n            "
+  },
   "9f4f3758dc89a08a53045521025882b21400c4e8c28369c3778dbf35a43a6f47": {
     "describe": {
       "columns": [
@@ -734,6 +781,50 @@
       }
     },
     "query": "\n                UPDATE\n                    groups g\n                SET\n                    title = $3\n                WHERE\n                    g.id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id AND\n                            ug.user_id = $1\n                    )\n                RETURNING\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n            "
+  },
+  "b0209a352c2de8f2a02c78d266393ffbb5da9bd78bcff121fe387dfdf08230f8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: CategoryId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "raw_title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "color",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_enabled: Option<bool>",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "subcategories: Json<Vec<SubcategoryResult>>",
+          "ordinal": 4,
+          "type_info": "Json"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    c.id as \"id: CategoryId\",\n                    c.raw_title,\n                    co.color,\n                    co.is_enabled as \"is_enabled: Option<bool>\",\n                    (\n                        SELECT\n                            json_agg(json_build_object(\n                                'id', s.id,\n                                'title', s.title,\n                                'color', s.color\n                            ))\n                        FROM\n                            subcategories s\n                        WHERE\n                            s.category_id = c.id AND\n                            s.user_id = $1\n                    ) as \"subcategories: Json<Vec<SubcategoryResult>>\"\n                FROM\n                    categories c\n                LEFT JOIN\n                    categories_override co ON\n                        co.category_id = c.id AND\n                        co.user_id = $1\n                ORDER BY\n                    c.raw_title\n            "
   },
   "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed": {
     "describe": {
@@ -793,6 +884,51 @@
     },
     "query": "\n                INSERT INTO users_groups (\n                    user_id,\n                    group_id\n                )\n                VALUES (\n                    $1,\n                    $2\n                )\n            "
   },
+  "d3bf0c822afaaec3180fcaaf1968d65987ed1a7a6f32d39476c2532cb7cc8060": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: CategoryId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "raw_title",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "color",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_enabled: Option<bool>",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "subcategories: Json<Vec<SubcategoryResult>>",
+          "ordinal": 4,
+          "type_info": "Json"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT\n                    c.id as \"id: CategoryId\",\n                    c.raw_title,\n                    co.color,\n                    co.is_enabled as \"is_enabled: Option<bool>\",\n                    (\n                        SELECT\n                            json_agg(json_build_object(\n                                'id', s.id,\n                                'title', s.title,\n                                'color', s.color\n                            ))\n                        FROM\n                            subcategories s\n                        WHERE\n                            s.category_id = c.id AND\n                            s.user_id = $1\n                    ) as \"subcategories: Json<Vec<SubcategoryResult>>\"\n                FROM\n                    categories c\n                LEFT JOIN\n                    categories_override co ON\n                        co.category_id = c.id AND\n                        co.user_id = $1\n                WHERE\n                    c.id = $2\n            "
+  },
   "ea07e2228de7a7e04e967f5970faf84108fe81657dba9c3c786cc2157989951a": {
     "describe": {
       "columns": [
@@ -824,6 +960,21 @@
       }
     },
     "query": "\n                SELECT\n                    g.id as \"id: GroupId\",\n                    g.title,\n                    g.uid\n                FROM\n                    groups g\n                INNER JOIN\n                    users_groups ug ON\n                        ug.group_id = g.id\n                WHERE\n                    ug.user_id = $1\n                ORDER BY\n                    g.created_at\n            "
+  },
+  "faf1bfc19670f94edb3ed58fb5b1fdd6bc9e61021b81462f244dd46a66c428f1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO categories_override (\n                    user_id,\n                    category_id,\n                    color,\n                    is_enabled\n                ) VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                ) ON CONFLICT (\n                    user_id,\n                    category_id\n                ) DO UPDATE SET\n                    color = EXCLUDED.color,\n                    is_enabled = EXCLUDED.is_enabled\n            "
   },
   "fb96380621e3048061609e3559381bbd403769f8caa2b0afa4235ce2d791936d": {
     "describe": {

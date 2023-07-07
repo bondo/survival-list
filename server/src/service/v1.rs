@@ -7,9 +7,10 @@ use tonic::{Request, Response, Status};
 
 use crate::{
     db::{
-        CreateTaskParams, Database, GroupId, SubcategoryResult, TaskEstimate, TaskGroup, TaskId,
-        TaskPeriod, TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput,
-        TaskRecurrenceOutput, TaskResponsible, TaskResult, UpdateTaskParams, UserId,
+        CategoryId, CreateTaskParams, Database, GroupId, SubcategoryId, SubcategoryResult,
+        TaskEstimate, TaskGroup, TaskId, TaskPeriod, TaskRecurrenceEvery, TaskRecurrenceFrequency,
+        TaskRecurrenceInput, TaskRecurrenceOutput, TaskResponsible, TaskResult, UpdateTaskParams,
+        UserId,
     },
     AuthExtension, Error, Result,
 };
@@ -312,6 +313,95 @@ impl api_server::Api for Service {
         Ok(Response::new(LeaveGroupResponse { id: id.into() }))
     }
 
+    async fn update_category(
+        &self,
+        request: Request<UpdateCategoryRequest>,
+    ) -> std::result::Result<Response<UpdateCategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let category = self
+            .db
+            .update_category(
+                user_id,
+                CategoryId::new(request.id),
+                &request.color,
+                request.is_enabled,
+            )
+            .await?;
+
+        Ok(Response::new(UpdateCategoryResponse {
+            id: category.id.into(),
+            raw_title: category.raw_title,
+            color: category.color.unwrap_or_default(),
+            is_enabled: category.is_enabled,
+            subcategories: category.subcategories.into_iter().map(Into::into).collect(),
+        }))
+    }
+
+    async fn create_subcategory(
+        &self,
+        request: Request<CreateSubcategoryRequest>,
+    ) -> std::result::Result<Response<CreateSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let subcategory = self
+            .db
+            .create_subcategory(
+                user_id,
+                CategoryId::new(request.category_id),
+                &request.title,
+                &request.color,
+            )
+            .await?;
+
+        Ok(Response::new(CreateSubcategoryResponse {
+            id: subcategory.id.into(),
+            title: subcategory.title,
+            color: subcategory.color.unwrap_or_default(),
+        }))
+    }
+
+    async fn update_subcategory(
+        &self,
+        request: Request<UpdateSubcategoryRequest>,
+    ) -> std::result::Result<Response<UpdateSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let subcategory = self
+            .db
+            .update_subcategory(
+                user_id,
+                SubcategoryId::new(request.id),
+                &request.title,
+                &request.color,
+            )
+            .await?;
+
+        Ok(Response::new(UpdateSubcategoryResponse {
+            id: subcategory.id.into(),
+            title: subcategory.title,
+            color: subcategory.color.unwrap_or_default(),
+        }))
+    }
+
+    async fn delete_subcategory(
+        &self,
+        request: Request<DeleteSubcategoryRequest>,
+    ) -> std::result::Result<Response<DeleteSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let id = self
+            .db
+            .delete_subcategory(user_id, SubcategoryId::new(request.id))
+            .await?;
+
+        Ok(Response::new(DeleteSubcategoryResponse { id: id.into() }))
+    }
+
     type GetGroupsStream = ReceiverStream<std::result::Result<GetGroupsResponse, Status>>;
     async fn get_groups(
         &self,
@@ -386,7 +476,7 @@ impl api_server::Api for Service {
 
         let db = self.db.clone();
         tokio::spawn(async move {
-            let categories = db.get_user_categories(user_id);
+            let categories = db.get_categories(user_id);
             pin_mut!(categories);
 
             while let Some(res) = categories.next().await {

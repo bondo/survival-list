@@ -18,6 +18,10 @@ service API {
     rpc GetGroups (GetGroupsRequest) returns (stream GetGroupsResponse);
     rpc GetGroupParticipants (GetGroupParticipantsRequest) returns (stream GetGroupParticipantsResponse);
     rpc GetCategories (GetCategoriesRequest) returns (stream GetCategoriesResponse);
+    rpc UpdateCategory (UpdateCategoryRequest) returns (UpdateCategoryResponse);
+    rpc CreateSubcategory (CreateSubcategoryRequest) returns (CreateSubcategoryResponse);
+    rpc UpdateSubcategory (UpdateSubcategoryRequest) returns (UpdateSubcategoryResponse);
+    rpc DeleteSubcategory (DeleteSubcategoryRequest) returns (DeleteSubcategoryResponse);
 }
 
 message LoginRequest {
@@ -257,4 +261,50 @@ message Subcategory {
     int32 id = 1;
     string title = 2;
     string color = 3;
+}
+
+message UpdateCategoryRequest {
+    int32 id = 1;
+    string color = 2;
+    bool is_enabled = 3;
+}
+
+message UpdateCategoryResponse {
+    int32 id = 1;
+    string raw_title = 2;
+    string color = 3;
+    bool is_enabled = 4;
+    repeated Subcategory subcategories = 5;
+}
+
+message CreateSubcategoryRequest {
+    int32 category_id = 1;
+    string title = 2;
+    string color = 3;
+}
+
+message CreateSubcategoryResponse {
+    int32 id = 1;
+    string title = 2;
+    string color = 3;
+}
+
+message UpdateSubcategoryRequest {
+    int32 id = 1;
+    string title = 2;
+    string color = 4;
+}
+
+message UpdateSubcategoryResponse {
+    int32 id = 1;
+    string title = 2;
+    string color = 3;
+}
+
+message DeleteSubcategoryRequest {
+    int32 id = 1;
+}
+
+message DeleteSubcategoryResponse {
+    int32 id = 1;
 }

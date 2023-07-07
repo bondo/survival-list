@@ -133,4 +133,65 @@ impl AuthenticatedClient {
             .await
             .unwrap()
     }
+
+    pub async fn get_categories(&mut self) -> Vec<GetCategoriesResponse> {
+        let request = GetCategoriesRequest::default();
+        let request = self.authenticate_request(request);
+        self.client
+            .get_categories(request)
+            .await
+            .unwrap()
+            .into_inner()
+            .collect::<std::result::Result<Vec<GetCategoriesResponse>, Status>>()
+            .await
+            .unwrap()
+    }
+
+    pub async fn update_category(
+        &mut self,
+        request: UpdateCategoryRequest,
+    ) -> UpdateCategoryResponse {
+        let request = self.authenticate_request(request);
+        self.client
+            .update_category(request)
+            .await
+            .unwrap()
+            .into_inner()
+    }
+
+    pub async fn create_subcategory(
+        &mut self,
+        request: CreateSubcategoryRequest,
+    ) -> CreateSubcategoryResponse {
+        let request = self.authenticate_request(request);
+        self.client
+            .create_subcategory(request)
+            .await
+            .unwrap()
+            .into_inner()
+    }
+
+    pub async fn update_subcategory(
+        &mut self,
+        request: UpdateSubcategoryRequest,
+    ) -> UpdateSubcategoryResponse {
+        let request = self.authenticate_request(request);
+        self.client
+            .update_subcategory(request)
+            .await
+            .unwrap()
+            .into_inner()
+    }
+
+    pub async fn delete_subcategory(
+        &mut self,
+        request: DeleteSubcategoryRequest,
+    ) -> DeleteSubcategoryResponse {
+        let request = self.authenticate_request(request);
+        self.client
+            .delete_subcategory(request)
+            .await
+            .unwrap()
+            .into_inner()
+    }
 }

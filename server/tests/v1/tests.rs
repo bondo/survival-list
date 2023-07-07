@@ -488,7 +488,161 @@ fn it_can_change_between_recurrence_types() {
     });
 }
 
-// TODO: Test get categories, some with overrides, some with subcategories
+#[test]
+fn it_can_fetch_categories() {
+    with_server_ready(|uri| async {
+        let mut client = AuthenticatedClient::connect(uri).await;
+
+        let categories = client.get_categories().await;
+
+        let get_category_id = |raw_title: &str| {
+            categories
+                .iter()
+                .find(|c| c.raw_title == raw_title)
+                .map(|c| c.id)
+                .unwrap_or_default()
+        };
+
+        let finance_id = get_category_id("finance");
+        let health_id = get_category_id("health");
+        let home_id = get_category_id("home");
+        let social_id = get_category_id("social");
+        let work_id = get_category_id("work");
+
+        assert_eq!(
+            categories,
+            vec![
+                GetCategoriesResponse {
+                    id: finance_id,
+                    raw_title: "finance".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: health_id,
+                    raw_title: "health".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: home_id,
+                    raw_title: "home".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: social_id,
+                    raw_title: "social".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: work_id,
+                    raw_title: "work".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+            ]
+        );
+
+        client
+            .update_category(UpdateCategoryRequest {
+                id: work_id,
+                color: "#ff0000".to_string(),
+                is_enabled: false,
+            })
+            .await;
+
+        client
+            .update_category(UpdateCategoryRequest {
+                id: work_id,
+                color: "#ff00ff".to_string(),
+                is_enabled: false,
+            })
+            .await;
+
+        let cleaning = client
+            .create_subcategory(CreateSubcategoryRequest {
+                category_id: home_id,
+                title: "Cleaning!".to_string(),
+                color: "".to_string(),
+            })
+            .await;
+
+        let cleaning = client
+            .update_subcategory(UpdateSubcategoryRequest {
+                id: cleaning.id,
+                title: "Cleaning".to_string(),
+                color: "#00ff00".to_string(),
+            })
+            .await;
+
+        let delete = client
+            .create_subcategory(CreateSubcategoryRequest {
+                category_id: home_id,
+                title: "Delete me".to_string(),
+                color: "".to_string(),
+            })
+            .await;
+
+        client
+            .delete_subcategory(DeleteSubcategoryRequest { id: delete.id })
+            .await;
+
+        let categories = client.get_categories().await;
+
+        assert_eq!(
+            categories,
+            vec![
+                GetCategoriesResponse {
+                    id: finance_id,
+                    raw_title: "finance".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: health_id,
+                    raw_title: "health".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: home_id,
+                    raw_title: "home".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![Subcategory {
+                        id: cleaning.id,
+                        title: "Cleaning".to_string(),
+                        color: "#00ff00".to_string(),
+                    },],
+                },
+                GetCategoriesResponse {
+                    id: social_id,
+                    raw_title: "social".to_string(),
+                    color: "".to_string(),
+                    is_enabled: true,
+                    subcategories: vec![],
+                },
+                GetCategoriesResponse {
+                    id: work_id,
+                    raw_title: "work".to_string(),
+                    color: "#ff00ff".to_string(),
+                    is_enabled: false,
+                    subcategories: vec![],
+                },
+            ]
+        );
+    });
+}
+
 // TODO: Test read task with category and no subcategory
 // TODO: Test read task with category and subcategory
 // TODO: Test update task with category and subcategory fails if subcategory not in category
