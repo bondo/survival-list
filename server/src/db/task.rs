@@ -1069,13 +1069,12 @@ impl<'c> Transaction<'c> {
         subcategory_id: Option<SubcategoryId>,
     ) -> Result<()> {
         match (category_id, subcategory_id) {
-            (None, None) => Ok(()),
+            (_, None) => Ok(()),
             (None, Some(_)) => Err(Error::InvalidArgument(
                 "Category must be set when subcategory is set",
             )),
-            (Some(_), None) => Ok(()),
             (Some(category_id), Some(subcategory_id)) => {
-                let parent = sqlx::query_scalar!(
+                let parent_id = sqlx::query_scalar!(
                     r#"
                         SELECT
                             category_id as "category_id: CategoryId"
@@ -1092,17 +1091,17 @@ impl<'c> Transaction<'c> {
                 .await
                 .context("Failed to fetch parent of subcategory")?;
 
-                if let Some(parent) = parent {
-                    if parent.0 != category_id.0 {
-                        return Err(Error::InvalidArgument(
+                if let Some(parent_id) = parent_id {
+                    if parent_id.0 == category_id.0 {
+                        Ok(())
+                    } else {
+                        Err(Error::InvalidArgument(
                             "Subcategory must be child of category",
-                        ));
+                        ))
                     }
                 } else {
-                    return Err(Error::NotFound("Subcategory not found"));
+                    Err(Error::NotFound("Subcategory not found"))
                 }
-
-                Ok(())
             }
         }
     }
