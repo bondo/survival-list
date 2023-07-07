@@ -29,7 +29,7 @@ fn it_can_handle_tasks() {
     with_server_ready(|uri| async {
         let mut client = AuthenticatedClient::connect(uri).await;
 
-        assert_eq!(client.get_tasks().await, vec![]);
+        assert_eq!(client.get_tasks().await.unwrap(), vec![]);
 
         let CreateTaskResponse { id: task_id, .. } = client
             .create_task(CreateTaskRequest {
@@ -40,12 +40,18 @@ fn it_can_handle_tasks() {
                 }),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
-        let user = client.login(LoginRequest::default()).await.user.unwrap();
+        let user = client
+            .login(LoginRequest::default())
+            .await
+            .unwrap()
+            .user
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 start_date: Some(Date {
@@ -72,10 +78,11 @@ fn it_can_handle_tasks() {
                 }),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 title: "My task".to_string(),
@@ -97,10 +104,11 @@ fn it_can_handle_tasks() {
                 id: task_id,
                 is_completed: true,
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 title: "My task".to_string(),
@@ -118,9 +126,12 @@ fn it_can_handle_tasks() {
             }]
         );
 
-        client.delete_task(DeleteTaskRequest { id: task_id }).await;
+        client
+            .delete_task(DeleteTaskRequest { id: task_id })
+            .await
+            .unwrap();
 
-        assert_eq!(client.get_tasks().await, vec![]);
+        assert_eq!(client.get_tasks().await.unwrap(), vec![]);
     });
 }
 
@@ -129,7 +140,7 @@ fn it_can_handle_groups() {
     with_server_ready(|uri| async {
         let mut client = AuthenticatedClient::connect(uri).await;
 
-        assert_eq!(client.get_groups().await, vec![]);
+        assert_eq!(client.get_groups().await.unwrap(), vec![]);
 
         let CreateGroupResponse {
             id: group_id,
@@ -139,10 +150,11 @@ fn it_can_handle_groups() {
             .create_group(CreateGroupRequest {
                 title: "My group".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_groups().await,
+            client.get_groups().await.unwrap(),
             vec![GetGroupsResponse {
                 id: group_id,
                 title: "My group".to_string(),
@@ -155,10 +167,11 @@ fn it_can_handle_groups() {
                 id: group_id,
                 title: "My group, new name".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_groups().await,
+            client.get_groups().await.unwrap(),
             vec![GetGroupsResponse {
                 id: group_id,
                 title: "My group, new name".to_string(),
@@ -166,19 +179,28 @@ fn it_can_handle_groups() {
             }]
         );
 
-        let user = client.login(LoginRequest::default()).await.user.unwrap();
+        let user = client
+            .login(LoginRequest::default())
+            .await
+            .unwrap()
+            .user
+            .unwrap();
         assert_eq!(
             client
                 .get_group_participants(GetGroupParticipantsRequest { group_id })
-                .await,
+                .await
+                .unwrap(),
             vec![GetGroupParticipantsResponse {
                 user: Some(user.clone()),
             }]
         );
 
-        client.leave_group(LeaveGroupRequest { id: group_id }).await;
+        client
+            .leave_group(LeaveGroupRequest { id: group_id })
+            .await
+            .unwrap();
 
-        assert_eq!(client.get_groups().await, vec![]);
+        assert_eq!(client.get_groups().await.unwrap(), vec![]);
     });
 }
 
@@ -195,6 +217,7 @@ fn it_can_have_multiple_users() {
                 ..Default::default()
             })
             .await
+            .unwrap()
             .user
             .unwrap();
 
@@ -210,7 +233,8 @@ fn it_can_have_multiple_users() {
                 }),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
         let CreateGroupResponse {
             id: group_id,
@@ -220,7 +244,8 @@ fn it_can_have_multiple_users() {
             .create_group(CreateGroupRequest {
                 title: "My group".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         let CreateTaskResponse {
             id: group_task_id, ..
@@ -235,14 +260,16 @@ fn it_can_have_multiple_users() {
                 }),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
-        assert_eq!(client.get_tasks().await.len(), 2);
-        assert_eq!(client.get_groups().await.len(), 1);
+        assert_eq!(client.get_tasks().await.unwrap().len(), 2);
+        assert_eq!(client.get_groups().await.unwrap().len(), 1);
         assert_eq!(
             client
                 .get_group_participants(GetGroupParticipantsRequest { group_id })
-                .await,
+                .await
+                .unwrap(),
             vec![GetGroupParticipantsResponse {
                 user: Some(alice.clone())
             }]
@@ -256,11 +283,12 @@ fn it_can_have_multiple_users() {
                 ..Default::default()
             })
             .await
+            .unwrap()
             .user
             .unwrap();
 
-        assert_eq!(client.get_tasks().await.len(), 0);
-        assert_eq!(client.get_groups().await.len(), 0);
+        assert_eq!(client.get_tasks().await.unwrap().len(), 0);
+        assert_eq!(client.get_groups().await.unwrap().len(), 0);
 
         let CreateTaskResponse {
             id: bob_task_id, ..
@@ -274,18 +302,20 @@ fn it_can_have_multiple_users() {
                 }),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
-        assert_eq!(client.get_tasks().await.len(), 1);
+        assert_eq!(client.get_tasks().await.unwrap().len(), 1);
 
         client
             .join_group(JoinGroupRequest {
                 uid: group_uid.clone(),
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![
                 GetTasksResponse {
                     id: alice_task_id,
@@ -342,7 +372,7 @@ fn it_can_have_multiple_users() {
             ]
         );
         assert_eq!(
-            client.get_groups().await,
+            client.get_groups().await.unwrap(),
             vec![GetGroupsResponse {
                 id: group_id,
                 title: "My group".to_string(),
@@ -352,7 +382,8 @@ fn it_can_have_multiple_users() {
         assert_eq!(
             client
                 .get_group_participants(GetGroupParticipantsRequest { group_id })
-                .await,
+                .await
+                .unwrap(),
             vec![
                 GetGroupParticipantsResponse {
                     user: Some(alice.clone())
@@ -369,7 +400,12 @@ fn it_can_have_multiple_users() {
 fn it_can_change_between_recurrence_types() {
     with_server_ready(|uri| async {
         let mut client = AuthenticatedClient::connect(uri).await;
-        let user = client.login(LoginRequest::default()).await.user.unwrap();
+        let user = client
+            .login(LoginRequest::default())
+            .await
+            .unwrap()
+            .user
+            .unwrap();
 
         let CreateTaskResponse { id: task_id, .. } = client
             .create_task(CreateTaskRequest {
@@ -382,10 +418,11 @@ fn it_can_change_between_recurrence_types() {
                 recurring: None,
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 title: "My task".to_string(),
@@ -418,10 +455,11 @@ fn it_can_change_between_recurrence_types() {
                 })),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 title: "My task".to_string(),
@@ -456,10 +494,11 @@ fn it_can_change_between_recurrence_types() {
                 )),
                 ..Default::default()
             })
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(
-            client.get_tasks().await,
+            client.get_tasks().await.unwrap(),
             vec![GetTasksResponse {
                 id: task_id,
                 title: "My task".to_string(),
@@ -489,11 +528,11 @@ fn it_can_change_between_recurrence_types() {
 }
 
 #[test]
-fn it_can_fetch_categories() {
+fn it_can_handle_categories() {
     with_server_ready(|uri| async {
         let mut client = AuthenticatedClient::connect(uri).await;
 
-        let categories = client.get_categories().await;
+        let categories = client.get_categories().await.unwrap();
 
         let get_category_id = |raw_title: &str| {
             categories
@@ -556,7 +595,8 @@ fn it_can_fetch_categories() {
                 color: "#ff0000".to_string(),
                 is_enabled: false,
             })
-            .await;
+            .await
+            .unwrap();
 
         client
             .update_category(UpdateCategoryRequest {
@@ -564,7 +604,8 @@ fn it_can_fetch_categories() {
                 color: "#ff00ff".to_string(),
                 is_enabled: false,
             })
-            .await;
+            .await
+            .unwrap();
 
         let cleaning = client
             .create_subcategory(CreateSubcategoryRequest {
@@ -572,7 +613,8 @@ fn it_can_fetch_categories() {
                 title: "Cleaning!".to_string(),
                 color: "".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         let cleaning = client
             .update_subcategory(UpdateSubcategoryRequest {
@@ -580,7 +622,8 @@ fn it_can_fetch_categories() {
                 title: "Cleaning".to_string(),
                 color: "#00ff00".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         let delete = client
             .create_subcategory(CreateSubcategoryRequest {
@@ -588,13 +631,15 @@ fn it_can_fetch_categories() {
                 title: "Delete me".to_string(),
                 color: "".to_string(),
             })
-            .await;
+            .await
+            .unwrap();
 
         client
             .delete_subcategory(DeleteSubcategoryRequest { id: delete.id })
-            .await;
+            .await
+            .unwrap();
 
-        let categories = client.get_categories().await;
+        let categories = client.get_categories().await.unwrap();
 
         assert_eq!(
             categories,
@@ -643,6 +688,180 @@ fn it_can_fetch_categories() {
     });
 }
 
-// TODO: Test read task with category and no subcategory
-// TODO: Test read task with category and subcategory
-// TODO: Test update task with category and subcategory fails if subcategory not in category
+#[test]
+fn it_can_have_tasks_with_subcategories() {
+    with_server_ready(|uri| async {
+        let mut client = AuthenticatedClient::connect(uri).await;
+        let user = client
+            .login(LoginRequest::default())
+            .await
+            .unwrap()
+            .user
+            .unwrap();
+
+        let categories = client.get_categories().await.unwrap();
+
+        let get_category_id = |raw_title: &str| {
+            categories
+                .iter()
+                .find(|c| c.raw_title == raw_title)
+                .map(|c| c.id)
+                .unwrap_or_default()
+        };
+
+        let finance_id = get_category_id("finance");
+        let home_id = get_category_id("home");
+
+        let cleaning = client
+            .create_subcategory(CreateSubcategoryRequest {
+                category_id: home_id,
+                title: "Cleaning!".to_string(),
+                color: "".to_string(),
+            })
+            .await
+            .unwrap();
+
+        let simple_task = client
+            .create_task(CreateTaskRequest {
+                title: "Simple task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+
+        let finance_task = client
+            .create_task(CreateTaskRequest {
+                title: "Finance task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                category_id: finance_id,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+
+        let cleaning_task = client
+            .create_task(CreateTaskRequest {
+                title: "Cleaning task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                category_id: home_id,
+                subcategory_id: cleaning.id,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            client.get_tasks().await.unwrap(),
+            vec![
+                GetTasksResponse {
+                    id: simple_task.id,
+                    title: "Simple task".to_string(),
+                    start_date: Some(Date {
+                        year: 2022,
+                        month: 1,
+                        day: 1,
+                    }),
+                    recurring: None,
+                    responsible: Some(user.clone()),
+                    can_update: true,
+                    can_toggle: true,
+                    can_delete: true,
+                    ..Default::default()
+                },
+                GetTasksResponse {
+                    id: finance_task.id,
+                    title: "Finance task".to_string(),
+                    start_date: Some(Date {
+                        year: 2022,
+                        month: 1,
+                        day: 1,
+                    }),
+                    recurring: None,
+                    responsible: Some(user.clone()),
+                    can_update: true,
+                    can_toggle: true,
+                    can_delete: true,
+                    category_id: finance_id,
+                    ..Default::default()
+                },
+                GetTasksResponse {
+                    id: cleaning_task.id,
+                    title: "Cleaning task".to_string(),
+                    start_date: Some(Date {
+                        year: 2022,
+                        month: 1,
+                        day: 1,
+                    }),
+                    recurring: None,
+                    responsible: Some(user.clone()),
+                    can_update: true,
+                    can_toggle: true,
+                    can_delete: true,
+                    category_id: home_id,
+                    subcategory_id: cleaning.id,
+                    ..Default::default()
+                },
+            ]
+        );
+    });
+}
+
+#[test]
+fn it_fails_to_create_task_with_invalid_category() {
+    with_server_ready(|uri| async {
+        let mut client = AuthenticatedClient::connect(uri).await;
+
+        let categories = client.get_categories().await.unwrap();
+
+        let get_category_id = |raw_title: &str| {
+            categories
+                .iter()
+                .find(|c| c.raw_title == raw_title)
+                .map(|c| c.id)
+                .unwrap_or_default()
+        };
+
+        let finance_id = get_category_id("finance");
+        let home_id = get_category_id("home");
+
+        let cleaning = client
+            .create_subcategory(CreateSubcategoryRequest {
+                category_id: home_id,
+                title: "Cleaning!".to_string(),
+                color: "".to_string(),
+            })
+            .await
+            .unwrap();
+
+        let err = client
+            .create_task(CreateTaskRequest {
+                title: "Cleaning task".to_string(),
+                start_date: Some(Date {
+                    year: 2022,
+                    month: 1,
+                    day: 1,
+                }),
+                category_id: finance_id,
+                subcategory_id: cleaning.id,
+                ..Default::default()
+            })
+            .await
+            .unwrap_err();
+
+        assert_eq!(err.code(), tonic::Code::InvalidArgument);
+        assert_eq!(err.message(), "Subcategory must be child of category");
+    });
+}

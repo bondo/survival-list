@@ -1,5 +1,26 @@
 {
   "db": "PostgreSQL",
+  "077237ef6e7664e8b688767921473a7af27a51b703b747d34d8199ac2315c7ed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "category_id: CategoryId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                        SELECT\n                            category_id as \"category_id: CategoryId\"\n                        FROM\n                            subcategories\n                        WHERE\n                            user_id = $1 AND\n                            id = $2\n                    "
+  },
   "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a": {
     "describe": {
       "columns": [
@@ -61,7 +82,7 @@
     },
     "query": "\n                SELECT\n                    u.id as \"id: UserId\",\n                    u.uid,\n                    u.name,\n                    u.picture_url\n                FROM\n                    users u\n                INNER JOIN\n                    users_groups ug ON\n                        ug.user_id = u.id\n                WHERE\n                    ug.group_id = $2 AND\n                    EXISTS (\n                        SELECT\n                        FROM\n                            users_groups viewer_groups\n                        WHERE\n                            viewer_groups.user_id = $1 AND\n                            viewer_groups.group_id = $2\n                    )\n                ORDER BY\n                    u.created_at\n            "
   },
-  "12fc47eaed77983b8e993e5be858d0bf846045409a702bdc554e9e624d7a7dcc": {
+  "23885329a12e673a5b439d52f06d8b71d9472da77af0b1a6e5bc85694236f3d4": {
     "describe": {
       "columns": [
         {
@@ -76,19 +97,18 @@
       "parameters": {
         "Left": [
           "Int4",
-          "Int4",
           "Text",
           "Date",
           "Date",
           "Int4",
-          "Int4",
-          "Interval"
+          "Interval",
+          "Int4"
         ]
       }
     },
-    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    title = $3,\n                    start_date = $4,\n                    end_date = $5,\n                    responsible_user_id = $6,\n                    group_id = $7,\n                    estimate = $8\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
+    "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date,\n                    group_id,\n                    estimate,\n                    category_id\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4,\n                    $5,\n                    $6,\n                    $7\n                )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
   },
-  "1bc3656027a772e1e3a63fb9b86cd0a5c67ab6f48cc9a9e423ead31b05a2cd8a": {
+  "259872f3b0ddf31c70d855c4bc40a2cb8055efe77dfd20a271b964075f0b5b04": {
     "describe": {
       "columns": [
         {
@@ -142,7 +162,7 @@
           "type_info": "Int4"
         },
         {
-          "name": "subcategory_id",
+          "name": "subcategory_id: Option<i32>",
           "ordinal": 10,
           "type_info": "Int4"
         },
@@ -241,37 +261,11 @@
       "parameters": {
         "Left": [
           "Int4",
-          "Int4",
           "Int4"
         ]
       }
     },
-    "query": "\n                WITH RECURSIVE\n                    base_task AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            (\n                                t.responsible_user_id = $1\n                            ) is_responsible,\n                            EXISTS (\n                                SELECT\n                                FROM\n                                    users_groups ug\n                                WHERE\n                                    ug.group_id = t.group_id AND\n                                    ug.user_id = $1\n                            ) is_in_group,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            t.category_id,\n                            ts.subcategory_id,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        LEFT JOIN\n                            tasks_subcategories ts ON\n                                ts.task_id = t.id AND\n                                ts.user_id = $1\n                        WHERE\n                            t.id = $2\n                    ),\n                    every_task AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_task bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.is_responsible,\n                            et.is_in_group,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.category_id,\n                            et.subcategory_id,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_task et\n                        WHERE\n                            et.depth < $3 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.is_responsible,\n                    bt.is_in_group,\n                    bt.completed_at,\n                    bt.completed_at < CURRENT_TIMESTAMP - INTERVAL '1 day' as is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.category_id,\n                    bt.subcategory_id,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_task bt\n            "
-  },
-  "1e59d0bc0b19919938c42f0ddc1f24e1411a9546a0d5d53c0e4b1f8ba3cf686b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: TaskId",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Text",
-          "Date",
-          "Date",
-          "Int4",
-          "Interval"
-        ]
-      }
-    },
-    "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date,\n                    group_id,\n                    estimate\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4,\n                    $5,\n                    $6\n                )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
+    "query": "\n                WITH RECURSIVE\n                    base_tasks AS (\n                        SELECT\n                            t.id,\n                            t.created_at,\n                            t.title,\n                            (\n                                t.responsible_user_id = $1\n                            ) is_responsible,\n                            EXISTS (\n                                SELECT\n                                FROM\n                                    users_groups ug\n                                WHERE\n                                    ug.group_id = t.group_id AND\n                                    ug.user_id = $1\n                            ) is_in_group,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            t.category_id,\n                            ts.subcategory_id,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        LEFT JOIN\n                            tasks_subcategories ts ON\n                                ts.task_id = t.id AND\n                                ts.user_id = $1\n                        WHERE\n                            -- Hide old items\n                            (\n                                t.completed_at IS NULL OR\n                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                            ) AND\n                            -- Permission check\n                            (\n                                -- Viewer is responsible\n                                t.responsible_user_id = $1 OR\n                                -- Viewer is in task group\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups ug\n                                    WHERE\n                                        ug.group_id = t.group_id AND\n                                        ug.user_id = $1\n                                ) OR\n                                -- Is friend responsible\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups viewer_group\n                                    INNER JOIN\n                                        users_groups friend_group ON\n                                            friend_group.group_id = viewer_group.group_id\n                                    WHERE\n                                        viewer_group.user_id = $1 AND\n                                        friend_group.user_id = t.responsible_user_id\n                                )\n                            )\n                    ),\n                    every_tasks AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_tasks bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.created_at,\n                            et.title,\n                            et.is_responsible,\n                            et.is_in_group,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.category_id,\n                            et.subcategory_id,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_tasks et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.is_responsible,\n                    bt.is_in_group,\n                    bt.completed_at,\n                    false is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.category_id,\n                    bt.subcategory_id as \"subcategory_id: Option<i32>\",\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_tasks bt\n                ORDER BY\n                    bt.created_at\n            "
   },
   "29a2e90c1d7e246ccfc4bf02af698eb19ee28950e467990f2db633c79c71d1ae": {
     "describe": {
@@ -469,7 +463,7 @@
     },
     "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = EXCLUDED.name,\n                    picture_url = EXCLUDED.picture_url\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            "
   },
-  "6e870d88150f44d31ab5a45fdc47023291b08500df25938b2a67bf1bf1e7cec9": {
+  "73a83166e980f4fa71c86899a4be0a91abf311fb8aa747a4f77f3acf522f0376": {
     "describe": {
       "columns": [
         {
@@ -523,7 +517,7 @@
           "type_info": "Int4"
         },
         {
-          "name": "subcategory_id",
+          "name": "subcategory_id: Option<i32>",
           "ordinal": 10,
           "type_info": "Int4"
         },
@@ -622,11 +616,12 @@
       "parameters": {
         "Left": [
           "Int4",
+          "Int4",
           "Int4"
         ]
       }
     },
-    "query": "\n                WITH RECURSIVE\n                    base_tasks AS (\n                        SELECT\n                            t.id,\n                            t.created_at,\n                            t.title,\n                            (\n                                t.responsible_user_id = $1\n                            ) is_responsible,\n                            EXISTS (\n                                SELECT\n                                FROM\n                                    users_groups ug\n                                WHERE\n                                    ug.group_id = t.group_id AND\n                                    ug.user_id = $1\n                            ) is_in_group,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            t.category_id,\n                            ts.subcategory_id,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        LEFT JOIN\n                            tasks_subcategories ts ON\n                                ts.task_id = t.id AND\n                                ts.user_id = $1\n                        WHERE\n                            -- Hide old items\n                            (\n                                t.completed_at IS NULL OR\n                                t.completed_at > CURRENT_TIMESTAMP - INTERVAL '1 day'\n                            ) AND\n                            -- Permission check\n                            (\n                                -- Viewer is responsible\n                                t.responsible_user_id = $1 OR\n                                -- Viewer is in task group\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups ug\n                                    WHERE\n                                        ug.group_id = t.group_id AND\n                                        ug.user_id = $1\n                                ) OR\n                                -- Is friend responsible\n                                EXISTS (\n                                    SELECT\n                                    FROM\n                                        users_groups viewer_group\n                                    INNER JOIN\n                                        users_groups friend_group ON\n                                            friend_group.group_id = viewer_group.group_id\n                                    WHERE\n                                        viewer_group.user_id = $1 AND\n                                        friend_group.user_id = t.responsible_user_id\n                                )\n                            )\n                    ),\n                    every_tasks AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_tasks bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.created_at,\n                            et.title,\n                            et.is_responsible,\n                            et.is_in_group,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.category_id,\n                            et.subcategory_id,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_tasks et\n                        WHERE\n                            et.depth < $2 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.is_responsible,\n                    bt.is_in_group,\n                    bt.completed_at,\n                    false is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.category_id,\n                    bt.subcategory_id,\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_tasks bt\n                ORDER BY\n                    bt.created_at\n            "
+    "query": "\n                WITH RECURSIVE\n                    base_task AS (\n                        SELECT\n                            t.id,\n                            t.title,\n                            (\n                                t.responsible_user_id = $1\n                            ) is_responsible,\n                            EXISTS (\n                                SELECT\n                                FROM\n                                    users_groups ug\n                                WHERE\n                                    ug.group_id = t.group_id AND\n                                    ug.user_id = $1\n                            ) is_in_group,\n                            t.completed_at,\n                            t.start_date,\n                            t.end_date,\n                            t.estimate,\n                            t.category_id,\n                            ts.subcategory_id,\n                            u.id as responsible_id,\n                            u.name as responsible_name,\n                            u.picture_url as responsible_picture_url,\n                            g.id as group_id,\n                            g.title as group_title,\n                            g.uid as group_uid,\n                            r.id as recurrence_id,\n                            r.frequency as recurrence_frequency,\n                            r.is_every as recurrence_is_every,\n                            r.current_task_id as recurrence_current_task_id,\n                            c.previous_task_id as recurrence_previous_task_id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            users u ON\n                                u.id = t.responsible_user_id\n                        LEFT JOIN\n                            groups g ON\n                                g.id = t.group_id\n                        LEFT JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        LEFT JOIN\n                            tasks c ON\n                                c.id = r.current_task_id\n                        LEFT JOIN\n                            tasks_subcategories ts ON\n                                ts.task_id = t.id AND\n                                ts.user_id = $1\n                        WHERE\n                            t.id = $2\n                    ),\n                    every_task AS (\n                        SELECT\n                            bt.*,\n                            0 depth\n                        FROM\n                            base_task bt\n                        WHERE\n                            bt.recurrence_is_every\n                        UNION ALL\n                        SELECT\n                            et.id,\n                            et.title,\n                            et.is_responsible,\n                            et.is_in_group,\n                            et.completed_at,\n                            (et.start_date + et.recurrence_frequency)::date,\n                            (et.end_date + et.recurrence_frequency)::date,\n                            et.estimate,\n                            et.category_id,\n                            et.subcategory_id,\n                            et.responsible_id,\n                            et.responsible_name,\n                            et.responsible_picture_url,\n                            et.group_id,\n                            et.group_title,\n                            et.group_uid,\n                            et.recurrence_id,\n                            et.recurrence_frequency,\n                            et.recurrence_is_every,\n                            et.recurrence_current_task_id,\n                            et.recurrence_previous_task_id,\n                            et.depth + 1\n                        FROM\n                            every_task et\n                        WHERE\n                            et.depth < $3 AND\n                            COALESCE(et.start_date, et.end_date) + et.recurrence_frequency < CURRENT_TIMESTAMP\n                    )\n                SELECT\n                    bt.id,\n                    bt.title,\n                    bt.is_responsible,\n                    bt.is_in_group,\n                    bt.completed_at,\n                    bt.completed_at < CURRENT_TIMESTAMP - INTERVAL '1 day' as is_old,\n                    bt.start_date,\n                    bt.end_date,\n                    bt.estimate,\n                    bt.category_id,\n                    bt.subcategory_id as \"subcategory_id: Option<i32>\",\n                    bt.responsible_id,\n                    bt.responsible_name,\n                    bt.responsible_picture_url,\n                    bt.group_id as \"group_id: Option<i32>\",\n                    bt.group_title as \"group_title: Option<String>\",\n                    bt.group_uid as \"group_uid: Option<Uuid>\",\n                    bt.recurrence_id as \"recurrence_id: Option<i32>\",\n                    bt.recurrence_frequency as \"recurrence_frequency: Option<PgInterval>\",\n                    bt.recurrence_is_every as \"recurrence_is_every: Option<bool>\",\n                    bt.recurrence_current_task_id as \"recurrence_current_task_id: Option<i32>\",\n                    bt.recurrence_previous_task_id,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.start_date < CURRENT_TIMESTAMP)::int as recurrence_num_ready_to_start,\n                    (SELECT COUNT(*) FROM every_task et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline\n                FROM\n                    base_task bt\n            "
   },
   "792c754e379cb5de080a08b3fd0036ba44e3c372559d46fb879bfa22cce47239": {
     "describe": {
@@ -641,6 +636,34 @@
       }
     },
     "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    frequency = $1,\n                    is_every = $2\n                WHERE\n                    r.id = $3\n            "
+  },
+  "81bebe3e273a2828324e250eb4aeb93d62fab9f600f8e9d858ff50749ee31ed6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: TaskId",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Text",
+          "Date",
+          "Date",
+          "Int4",
+          "Int4",
+          "Interval",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                UPDATE\n                    tasks t\n                SET\n                    title = $3,\n                    start_date = $4,\n                    end_date = $5,\n                    responsible_user_id = $6,\n                    group_id = $7,\n                    estimate = $8,\n                    category_id = $9\n                WHERE\n                    t.id = $2 AND\n                    -- Permission check\n                    (\n                        -- Viewer is responsible\n                        t.responsible_user_id = $1 OR\n                        -- Viewer is in task group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups ug\n                            WHERE\n                                ug.group_id = t.group_id AND\n                                ug.user_id = $1\n                        )\n                    )\n                RETURNING\n                    id as \"id: TaskId\"\n            "
   },
   "89634b2042189f891057f5fd5072eb4d6ca3067ec863fca212aca81df06880bf": {
     "describe": {
@@ -929,6 +952,19 @@
     },
     "query": "\n                SELECT\n                    c.id as \"id: CategoryId\",\n                    c.raw_title,\n                    co.color,\n                    co.is_enabled as \"is_enabled: Option<bool>\",\n                    (\n                        SELECT\n                            json_agg(json_build_object(\n                                'id', s.id,\n                                'title', s.title,\n                                'color', s.color\n                            ))\n                        FROM\n                            subcategories s\n                        WHERE\n                            s.category_id = c.id AND\n                            s.user_id = $1\n                    ) as \"subcategories: Json<Vec<SubcategoryResult>>\"\n                FROM\n                    categories c\n                LEFT JOIN\n                    categories_override co ON\n                        co.category_id = c.id AND\n                        co.user_id = $1\n                WHERE\n                    c.id = $2\n            "
   },
+  "e427e764c35a2a46ef61a0299b466af362e9a93d611a794d5a39b50d31573140": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                DELETE FROM\n                    tasks_subcategories\n                WHERE\n                    user_id = $1 AND\n                    task_id = $2\n            "
+  },
   "ea07e2228de7a7e04e967f5970faf84108fe81657dba9c3c786cc2157989951a": {
     "describe": {
       "columns": [
@@ -995,5 +1031,19 @@
       }
     },
     "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    -- No-op to allow RETURNING\n                    uid = EXCLUDED.uid\n                RETURNING\n                    id as \"id: UserId\"\n            "
+  },
+  "ff01a4953967e5f06e7c85fa16e8f154a71db744be3bd431abeb14be06e98064": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                INSERT INTO tasks_subcategories (\n                    user_id,\n                    task_id,\n                    subcategory_id\n                ) VALUES (\n                    $1,\n                    $2,\n                    $3\n                ) ON CONFLICT (\n                    user_id,\n                    task_id\n                ) DO UPDATE SET\n                    subcategory_id = EXCLUDED.subcategory_id\n            "
   }
 }

@@ -63,7 +63,7 @@ struct TaskRawResult {
     pub recurrence_num_ready_to_start: Option<i32>,
     pub recurrence_num_reached_deadline: Option<i32>,
     pub category_id: Option<i32>,
-    pub subcategory_id: i32,
+    pub subcategory_id: Option<i32>,
 }
 
 impl TaskRawResult {
@@ -199,7 +199,7 @@ impl TryFrom<TaskRawResult> for TaskResult {
             can_delete,
             is_friend_task,
             category_id: value.category_id.map(CategoryId),
-            subcategory_id: Some(SubcategoryId(value.subcategory_id)),
+            subcategory_id: value.subcategory_id.map(SubcategoryId),
         })
     }
 }
@@ -377,6 +377,8 @@ pub struct CreateTaskParams {
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
     pub recurrence: Option<TaskRecurrenceInput>,
+    pub category_id: Option<CategoryId>,
+    pub subcategory_id: Option<SubcategoryId>,
 }
 
 pub struct UpdateTaskParams {
@@ -388,6 +390,8 @@ pub struct UpdateTaskParams {
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
     pub recurrence: Option<TaskRecurrenceInput>,
+    pub category_id: Option<CategoryId>,
+    pub subcategory_id: Option<SubcategoryId>,
 }
 
 impl Database {
@@ -530,7 +534,7 @@ impl Database {
                     bt.end_date,
                     bt.estimate,
                     bt.category_id,
-                    bt.subcategory_id,
+                    bt.subcategory_id as "subcategory_id: Option<i32>",
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,
@@ -566,6 +570,13 @@ impl Database {
                 )
                 .await?;
 
+                tx.validate_category_and_subcategory(
+                    params.user_id,
+                    params.category_id,
+                    params.subcategory_id,
+                )
+                .await?;
+
                 let task_id = tx.create_task_internal(&params).await?;
 
                 match params.recurrence {
@@ -578,6 +589,11 @@ impl Database {
                         tx.create_recurrence_internal(task_id, frequency, false)
                             .await?;
                     }
+                }
+
+                if let Some(subcategory_id) = params.subcategory_id {
+                    tx.set_task_subcategory_internal(params.user_id, task_id, subcategory_id)
+                        .await?;
                 }
 
                 tx.get_task_unchecked(params.user_id, task_id)
@@ -596,6 +612,13 @@ impl Database {
                     params.user_id,
                     params.responsible_id,
                     params.group_id,
+                )
+                .await?;
+
+                tx.validate_category_and_subcategory(
+                    params.user_id,
+                    params.category_id,
+                    params.subcategory_id,
                 )
                 .await?;
 
@@ -648,6 +671,14 @@ impl Database {
                                 .await?;
                         }
                     }
+                }
+
+                if let Some(subcategory_id) = params.subcategory_id {
+                    tx.set_task_subcategory_internal(params.user_id, task_id, subcategory_id)
+                        .await?;
+                } else {
+                    tx.unset_task_subcategory_internal(params.user_id, task_id)
+                        .await?;
                 }
 
                 tx.get_task_unchecked(params.user_id, task_id)
@@ -952,7 +983,7 @@ impl<'c> Transaction<'c> {
                     bt.end_date,
                     bt.estimate,
                     bt.category_id,
-                    bt.subcategory_id,
+                    bt.subcategory_id as "subcategory_id: Option<i32>",
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,
@@ -1031,6 +1062,51 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
+    async fn validate_category_and_subcategory(
+        &mut self,
+        user_id: UserId,
+        category_id: Option<CategoryId>,
+        subcategory_id: Option<SubcategoryId>,
+    ) -> Result<()> {
+        match (category_id, subcategory_id) {
+            (None, None) => Ok(()),
+            (None, Some(_)) => Err(Error::InvalidArgument(
+                "Category must be set when subcategory is set",
+            )),
+            (Some(_), None) => Ok(()),
+            (Some(category_id), Some(subcategory_id)) => {
+                let parent = sqlx::query_scalar!(
+                    r#"
+                        SELECT
+                            category_id as "category_id: CategoryId"
+                        FROM
+                            subcategories
+                        WHERE
+                            user_id = $1 AND
+                            id = $2
+                    "#,
+                    user_id.0,
+                    subcategory_id.0
+                )
+                .fetch_optional(self)
+                .await
+                .context("Failed to fetch parent of subcategory")?;
+
+                if let Some(parent) = parent {
+                    if parent.0 != category_id.0 {
+                        return Err(Error::InvalidArgument(
+                            "Subcategory must be child of category",
+                        ));
+                    }
+                } else {
+                    return Err(Error::NotFound("Subcategory not found"));
+                }
+
+                Ok(())
+            }
+        }
+    }
+
     async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId> {
         sqlx::query_scalar!(
             r#"
@@ -1040,7 +1116,8 @@ impl<'c> Transaction<'c> {
                     start_date,
                     end_date,
                     group_id,
-                    estimate
+                    estimate,
+                    category_id
                 )
                 VALUES (
                     $1,
@@ -1048,7 +1125,8 @@ impl<'c> Transaction<'c> {
                     $3,
                     $4,
                     $5,
-                    $6
+                    $6,
+                    $7
                 )
                 RETURNING
                     id as "id: TaskId"
@@ -1059,6 +1137,7 @@ impl<'c> Transaction<'c> {
             params.period.end(),
             params.group_id.map(|id| id.0),
             params.estimate.as_ref().map(PgInterval::from),
+            params.category_id.map(|id| id.0)
         )
         .fetch_one(self)
         .await
@@ -1077,7 +1156,8 @@ impl<'c> Transaction<'c> {
                     end_date = $5,
                     responsible_user_id = $6,
                     group_id = $7,
-                    estimate = $8
+                    estimate = $8,
+                    category_id = $9
                 WHERE
                     t.id = $2 AND
                     -- Permission check
@@ -1105,10 +1185,67 @@ impl<'c> Transaction<'c> {
             params.responsible_id.0,
             params.group_id.map(|id| id.0),
             params.estimate.as_ref().map(PgInterval::from),
+            params.category_id.map(|id| id.0)
         )
         .fetch_one(self)
         .await
         .map_err(|_| Error::PermissionDenied("You are not allowed to update this item"))
+    }
+
+    async fn set_task_subcategory_internal(
+        &mut self,
+        user_id: UserId,
+        task_id: TaskId,
+        subcategory_id: SubcategoryId,
+    ) -> Result<()> {
+        sqlx::query!(
+            r#"
+                INSERT INTO tasks_subcategories (
+                    user_id,
+                    task_id,
+                    subcategory_id
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3
+                ) ON CONFLICT (
+                    user_id,
+                    task_id
+                ) DO UPDATE SET
+                    subcategory_id = EXCLUDED.subcategory_id
+            "#,
+            user_id.0,
+            task_id.0,
+            subcategory_id.0
+        )
+        .execute(self)
+        .await
+        .context("Failed to set task subcategory")?;
+
+        Ok(())
+    }
+
+    async fn unset_task_subcategory_internal(
+        &mut self,
+        user_id: UserId,
+        task_id: TaskId,
+    ) -> Result<()> {
+        sqlx::query!(
+            r#"
+                DELETE FROM
+                    tasks_subcategories
+                WHERE
+                    user_id = $1 AND
+                    task_id = $2
+            "#,
+            user_id.0,
+            task_id.0
+        )
+        .execute(self)
+        .await
+        .context("Failed to unset task subcategory")?;
+
+        Ok(())
     }
 
     async fn toggle_task_completed_internal(

@@ -93,6 +93,16 @@ impl api_server::Api for Service {
                 } else {
                     Some(GroupId::new(request.group_id))
                 },
+                category_id: if request.category_id == i32::default() {
+                    None
+                } else {
+                    Some(CategoryId::new(request.category_id))
+                },
+                subcategory_id: if request.subcategory_id == i32::default() {
+                    None
+                } else {
+                    Some(SubcategoryId::new(request.subcategory_id))
+                },
                 estimate: request.estimate.map(TryInto::try_into).transpose()?,
                 recurrence: request
                     .recurring
@@ -134,6 +144,16 @@ impl api_server::Api for Service {
                     None
                 } else {
                     Some(GroupId::new(request.group_id))
+                },
+                category_id: if request.category_id == i32::default() {
+                    None
+                } else {
+                    Some(CategoryId::new(request.category_id))
+                },
+                subcategory_id: if request.subcategory_id == i32::default() {
+                    None
+                } else {
+                    Some(SubcategoryId::new(request.subcategory_id))
                 },
                 estimate: request.estimate.map(TryInto::try_into).transpose()?,
                 recurrence: request
