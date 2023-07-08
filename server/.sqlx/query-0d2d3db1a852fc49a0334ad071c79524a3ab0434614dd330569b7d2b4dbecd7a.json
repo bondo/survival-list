@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    SELECT\n                        -- Viewer in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $1 AND\n                                group_id = $3\n                        ) AND\n                        -- Responsible in group\n                        EXISTS (\n                            SELECT\n                            FROM\n                                users_groups\n                            WHERE\n                                user_id = $2 AND\n                                group_id = $3\n                        )\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "?column?",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0d2d3db1a852fc49a0334ad071c79524a3ab0434614dd330569b7d2b4dbecd7a"
+}

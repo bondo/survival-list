@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH\n                    new_task AS (\n                        INSERT INTO tasks (\n                            responsible_user_id,\n                            title,\n                            start_date,\n                            end_date,\n                            group_id,\n                            estimate,\n                            previous_task_id,\n                            recurrence_id\n                        )\n                        SELECT\n                            t.responsible_user_id,\n                            t.title,\n                            t.start_date + CASE\n                                WHEN r.is_every THEN\n                                    r.frequency\n                                ELSE\n                                    r.frequency +\n                                    (\n                                        CURRENT_DATE -\n                                        COALESCE(t.start_date, t.end_date)\n                                    ) * INTERVAL '1 day'\n                            END,\n                            t.end_date + CASE\n                                WHEN r.is_every THEN\n                                    r.frequency\n                                ELSE\n                                    r.frequency +\n                                    (\n                                        CURRENT_DATE -\n                                        COALESCE(t.start_date, t.end_date)\n                                    ) * INTERVAL '1 day'\n                            END,\n                            t.group_id,\n                            t.estimate,\n                            t.id,\n                            r.id\n                        FROM\n                            tasks t\n                        INNER JOIN\n                            recurrences r ON\n                                r.id = t.recurrence_id\n                        WHERE\n                            t.id = $1\n                        RETURNING\n                            id,\n                            recurrence_id\n                    )\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = t.id\n                FROM\n                    new_task t\n                WHERE\n                    t.recurrence_id = r.id\n                RETURNING\n                    t.id as \"id: TaskId\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: TaskId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "99cb7feb76b5395b61af9edbffc05c5abd6bacb7d81db329075fe676b515cf42"
+}

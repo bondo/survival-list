@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    c.id as \"id: CategoryId\",\n                    c.raw_title,\n                    co.color,\n                    co.is_enabled as \"is_enabled: Option<bool>\",\n                    (\n                        SELECT\n                            json_agg(json_build_object(\n                                'id', s.id,\n                                'title', s.title,\n                                'color', s.color\n                            ))\n                        FROM\n                            subcategories s\n                        WHERE\n                            s.category_id = c.id AND\n                            s.user_id = $1\n                    ) as \"subcategories: Json<Vec<SubcategoryResult>>\"\n                FROM\n                    categories c\n                LEFT JOIN\n                    categories_override co ON\n                        co.category_id = c.id AND\n                        co.user_id = $1\n                WHERE\n                    c.id = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: CategoryId",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "raw_title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "color",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_enabled: Option<bool>",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "subcategories: Json<Vec<SubcategoryResult>>",
+        "type_info": "Json"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "d3bf0c822afaaec3180fcaaf1968d65987ed1a7a6f32d39476c2532cb7cc8060"
+}
