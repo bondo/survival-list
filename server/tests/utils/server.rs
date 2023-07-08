@@ -9,11 +9,12 @@ use rand::{thread_rng, Rng};
 use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use tonic::transport::{Channel, Uri};
+use with_postgres_ready::with_postgres_ready;
 
 use crate::utils::AuthStub;
 use server::proto::ping::v1::{ping_api_client::PingApiClient, PingRequest};
 
-use super::{block_on, with_postgres_ready};
+use super::block_on;
 
 pub(crate) fn with_server_ready<T, Fut>(f: T)
 where
