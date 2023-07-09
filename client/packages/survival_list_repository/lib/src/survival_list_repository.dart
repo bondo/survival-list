@@ -40,6 +40,10 @@ class SurvivalListRepository {
     _groupsStreamController
       ..onListen = _onGroupsListen
       ..onCancel = _onGroupsCancel;
+
+    _categoriesStreamController
+      ..onListen = _onCategoriesListen
+      ..onCancel = _onCategoriesCancel;
   }
 
   Future<void> _authProvider(
@@ -509,6 +513,101 @@ class SurvivalListRepository {
         _pendingGroupParticipantsResponse = null;
         _groupParticipantsStreamController.add(result);
         _isFetchingGroupParticipantsStreamController.add(false);
+      },
+      cancelOnError: true,
+    );
+  }
+
+  /*++++++++++++*
+   + CATEGORIES +
+   *++++++++++++*/
+
+  final _isFetchingCategoriesStreamController =
+      BehaviorSubject<bool>.seeded(false);
+  final _categoriesStreamController =
+      BehaviorSubject<Map<int, (Category, List<Subcategory>)>>.seeded(
+          HashMap());
+  StreamSubscription<bool>? _categoriesUserSubscription;
+
+  Stream<List<(Category, List<Subcategory>)>> get categories {
+    return _categoriesStreamController
+        .asBroadcastStream()
+        .map((event) => event.values.toList());
+  }
+
+  Stream<bool> get isFetchingCategories {
+    return _isFetchingCategoriesStreamController.asBroadcastStream();
+  }
+
+  void _onCategoriesListen() {
+    assert(
+      _categoriesUserSubscription == null,
+      'Already listening for categories',
+    );
+
+    if (_authenticationRepository.currentUser.isNotEmpty) {
+      _fetchCategories();
+    }
+    _categoriesUserSubscription = _authenticationRepository.user
+        .map((u) => u.isNotEmpty)
+        .distinct()
+        .listen((isNotEmpty) {
+      if (isNotEmpty) {
+        unawaited(_fetchCategories());
+      } else {
+        _categoriesStreamController.add(HashMap());
+      }
+    });
+  }
+
+  void _onCategoriesCancel() {
+    assert(
+      _categoriesUserSubscription != null,
+      'Not listening for categories',
+    );
+
+    _categoriesUserSubscription!.cancel();
+  }
+
+  ResponseStream<api.GetCategoriesResponse>? _pendingCategoriesResponse;
+  Future<void> _fetchCategories() async {
+    if (_pendingCategoriesResponse != null) {
+      unawaited(_pendingCategoriesResponse!.cancel());
+      _pendingCategoriesResponse = null;
+    } else {
+      _isFetchingCategoriesStreamController.add(true);
+    }
+
+    _pendingCategoriesResponse = _client.getCategories(
+      api.GetCategoriesRequest(),
+    );
+    final result = HashMap<int, (Category, List<Subcategory>)>();
+    _pendingCategoriesResponse!
+        .map(
+      (response) => (
+        Category(
+          id: response.id,
+          rawTitle: response.rawTitle,
+          color: response.color,
+          isEnabled: response.isEnabled,
+        ),
+        response.subcategories
+            .map(
+              (subcategory) => Subcategory(
+                id: subcategory.id,
+                title: subcategory.title,
+                color: subcategory.color,
+              ),
+            )
+            .toList()
+      ),
+    )
+        .listen(
+      (v) => result[v.$1.id] = v,
+      onDone: () {
+        _pendingCategoriesResponse = null;
+        _categoriesStreamController.add(result);
+        _isFetchingCategoriesStreamController.add(false);
       },
       cancelOnError: true,
     );
