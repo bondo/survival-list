@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO users (\n                    uid,\n                    name,\n                    picture_url\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    name = EXCLUDED.name,\n                    picture_url = EXCLUDED.picture_url\n                RETURNING\n                    id as \"id: UserId\",\n                    uid,\n                    name,\n                    picture_url\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: UserId",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "uid",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "picture_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6ce4ba473682291f826b9ce5d2294132014c9b7948993827ca9e5ffa34355523"
+}

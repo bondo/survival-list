@@ -79,6 +79,24 @@ class CreateItemResponsibleChanged extends CreateItemEvent {
   List<Object> get props => [responsible ?? 'null'];
 }
 
+class CreateItemCategoryChanged extends CreateItemEvent {
+  const CreateItemCategoryChanged(this.category);
+
+  final Category? category;
+
+  @override
+  List<Object> get props => [category ?? 'null'];
+}
+
+class CreateItemSubcategoryChanged extends CreateItemEvent {
+  const CreateItemSubcategoryChanged(this.subcategory);
+
+  final Subcategory? subcategory;
+
+  @override
+  List<Object> get props => [subcategory ?? 'null'];
+}
+
 class CreateItemSubmitted extends CreateItemEvent {
   const CreateItemSubmitted();
 }

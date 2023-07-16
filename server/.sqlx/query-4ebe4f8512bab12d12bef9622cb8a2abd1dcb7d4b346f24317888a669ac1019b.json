@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM\n                    groups g\n                WHERE\n                    id = $1 AND\n                    NOT EXISTS (\n                        SELECT\n                        FROM\n                            users_groups ug\n                        WHERE\n                            ug.group_id = g.id\n                    )\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4ebe4f8512bab12d12bef9622cb8a2abd1dcb7d4b346f24317888a669ac1019b"
+}

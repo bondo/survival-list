@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM\n                    recurrences r\n                WHERE\n                    r.id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3ee3b2e61ebcd26cb17cbb8aa4ed13ae25a5e344abfc4feb15d6de1ede745fa5"
+}

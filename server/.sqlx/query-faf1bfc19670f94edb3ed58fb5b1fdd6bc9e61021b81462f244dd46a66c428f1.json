@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO categories_override (\n                    user_id,\n                    category_id,\n                    color,\n                    is_enabled\n                ) VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4\n                ) ON CONFLICT (\n                    user_id,\n                    category_id\n                ) DO UPDATE SET\n                    color = EXCLUDED.color,\n                    is_enabled = EXCLUDED.is_enabled\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "faf1bfc19670f94edb3ed58fb5b1fdd6bc9e61021b81462f244dd46a66c428f1"
+}

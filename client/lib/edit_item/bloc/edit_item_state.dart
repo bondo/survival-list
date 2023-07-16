@@ -11,6 +11,8 @@ extension EditItemStatusX on EditItemStatus {
 
 class EditItemState extends Equatable {
   const EditItemState({
+    required this.category,
+    required this.subcategory,
     required this.group,
     required this.item,
     required this.title,
@@ -21,6 +23,8 @@ class EditItemState extends Equatable {
     required this.recurrenceFrequency,
     required this.responsible,
     this.status = EditItemStatus.initial,
+    this.categories = const [],
+    this.categoriesStatus = EditItemStatus.initial,
     this.groups = const [],
     this.groupsStatus = EditItemStatus.initial,
     this.groupParticipants = const [],
@@ -29,6 +33,10 @@ class EditItemState extends Equatable {
   });
 
   final EditItemStatus status;
+  final Category? category;
+  final Subcategory? subcategory;
+  final List<(Category, List<Subcategory>)> categories;
+  final EditItemStatus categoriesStatus;
   final Group? group;
   final List<Group> groups;
   final EditItemStatus groupsStatus;
@@ -46,6 +54,10 @@ class EditItemState extends Equatable {
 
   EditItemState copyWith({
     EditItemStatus Function()? status,
+    Category? Function()? category,
+    Subcategory? Function()? subcategory,
+    List<(Category, List<Subcategory>)> Function()? categories,
+    EditItemStatus Function()? categoriesStatus,
     Group? Function()? group,
     List<Group> Function()? groups,
     EditItemStatus Function()? groupsStatus,
@@ -63,6 +75,11 @@ class EditItemState extends Equatable {
   }) {
     return EditItemState(
       status: status != null ? status() : this.status,
+      category: category != null ? category() : this.category,
+      subcategory: subcategory != null ? subcategory() : this.subcategory,
+      categories: categories != null ? categories() : this.categories,
+      categoriesStatus:
+          categoriesStatus != null ? categoriesStatus() : this.categoriesStatus,
       group: group != null ? group() : this.group,
       groups: groups != null ? groups() : this.groups,
       groupsStatus: groupsStatus != null ? groupsStatus() : this.groupsStatus,
@@ -90,6 +107,10 @@ class EditItemState extends Equatable {
   @override
   List<Object?> get props => [
         status,
+        category,
+        subcategory,
+        categories,
+        categoriesStatus,
         group,
         groups,
         groupsStatus,

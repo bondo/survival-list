@@ -40,6 +40,10 @@ class SurvivalListRepository {
     _groupsStreamController
       ..onListen = _onGroupsListen
       ..onCancel = _onGroupsCancel;
+
+    _categoriesStreamController
+      ..onListen = _onCategoriesListen
+      ..onCancel = _onCategoriesCancel;
   }
 
   Future<void> _authProvider(
@@ -145,6 +149,8 @@ class SurvivalListRepository {
         },
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
+        category: _parseCategory(response.category),
+        subcategory: _parseSubcategory(response.subcategory),
         canUpdate: response.canUpdate,
         canToggle: response.canToggle,
         canDelete: response.canDelete,
@@ -514,6 +520,102 @@ class SurvivalListRepository {
     );
   }
 
+  /*++++++++++++*
+   + CATEGORIES +
+   *++++++++++++*/
+
+  final _isFetchingCategoriesStreamController =
+      BehaviorSubject<bool>.seeded(false);
+  final _categoriesStreamController =
+      BehaviorSubject<Map<int, (Category, List<Subcategory>)>>.seeded(
+    HashMap(),
+  );
+  StreamSubscription<bool>? _categoriesUserSubscription;
+
+  Stream<List<(Category, List<Subcategory>)>> get categories {
+    return _categoriesStreamController
+        .asBroadcastStream()
+        .map((event) => event.values.toList());
+  }
+
+  Stream<bool> get isFetchingCategories {
+    return _isFetchingCategoriesStreamController.asBroadcastStream();
+  }
+
+  void _onCategoriesListen() {
+    assert(
+      _categoriesUserSubscription == null,
+      'Already listening for categories',
+    );
+
+    if (_authenticationRepository.currentUser.isNotEmpty) {
+      _fetchCategories();
+    }
+    _categoriesUserSubscription = _authenticationRepository.user
+        .map((u) => u.isNotEmpty)
+        .distinct()
+        .listen((isNotEmpty) {
+      if (isNotEmpty) {
+        unawaited(_fetchCategories());
+      } else {
+        _categoriesStreamController.add(HashMap());
+      }
+    });
+  }
+
+  void _onCategoriesCancel() {
+    assert(
+      _categoriesUserSubscription != null,
+      'Not listening for categories',
+    );
+
+    _categoriesUserSubscription!.cancel();
+  }
+
+  ResponseStream<api.GetCategoriesResponse>? _pendingCategoriesResponse;
+  Future<void> _fetchCategories() async {
+    if (_pendingCategoriesResponse != null) {
+      unawaited(_pendingCategoriesResponse!.cancel());
+      _pendingCategoriesResponse = null;
+    } else {
+      _isFetchingCategoriesStreamController.add(true);
+    }
+
+    _pendingCategoriesResponse = _client.getCategories(
+      api.GetCategoriesRequest(),
+    );
+    final result = HashMap<int, (Category, List<Subcategory>)>();
+    _pendingCategoriesResponse!
+        .map(
+      (response) => (
+        Category(
+          id: response.id,
+          rawTitle: response.rawTitle,
+          color: response.color,
+          isEnabled: response.isEnabled,
+        ),
+        response.subcategories
+            .map(
+              (subcategory) => Subcategory(
+                id: subcategory.id,
+                title: subcategory.title,
+                color: subcategory.color,
+              ),
+            )
+            .toList()
+      ),
+    )
+        .listen(
+      (v) => result[v.$1.id] = v,
+      onDone: () {
+        _pendingCategoriesResponse = null;
+        _categoriesStreamController.add(result);
+        _isFetchingCategoriesStreamController.add(false);
+      },
+      cancelOnError: true,
+    );
+  }
+
   /*+++++++*
    + UTILS +
    *+++++++*/
@@ -569,6 +671,31 @@ class SurvivalListRepository {
     }
   }
 
+  Category? _parseCategory(api.Category category) {
+    if (category.hasId()) {
+      return Category(
+        id: category.id,
+        rawTitle: category.rawTitle,
+        color: category.color,
+        isEnabled: category.isEnabled,
+      );
+    } else {
+      return null;
+    }
+  }
+
+  Subcategory? _parseSubcategory(api.Subcategory subcategory) {
+    if (subcategory.hasId()) {
+      return Subcategory(
+        id: subcategory.id,
+        title: subcategory.title,
+        color: subcategory.color,
+      );
+    } else {
+      return null;
+    }
+  }
+
   LongDuration _parseRecurrenceChecked(api.RecurringChecked checked) {
     return LongDuration(months: checked.months, days: checked.days);
   }
@@ -601,6 +728,8 @@ class SurvivalListRepository {
           )
       },
       group: _parseGroup(task.group),
+      category: _parseCategory(task.category),
+      subcategory: _parseSubcategory(task.subcategory),
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,
@@ -636,6 +765,8 @@ class SurvivalListRepository {
           )
       },
       group: _parseGroup(task.group),
+      category: _parseCategory(task.category),
+      subcategory: _parseSubcategory(task.subcategory),
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,

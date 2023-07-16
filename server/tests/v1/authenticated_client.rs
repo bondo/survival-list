@@ -11,6 +11,8 @@ pub(super) struct AuthenticatedClient {
     user_uid: &'static str,
 }
 
+type Result<T> = std::result::Result<T, Status>;
+
 impl AuthenticatedClient {
     pub async fn connect(uri: Uri) -> Self {
         Self {
@@ -33,104 +35,129 @@ impl AuthenticatedClient {
         request
     }
 
-    pub async fn login(&mut self, request: LoginRequest) -> LoginResponse {
+    pub async fn login(&mut self, request: LoginRequest) -> Result<LoginResponse> {
         let request = self.authenticate_request(request);
-        self.client.login(request).await.unwrap().into_inner()
+        let response = self.client.login(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn create_task(&mut self, request: CreateTaskRequest) -> CreateTaskResponse {
+    pub async fn create_task(&mut self, request: CreateTaskRequest) -> Result<CreateTaskResponse> {
         let request = self.authenticate_request(request);
-        self.client.create_task(request).await.unwrap().into_inner()
+        let response = self.client.create_task(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn update_task(&mut self, request: UpdateTaskRequest) -> UpdateTaskResponse {
+    pub async fn update_task(&mut self, request: UpdateTaskRequest) -> Result<UpdateTaskResponse> {
         let request = self.authenticate_request(request);
-        self.client.update_task(request).await.unwrap().into_inner()
+        let response = self.client.update_task(request).await?;
+        Ok(response.into_inner())
     }
 
     pub async fn toggle_task_completed(
         &mut self,
         request: ToggleTaskCompletedRequest,
-    ) -> ToggleTaskCompletedResponse {
+    ) -> Result<ToggleTaskCompletedResponse> {
         let request = self.authenticate_request(request);
-        self.client
-            .toggle_task_completed(request)
-            .await
-            .unwrap()
-            .into_inner()
+        let response = self.client.toggle_task_completed(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn delete_task(&mut self, request: DeleteTaskRequest) -> DeleteTaskResponse {
+    pub async fn delete_task(&mut self, request: DeleteTaskRequest) -> Result<DeleteTaskResponse> {
         let request = self.authenticate_request(request);
-        self.client.delete_task(request).await.unwrap().into_inner()
+        let response = self.client.delete_task(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn get_tasks(&mut self) -> Vec<GetTasksResponse> {
-        let request = GetTasksRequest::default();
-        let request = self.authenticate_request(request);
-        self.client
-            .get_tasks(request)
-            .await
-            .unwrap()
-            .into_inner()
-            .collect::<std::result::Result<Vec<GetTasksResponse>, Status>>()
-            .await
-            .unwrap()
+    pub async fn get_tasks(&mut self) -> Result<Vec<GetTasksResponse>> {
+        let request = self.authenticate_request(GetTasksRequest::default());
+        let response = self.client.get_tasks(request).await?;
+        response.into_inner().collect().await
     }
 
-    pub async fn create_group(&mut self, request: CreateGroupRequest) -> CreateGroupResponse {
+    pub async fn create_group(
+        &mut self,
+        request: CreateGroupRequest,
+    ) -> Result<CreateGroupResponse> {
         let request = self.authenticate_request(request);
-        self.client
-            .create_group(request)
-            .await
-            .unwrap()
-            .into_inner()
+        let response = self.client.create_group(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn join_group(&mut self, request: JoinGroupRequest) -> JoinGroupResponse {
+    pub async fn join_group(&mut self, request: JoinGroupRequest) -> Result<JoinGroupResponse> {
         let request = self.authenticate_request(request);
-        self.client.join_group(request).await.unwrap().into_inner()
+        let response = self.client.join_group(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn update_group(&mut self, request: UpdateGroupRequest) -> UpdateGroupResponse {
+    pub async fn update_group(
+        &mut self,
+        request: UpdateGroupRequest,
+    ) -> Result<UpdateGroupResponse> {
         let request = self.authenticate_request(request);
-        self.client
-            .update_group(request)
-            .await
-            .unwrap()
-            .into_inner()
+        let response = self.client.update_group(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn leave_group(&mut self, request: LeaveGroupRequest) -> LeaveGroupResponse {
+    pub async fn leave_group(&mut self, request: LeaveGroupRequest) -> Result<LeaveGroupResponse> {
         let request = self.authenticate_request(request);
-        self.client.leave_group(request).await.unwrap().into_inner()
+        let response = self.client.leave_group(request).await?;
+        Ok(response.into_inner())
     }
 
-    pub async fn get_groups(&mut self) -> Vec<GetGroupsResponse> {
-        let request = GetGroupsRequest::default();
-        let request = self.authenticate_request(request);
-        self.client
-            .get_groups(request)
-            .await
-            .unwrap()
-            .into_inner()
-            .collect::<std::result::Result<Vec<GetGroupsResponse>, Status>>()
-            .await
-            .unwrap()
+    pub async fn get_groups(&mut self) -> Result<Vec<GetGroupsResponse>> {
+        let request = self.authenticate_request(GetGroupsRequest::default());
+        let response = self.client.get_groups(request).await?;
+        response.into_inner().collect().await
     }
 
     pub async fn get_group_participants(
         &mut self,
         request: GetGroupParticipantsRequest,
-    ) -> Vec<GetGroupParticipantsResponse> {
+    ) -> Result<Vec<GetGroupParticipantsResponse>> {
         let request = self.authenticate_request(request);
-        self.client
-            .get_group_participants(request)
-            .await
-            .unwrap()
-            .into_inner()
-            .collect::<std::result::Result<Vec<GetGroupParticipantsResponse>, Status>>()
-            .await
-            .unwrap()
+        let response = self.client.get_group_participants(request).await?;
+        response.into_inner().collect().await
+    }
+
+    pub async fn get_categories(&mut self) -> Result<Vec<GetCategoriesResponse>> {
+        let request = self.authenticate_request(GetCategoriesRequest::default());
+        let response = self.client.get_categories(request).await?;
+        response.into_inner().collect().await
+    }
+
+    pub async fn update_category(
+        &mut self,
+        request: UpdateCategoryRequest,
+    ) -> Result<UpdateCategoryResponse> {
+        let request = self.authenticate_request(request);
+        let response = self.client.update_category(request).await?;
+        Ok(response.into_inner())
+    }
+
+    pub async fn create_subcategory(
+        &mut self,
+        request: CreateSubcategoryRequest,
+    ) -> Result<CreateSubcategoryResponse> {
+        let request = self.authenticate_request(request);
+        let response = self.client.create_subcategory(request).await?;
+        Ok(response.into_inner())
+    }
+
+    pub async fn update_subcategory(
+        &mut self,
+        request: UpdateSubcategoryRequest,
+    ) -> Result<UpdateSubcategoryResponse> {
+        let request = self.authenticate_request(request);
+        let response = self.client.update_subcategory(request).await?;
+        Ok(response.into_inner())
+    }
+
+    pub async fn delete_subcategory(
+        &mut self,
+        request: DeleteSubcategoryRequest,
+    ) -> Result<DeleteSubcategoryResponse> {
+        let request = self.authenticate_request(request);
+        let response = self.client.delete_subcategory(request).await?;
+        Ok(response.into_inner())
     }
 }

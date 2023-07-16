@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                        SELECT\n                            category_id as \"category_id: CategoryId\"\n                        FROM\n                            subcategories\n                        WHERE\n                            user_id = $1 AND\n                            id = $2\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "category_id: CategoryId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "077237ef6e7664e8b688767921473a7af27a51b703b747d34d8199ac2315c7ed"
+}

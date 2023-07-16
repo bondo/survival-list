@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE\n                    recurrences r\n                SET\n                    current_task_id = $1\n                WHERE\n                    r.current_task_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5207d2887c50a44bf6d0b6b5c0a326dd595b1de1a1b0d9d40d8f2d723d1aea46"
+}

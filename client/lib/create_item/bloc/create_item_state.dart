@@ -12,6 +12,10 @@ extension CreateItemStatusX on CreateItemStatus {
 class CreateItemState extends Equatable {
   const CreateItemState({
     this.status = CreateItemStatus.initial,
+    this.category,
+    this.subcategory,
+    this.categories = const [],
+    this.categoriesStatus = CreateItemStatus.initial,
     this.group,
     this.groups = const [],
     this.groupsStatus = CreateItemStatus.initial,
@@ -28,6 +32,10 @@ class CreateItemState extends Equatable {
   });
 
   final CreateItemStatus status;
+  final Category? category;
+  final Subcategory? subcategory;
+  final List<(Category, List<Subcategory>)> categories;
+  final CreateItemStatus categoriesStatus;
   final Group? group;
   final List<Group> groups;
   final CreateItemStatus groupsStatus;
@@ -44,6 +52,10 @@ class CreateItemState extends Equatable {
 
   CreateItemState copyWith({
     CreateItemStatus Function()? status,
+    Category? Function()? category,
+    Subcategory? Function()? subcategory,
+    List<(Category, List<Subcategory>)> Function()? categories,
+    CreateItemStatus Function()? categoriesStatus,
     Group? Function()? group,
     List<Group> Function()? groups,
     CreateItemStatus Function()? groupsStatus,
@@ -60,6 +72,11 @@ class CreateItemState extends Equatable {
   }) {
     return CreateItemState(
       status: status != null ? status() : this.status,
+      category: category != null ? category() : this.category,
+      subcategory: subcategory != null ? subcategory() : this.subcategory,
+      categories: categories != null ? categories() : this.categories,
+      categoriesStatus:
+          categoriesStatus != null ? categoriesStatus() : this.categoriesStatus,
       group: group != null ? group() : this.group,
       groups: groups != null ? groups() : this.groups,
       groupsStatus: groupsStatus != null ? groupsStatus() : this.groupsStatus,
@@ -86,6 +103,10 @@ class CreateItemState extends Equatable {
   @override
   List<Object?> get props => [
         status,
+        category,
+        subcategory,
+        categories,
+        categoriesStatus,
         group,
         groups,
         groupsStatus,

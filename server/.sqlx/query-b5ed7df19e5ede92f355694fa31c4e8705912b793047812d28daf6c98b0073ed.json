@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT\n                    id as \"id: GroupId\",\n                    title,\n                    uid\n                FROM\n                    groups\n                WHERE\n                    uid = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: GroupId",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "uid",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b5ed7df19e5ede92f355694fa31c4e8705912b793047812d28daf6c98b0073ed"
+}

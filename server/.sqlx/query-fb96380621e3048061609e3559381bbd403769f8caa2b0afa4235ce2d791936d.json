@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO users (\n                    uid,\n                    name\n                )\n                VALUES (\n                    $1,\n                    '?'\n                )\n                ON CONFLICT (uid) DO UPDATE SET\n                    -- No-op to allow RETURNING\n                    uid = EXCLUDED.uid\n                RETURNING\n                    id as \"id: UserId\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: UserId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fb96380621e3048061609e3559381bbd403769f8caa2b0afa4235ce2d791936d"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO tasks_subcategories (\n                    user_id,\n                    task_id,\n                    subcategory_id\n                ) VALUES (\n                    $1,\n                    $2,\n                    $3\n                ) ON CONFLICT (\n                    user_id,\n                    task_id\n                ) DO UPDATE SET\n                    subcategory_id = EXCLUDED.subcategory_id\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ff01a4953967e5f06e7c85fa16e8f154a71db744be3bd431abeb14be06e98064"
+}

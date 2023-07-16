@@ -25,11 +25,11 @@ impl From<Error> for Status {
     fn from(value: Error) -> Self {
         match &value {
             Error::Anyhow(e) => {
-                error!("internal server error: {}", e);
+                error!("{value}: {e:?}\n");
                 Status::internal(value.to_string())
             }
             Error::InternalState(e) => {
-                error!("internal state error: {}", e);
+                error!("{value}: {e:?}\n");
                 Status::internal(value.to_string())
             }
             Error::InvalidArgument(message) => Status::invalid_argument(*message),

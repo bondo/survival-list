@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH\n                    rec AS (\n                        INSERT INTO recurrences (\n                            frequency,\n                            is_every,\n                            current_task_id\n                        )\n                        VALUES (\n                            $1,\n                            $2,\n                            $3\n                        )\n                        RETURNING\n                            id\n                    )\n                UPDATE\n                    tasks t\n                SET\n                    recurrence_id = r.id\n                FROM\n                    rec r\n                WHERE\n                    t.id = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Interval",
+        "Bool",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "29a2e90c1d7e246ccfc4bf02af698eb19ee28950e467990f2db633c79c71d1ae"
+}

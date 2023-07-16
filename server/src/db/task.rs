@@ -11,7 +11,7 @@ use sqlx::{
 };
 use std::{cmp::Ordering, fmt::Display};
 
-use super::{Database, GroupId, Transaction, UserId};
+use super::{CategoryId, Database, GroupId, SubcategoryId, Transaction, UserId};
 use crate::{Error, Result};
 
 #[derive(Clone, Copy, Debug, sqlx::Type)]
@@ -62,6 +62,13 @@ struct TaskRawResult {
     pub recurrence_previous_task_id: Option<i32>,
     pub recurrence_num_ready_to_start: Option<i32>,
     pub recurrence_num_reached_deadline: Option<i32>,
+    pub category_id: Option<i32>,
+    pub category_raw_title: Option<String>,
+    pub category_color: Option<String>,
+    pub category_is_enabled: Option<bool>,
+    pub subcategory_id: Option<i32>,
+    pub subcategory_title: Option<String>,
+    pub subcategory_color: Option<String>,
 }
 
 impl TaskRawResult {
@@ -132,6 +139,8 @@ pub struct TaskResult {
     pub can_toggle: bool,
     pub can_delete: bool,
     pub is_friend_task: bool,
+    pub category: Option<TaskCategory>,
+    pub subcategory: Option<TaskSubcategory>,
 }
 
 static RECURRENCE_MAX: i32 = 5;
@@ -194,6 +203,25 @@ impl TryFrom<TaskRawResult> for TaskResult {
             can_toggle,
             can_delete,
             is_friend_task,
+            category: match (value.category_id, value.category_raw_title) {
+                (None, None) => Ok(None),
+                (Some(id), Some(raw_title)) => Ok(Some(TaskCategory {
+                    id: CategoryId(id),
+                    raw_title,
+                    color: value.category_color,
+                    is_enabled: value.category_is_enabled.unwrap_or(true),
+                })),
+                _ => Err(Error::InternalState("Unexpected category result")),
+            }?,
+            subcategory: match (value.subcategory_id, value.subcategory_title) {
+                (None, None) => Ok(None),
+                (Some(id), Some(title)) => Ok(Some(TaskSubcategory {
+                    id: SubcategoryId(id),
+                    title,
+                    color: value.subcategory_color,
+                })),
+                _ => Err(Error::InternalState("Unexpected subcategory result")),
+            }?,
         })
     }
 }
@@ -278,6 +306,21 @@ pub struct TaskEstimate {
     pub days: i32,
     pub hours: i32,
     pub minutes: i32,
+}
+
+#[derive(Debug)]
+pub struct TaskCategory {
+    pub id: CategoryId,
+    pub raw_title: String,
+    pub color: Option<String>,
+    pub is_enabled: bool,
+}
+
+#[derive(Debug)]
+pub struct TaskSubcategory {
+    pub id: SubcategoryId,
+    pub title: String,
+    pub color: Option<String>,
 }
 
 impl TryFrom<PgInterval> for TaskEstimate {
@@ -371,6 +414,8 @@ pub struct CreateTaskParams {
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
     pub recurrence: Option<TaskRecurrenceInput>,
+    pub category_id: Option<CategoryId>,
+    pub subcategory_id: Option<SubcategoryId>,
 }
 
 pub struct UpdateTaskParams {
@@ -382,6 +427,8 @@ pub struct UpdateTaskParams {
     pub group_id: Option<GroupId>,
     pub estimate: Option<TaskEstimate>,
     pub recurrence: Option<TaskRecurrenceInput>,
+    pub category_id: Option<CategoryId>,
+    pub subcategory_id: Option<SubcategoryId>,
 }
 
 impl Database {
@@ -395,27 +442,14 @@ impl Database {
                             t.id,
                             t.created_at,
                             t.title,
-                            (
-                                t.responsible_user_id = $1
-                            ) is_responsible,
-                            EXISTS (
-                                SELECT
-                                FROM
-                                    users_groups ug
-                                WHERE
-                                    ug.group_id = t.group_id AND
-                                    ug.user_id = $1
-                            ) is_in_group,
                             t.completed_at,
                             t.start_date,
                             t.end_date,
                             t.estimate,
-                            u.id as responsible_id,
-                            u.name as responsible_name,
-                            u.picture_url as responsible_picture_url,
-                            g.id as group_id,
-                            g.title as group_title,
-                            g.uid as group_uid,
+                            t.category_id,
+                            ts.subcategory_id,
+                            t.responsible_user_id,
+                            t.group_id,
                             r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
@@ -423,18 +457,16 @@ impl Database {
                             c.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
-                        INNER JOIN
-                            users u ON
-                                u.id = t.responsible_user_id
-                        LEFT JOIN
-                            groups g ON
-                                g.id = t.group_id
                         LEFT JOIN
                             recurrences r ON
                                 r.id = t.recurrence_id
                         LEFT JOIN
                             tasks c ON
                                 c.id = r.current_task_id
+                        LEFT JOIN
+                            tasks_subcategories ts ON
+                                ts.task_id = t.id AND
+                                ts.user_id = $1
                         WHERE
                             -- Hide old items
                             (
@@ -481,18 +513,14 @@ impl Database {
                             et.id,
                             et.created_at,
                             et.title,
-                            et.is_responsible,
-                            et.is_in_group,
                             et.completed_at,
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
-                            et.responsible_id,
-                            et.responsible_name,
-                            et.responsible_picture_url,
+                            et.category_id,
+                            et.subcategory_id,
+                            et.responsible_user_id,
                             et.group_id,
-                            et.group_title,
-                            et.group_uid,
                             et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
@@ -508,19 +536,35 @@ impl Database {
                 SELECT
                     bt.id,
                     bt.title,
-                    bt.is_responsible,
-                    bt.is_in_group,
+                    (
+                        bt.responsible_user_id = $1
+                    ) is_responsible,
+                    EXISTS (
+                        SELECT
+                        FROM
+                            users_groups ug
+                        WHERE
+                            ug.group_id = bt.group_id AND
+                            ug.user_id = $1
+                    ) is_in_group,
                     bt.completed_at,
                     false is_old,
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
-                    bt.responsible_id,
-                    bt.responsible_name,
-                    bt.responsible_picture_url,
-                    bt.group_id as "group_id: Option<i32>",
-                    bt.group_title as "group_title: Option<String>",
-                    bt.group_uid as "group_uid: Option<Uuid>",
+                    c.id as "category_id: Option<i32>",
+                    c.raw_title as "category_raw_title: Option<String>",
+                    co.color category_color,
+                    co.is_enabled as "category_is_enabled: Option<bool>",
+                    sc.id as "subcategory_id: Option<i32>",
+                    sc.title as "subcategory_title: Option<String>",
+                    sc.color subcategory_color,
+                    u.id responsible_id,
+                    u.name responsible_name,
+                    u.picture_url responsible_picture_url,
+                    g.id as "group_id: Option<i32>",
+                    g.title as "group_title: Option<String>",
+                    g.uid as "group_uid: Option<Uuid>",
                     bt.recurrence_id as "recurrence_id: Option<i32>",
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
@@ -530,6 +574,22 @@ impl Database {
                     (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
                     base_tasks bt
+                INNER JOIN
+                    users u ON
+                        u.id = bt.responsible_user_id
+                LEFT JOIN
+                    groups g ON
+                        g.id = bt.group_id
+                LEFT JOIN
+                    categories c ON
+                        c.id = bt.category_id
+                LEFT JOIN
+                    categories_override co ON
+                        co.category_id = c.id AND
+                        co.user_id = $1
+                LEFT JOIN
+                    subcategories sc ON
+                        sc.id = bt.subcategory_id
                 ORDER BY
                     bt.created_at
             "#,
@@ -550,6 +610,13 @@ impl Database {
                 )
                 .await?;
 
+                tx.validate_category_and_subcategory(
+                    params.user_id,
+                    params.category_id,
+                    params.subcategory_id,
+                )
+                .await?;
+
                 let task_id = tx.create_task_internal(&params).await?;
 
                 match params.recurrence {
@@ -562,6 +629,11 @@ impl Database {
                         tx.create_recurrence_internal(task_id, frequency, false)
                             .await?;
                     }
+                }
+
+                if let Some(subcategory_id) = params.subcategory_id {
+                    tx.set_task_subcategory_internal(params.user_id, task_id, subcategory_id)
+                        .await?;
                 }
 
                 tx.get_task_unchecked(params.user_id, task_id)
@@ -580,6 +652,13 @@ impl Database {
                     params.user_id,
                     params.responsible_id,
                     params.group_id,
+                )
+                .await?;
+
+                tx.validate_category_and_subcategory(
+                    params.user_id,
+                    params.category_id,
+                    params.subcategory_id,
                 )
                 .await?;
 
@@ -632,6 +711,14 @@ impl Database {
                                 .await?;
                         }
                     }
+                }
+
+                if let Some(subcategory_id) = params.subcategory_id {
+                    tx.set_task_subcategory_internal(params.user_id, task_id, subcategory_id)
+                        .await?;
+                } else {
+                    tx.unset_task_subcategory_internal(params.user_id, task_id)
+                        .await?;
                 }
 
                 tx.get_task_unchecked(params.user_id, task_id)
@@ -853,6 +940,13 @@ impl<'c> Transaction<'c> {
                             t.start_date,
                             t.end_date,
                             t.estimate,
+                            c.id category_id,
+                            c.raw_title category_raw_title,
+                            co.color category_color,
+                            co.is_enabled category_is_enabled,
+                            sc.id subcategory_id,
+                            sc.title subcategory_title,
+                            sc.color subcategory_color,
                             u.id as responsible_id,
                             u.name as responsible_name,
                             u.picture_url as responsible_picture_url,
@@ -863,7 +957,7 @@ impl<'c> Transaction<'c> {
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
                             r.current_task_id as recurrence_current_task_id,
-                            c.previous_task_id as recurrence_previous_task_id
+                            cur.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
                         INNER JOIN
@@ -876,8 +970,22 @@ impl<'c> Transaction<'c> {
                             recurrences r ON
                                 r.id = t.recurrence_id
                         LEFT JOIN
-                            tasks c ON
-                                c.id = r.current_task_id
+                            tasks cur ON
+                                cur.id = r.current_task_id
+                        LEFT JOIN
+                            categories c ON
+                                c.id = t.category_id
+                        LEFT JOIN
+                            categories_override co ON
+                                co.category_id = c.id AND
+                                co.user_id = $1
+                        LEFT JOIN
+                            tasks_subcategories ts ON
+                                ts.task_id = t.id AND
+                                ts.user_id = $1
+                        LEFT JOIN
+                            subcategories sc ON
+                                sc.id = ts.subcategory_id
                         WHERE
                             t.id = $2
                     ),
@@ -899,6 +1007,13 @@ impl<'c> Transaction<'c> {
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
+                            et.category_id,
+                            et.category_raw_title,
+                            et.category_color,
+                            et.category_is_enabled,
+                            et.subcategory_id,
+                            et.subcategory_title,
+                            et.subcategory_color,
                             et.responsible_id,
                             et.responsible_name,
                             et.responsible_picture_url,
@@ -927,6 +1042,13 @@ impl<'c> Transaction<'c> {
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
+                    bt.category_id as "category_id: Option<i32>",
+                    bt.category_raw_title as "category_raw_title: Option<String>",
+                    bt.category_color,
+                    bt.category_is_enabled as "category_is_enabled: Option<bool>",
+                    bt.subcategory_id as "subcategory_id: Option<i32>",
+                    bt.subcategory_title as "subcategory_title: Option<String>",
+                    bt.subcategory_color,
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,
@@ -1005,6 +1127,50 @@ impl<'c> Transaction<'c> {
         Ok(())
     }
 
+    async fn validate_category_and_subcategory(
+        &mut self,
+        user_id: UserId,
+        category_id: Option<CategoryId>,
+        subcategory_id: Option<SubcategoryId>,
+    ) -> Result<()> {
+        match (category_id, subcategory_id) {
+            (_, None) => Ok(()),
+            (None, Some(_)) => Err(Error::InvalidArgument(
+                "Category must be set when subcategory is set",
+            )),
+            (Some(category_id), Some(subcategory_id)) => {
+                let parent_id = sqlx::query_scalar!(
+                    r#"
+                        SELECT
+                            category_id as "category_id: CategoryId"
+                        FROM
+                            subcategories
+                        WHERE
+                            user_id = $1 AND
+                            id = $2
+                    "#,
+                    user_id.0,
+                    subcategory_id.0
+                )
+                .fetch_optional(self)
+                .await
+                .context("Failed to fetch parent of subcategory")?;
+
+                if let Some(parent_id) = parent_id {
+                    if parent_id.0 == category_id.0 {
+                        Ok(())
+                    } else {
+                        Err(Error::InvalidArgument(
+                            "Subcategory must be child of category",
+                        ))
+                    }
+                } else {
+                    Err(Error::NotFound("Subcategory not found"))
+                }
+            }
+        }
+    }
+
     async fn create_task_internal(&mut self, params: &CreateTaskParams) -> Result<TaskId> {
         sqlx::query_scalar!(
             r#"
@@ -1014,7 +1180,8 @@ impl<'c> Transaction<'c> {
                     start_date,
                     end_date,
                     group_id,
-                    estimate
+                    estimate,
+                    category_id
                 )
                 VALUES (
                     $1,
@@ -1022,7 +1189,8 @@ impl<'c> Transaction<'c> {
                     $3,
                     $4,
                     $5,
-                    $6
+                    $6,
+                    $7
                 )
                 RETURNING
                     id as "id: TaskId"
@@ -1033,6 +1201,7 @@ impl<'c> Transaction<'c> {
             params.period.end(),
             params.group_id.map(|id| id.0),
             params.estimate.as_ref().map(PgInterval::from),
+            params.category_id.map(|id| id.0)
         )
         .fetch_one(self)
         .await
@@ -1051,7 +1220,8 @@ impl<'c> Transaction<'c> {
                     end_date = $5,
                     responsible_user_id = $6,
                     group_id = $7,
-                    estimate = $8
+                    estimate = $8,
+                    category_id = $9
                 WHERE
                     t.id = $2 AND
                     -- Permission check
@@ -1079,10 +1249,67 @@ impl<'c> Transaction<'c> {
             params.responsible_id.0,
             params.group_id.map(|id| id.0),
             params.estimate.as_ref().map(PgInterval::from),
+            params.category_id.map(|id| id.0)
         )
         .fetch_one(self)
         .await
         .map_err(|_| Error::PermissionDenied("You are not allowed to update this item"))
+    }
+
+    async fn set_task_subcategory_internal(
+        &mut self,
+        user_id: UserId,
+        task_id: TaskId,
+        subcategory_id: SubcategoryId,
+    ) -> Result<()> {
+        sqlx::query!(
+            r#"
+                INSERT INTO tasks_subcategories (
+                    user_id,
+                    task_id,
+                    subcategory_id
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3
+                ) ON CONFLICT (
+                    user_id,
+                    task_id
+                ) DO UPDATE SET
+                    subcategory_id = EXCLUDED.subcategory_id
+            "#,
+            user_id.0,
+            task_id.0,
+            subcategory_id.0
+        )
+        .execute(self)
+        .await
+        .context("Failed to set task subcategory")?;
+
+        Ok(())
+    }
+
+    async fn unset_task_subcategory_internal(
+        &mut self,
+        user_id: UserId,
+        task_id: TaskId,
+    ) -> Result<()> {
+        sqlx::query!(
+            r#"
+                DELETE FROM
+                    tasks_subcategories
+                WHERE
+                    user_id = $1 AND
+                    task_id = $2
+            "#,
+            user_id.0,
+            task_id.0
+        )
+        .execute(self)
+        .await
+        .context("Failed to unset task subcategory")?;
+
+        Ok(())
     }
 
     async fn toggle_task_completed_internal(

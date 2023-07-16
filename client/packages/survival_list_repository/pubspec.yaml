@@ -14,7 +14,7 @@ dependencies:
     path: ../generated_grpc_api
   grpc: ^3.1.0
   meta: ^1.8.0
-  protobuf: ^2.1.0
+  protobuf: ^3.0.0
   rxdart: ^0.27.7
 
 dev_dependencies:

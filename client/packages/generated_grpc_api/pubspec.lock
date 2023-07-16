@@ -349,10 +349,10 @@ packages:
     dependency: "direct dev"
     description:
       name: protoc_builder
-      sha256: "48dc9a8c9e48fe9633b03f1f88b4a4d1e7c1c6c50003f5b218b411603e106ace"
+      sha256: "13a1262d0bcc8729df8d3205778d1e5619d22bb71747af5d86358ad1c8a2a99a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   pub_semver:
     dependency: transitive
     description:

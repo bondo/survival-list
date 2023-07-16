@@ -7,9 +7,10 @@ use tonic::{Request, Response, Status};
 
 use crate::{
     db::{
-        CreateTaskParams, Database, GroupId, TaskEstimate, TaskGroup, TaskId, TaskPeriod,
-        TaskRecurrenceEvery, TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput,
-        TaskResponsible, TaskResult, UpdateTaskParams, UserId,
+        CategoryId, CreateTaskParams, Database, GroupId, SubcategoryId, SubcategoryResult,
+        TaskCategory, TaskEstimate, TaskGroup, TaskId, TaskPeriod, TaskRecurrenceEvery,
+        TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput, TaskResponsible,
+        TaskResult, TaskSubcategory, UpdateTaskParams, UserId,
     },
     AuthExtension, Error, Result,
 };
@@ -92,6 +93,16 @@ impl api_server::Api for Service {
                 } else {
                     Some(GroupId::new(request.group_id))
                 },
+                category_id: if request.category_id == i32::default() {
+                    None
+                } else {
+                    Some(CategoryId::new(request.category_id))
+                },
+                subcategory_id: if request.subcategory_id == i32::default() {
+                    None
+                } else {
+                    Some(SubcategoryId::new(request.subcategory_id))
+                },
                 estimate: request.estimate.map(TryInto::try_into).transpose()?,
                 recurrence: request
                     .recurring
@@ -133,6 +144,16 @@ impl api_server::Api for Service {
                     None
                 } else {
                     Some(GroupId::new(request.group_id))
+                },
+                category_id: if request.category_id == i32::default() {
+                    None
+                } else {
+                    Some(CategoryId::new(request.category_id))
+                },
+                subcategory_id: if request.subcategory_id == i32::default() {
+                    None
+                } else {
+                    Some(SubcategoryId::new(request.subcategory_id))
                 },
                 estimate: request.estimate.map(TryInto::try_into).transpose()?,
                 recurrence: request
@@ -228,6 +249,8 @@ impl api_server::Api for Service {
                         can_toggle: task.can_toggle,
                         can_delete: task.can_delete,
                         is_friend_task: task.is_friend_task,
+                        category: task.category.map(Into::into),
+                        subcategory: task.subcategory.map(Into::into),
                     })
                     .map_err(Into::into),
                 )
@@ -310,6 +333,95 @@ impl api_server::Api for Service {
         Ok(Response::new(LeaveGroupResponse { id: id.into() }))
     }
 
+    async fn update_category(
+        &self,
+        request: Request<UpdateCategoryRequest>,
+    ) -> std::result::Result<Response<UpdateCategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let category = self
+            .db
+            .update_category(
+                user_id,
+                CategoryId::new(request.id),
+                &request.color,
+                request.is_enabled,
+            )
+            .await?;
+
+        Ok(Response::new(UpdateCategoryResponse {
+            id: category.id.into(),
+            raw_title: category.raw_title,
+            color: category.color.unwrap_or_default(),
+            is_enabled: category.is_enabled,
+            subcategories: category.subcategories.into_iter().map(Into::into).collect(),
+        }))
+    }
+
+    async fn create_subcategory(
+        &self,
+        request: Request<CreateSubcategoryRequest>,
+    ) -> std::result::Result<Response<CreateSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let subcategory = self
+            .db
+            .create_subcategory(
+                user_id,
+                CategoryId::new(request.category_id),
+                &request.title,
+                &request.color,
+            )
+            .await?;
+
+        Ok(Response::new(CreateSubcategoryResponse {
+            id: subcategory.id.into(),
+            title: subcategory.title,
+            color: subcategory.color.unwrap_or_default(),
+        }))
+    }
+
+    async fn update_subcategory(
+        &self,
+        request: Request<UpdateSubcategoryRequest>,
+    ) -> std::result::Result<Response<UpdateSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let subcategory = self
+            .db
+            .update_subcategory(
+                user_id,
+                SubcategoryId::new(request.id),
+                &request.title,
+                &request.color,
+            )
+            .await?;
+
+        Ok(Response::new(UpdateSubcategoryResponse {
+            id: subcategory.id.into(),
+            title: subcategory.title,
+            color: subcategory.color.unwrap_or_default(),
+        }))
+    }
+
+    async fn delete_subcategory(
+        &self,
+        request: Request<DeleteSubcategoryRequest>,
+    ) -> std::result::Result<Response<DeleteSubcategoryResponse>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let request = request.into_inner();
+
+        let id = self
+            .db
+            .delete_subcategory(user_id, SubcategoryId::new(request.id))
+            .await?;
+
+        Ok(Response::new(DeleteSubcategoryResponse { id: id.into() }))
+    }
+
     type GetGroupsStream = ReceiverStream<std::result::Result<GetGroupsResponse, Status>>;
     async fn get_groups(
         &self,
@@ -363,6 +475,38 @@ impl api_server::Api for Service {
                             name: user.name,
                             picture_url: user.picture_url.unwrap_or_default(),
                         }),
+                    })
+                    .map_err(Into::into),
+                )
+                .await
+                .unwrap();
+            }
+        });
+
+        Ok(Response::new(ReceiverStream::new(rx)))
+    }
+
+    type GetCategoriesStream = ReceiverStream<std::result::Result<GetCategoriesResponse, Status>>;
+    async fn get_categories(
+        &self,
+        request: Request<GetCategoriesRequest>,
+    ) -> std::result::Result<Response<Self::GetCategoriesStream>, Status> {
+        let user_id = self.get_user_id(&request).await?;
+        let (tx, rx) = mpsc::channel(10);
+
+        let db = self.db.clone();
+        tokio::spawn(async move {
+            let categories = db.get_categories(user_id);
+            pin_mut!(categories);
+
+            while let Some(res) = categories.next().await {
+                tx.send(
+                    res.map(|category| GetCategoriesResponse {
+                        id: category.id.into(),
+                        raw_title: category.raw_title,
+                        color: category.color.unwrap_or_default(),
+                        is_enabled: category.is_enabled,
+                        subcategories: category.subcategories.into_iter().map(Into::into).collect(),
                     })
                     .map_err(Into::into),
                 )
@@ -437,6 +581,27 @@ impl From<TaskGroup> for Group {
             id: value.id.into(),
             title: value.title,
             uid: value.uid.to_string(),
+        }
+    }
+}
+
+impl From<TaskCategory> for Category {
+    fn from(value: TaskCategory) -> Self {
+        Self {
+            id: value.id.into(),
+            raw_title: value.raw_title,
+            color: value.color.unwrap_or_default(),
+            is_enabled: value.is_enabled,
+        }
+    }
+}
+
+impl From<TaskSubcategory> for Subcategory {
+    fn from(value: TaskSubcategory) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            color: value.color.unwrap_or_default(),
         }
     }
 }
@@ -526,6 +691,8 @@ impl From<TaskResult> for CreateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
+            category: value.category.map(Into::into),
+            subcategory: value.subcategory.map(Into::into),
         }
     }
 }
@@ -552,6 +719,18 @@ impl From<TaskResult> for UpdateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
+            category: value.category.map(Into::into),
+            subcategory: value.subcategory.map(Into::into),
+        }
+    }
+}
+
+impl From<SubcategoryResult> for Subcategory {
+    fn from(value: SubcategoryResult) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            color: value.color.unwrap_or_default(),
         }
     }
 }

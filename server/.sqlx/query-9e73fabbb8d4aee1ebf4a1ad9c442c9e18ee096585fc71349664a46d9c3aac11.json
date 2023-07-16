@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM\n                    subcategories\n                WHERE\n                    id = $2 AND\n                    user_id = $1\n                RETURNING\n                    id as \"id: SubcategoryId\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: SubcategoryId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9e73fabbb8d4aee1ebf4a1ad9c442c9e18ee096585fc71349664a46d9c3aac11"
+}

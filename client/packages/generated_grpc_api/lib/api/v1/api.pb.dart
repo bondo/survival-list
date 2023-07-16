@@ -5,12 +5,11 @@
 // @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-import 'dart:async' as $async;
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/type/date.pb.dart' as $0;
+import '../../google/type/date.pb.dart' as $1;
 
 class LoginRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LoginRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
@@ -137,26 +136,30 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTaskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
     ..oo(0, [7, 8])
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$0.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
-    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
+    ..aOM<$1.Date>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..aOM<Duration>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..aOM<RecurringChecked>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
     ..aOM<RecurringEveryRequest>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryRequest.create)
+    ..a<$core.int>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
+    ..a<$core.int>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategoryId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
   CreateTaskRequest._() : super();
   factory CreateTaskRequest({
     $core.String? title,
-    $0.Date? startDate,
-    $0.Date? endDate,
+    $1.Date? startDate,
+    $1.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
     Duration? estimate,
     RecurringChecked? checked,
     RecurringEveryRequest? every,
+    $core.int? categoryId,
+    $core.int? subcategoryId,
   }) {
     final _result = create();
     if (title != null) {
@@ -182,6 +185,12 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
     }
     if (every != null) {
       _result.every = every;
+    }
+    if (categoryId != null) {
+      _result.categoryId = categoryId;
+    }
+    if (subcategoryId != null) {
+      _result.subcategoryId = subcategoryId;
     }
     return _result;
   }
@@ -219,26 +228,26 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   void clearTitle() => clearField(1);
 
   @$pb.TagNumber(2)
-  $0.Date get startDate => $_getN(1);
+  $1.Date get startDate => $_getN(1);
   @$pb.TagNumber(2)
-  set startDate($0.Date v) { setField(2, v); }
+  set startDate($1.Date v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasStartDate() => $_has(1);
   @$pb.TagNumber(2)
   void clearStartDate() => clearField(2);
   @$pb.TagNumber(2)
-  $0.Date ensureStartDate() => $_ensure(1);
+  $1.Date ensureStartDate() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $0.Date get endDate => $_getN(2);
+  $1.Date get endDate => $_getN(2);
   @$pb.TagNumber(3)
-  set endDate($0.Date v) { setField(3, v); }
+  set endDate($1.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasEndDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearEndDate() => clearField(3);
   @$pb.TagNumber(3)
-  $0.Date ensureEndDate() => $_ensure(2);
+  $1.Date ensureEndDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.int get responsibleId => $_getIZ(3);
@@ -290,6 +299,24 @@ class CreateTaskRequest extends $pb.GeneratedMessage {
   void clearEvery() => clearField(8);
   @$pb.TagNumber(8)
   RecurringEveryRequest ensureEvery() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $core.int get categoryId => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set categoryId($core.int v) { $_setSignedInt32(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasCategoryId() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearCategoryId() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.int get subcategoryId => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set subcategoryId($core.int v) { $_setSignedInt32(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasSubcategoryId() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearSubcategoryId() => clearField(10);
 }
 
 enum CreateTaskResponse_Recurring {
@@ -308,8 +335,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..oo(0, [8, 9])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
-    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..aOM<User>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
@@ -318,6 +345,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
     ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
+    ..aOM<Category>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -325,8 +354,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   factory CreateTaskResponse({
     $core.int? id,
     $core.String? title,
-    $0.Date? startDate,
-    $0.Date? endDate,
+    $1.Date? startDate,
+    $1.Date? endDate,
     User? responsible,
     Group? group,
     Duration? estimate,
@@ -335,6 +364,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     $core.bool? canUpdate,
     $core.bool? canToggle,
     $core.bool? canDelete,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -372,6 +403,12 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     }
     if (canDelete != null) {
       _result.canDelete = canDelete;
+    }
+    if (category != null) {
+      _result.category = category;
+    }
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -418,26 +455,26 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $0.Date get startDate => $_getN(2);
+  $1.Date get startDate => $_getN(2);
   @$pb.TagNumber(3)
-  set startDate($0.Date v) { setField(3, v); }
+  set startDate($1.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasStartDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearStartDate() => clearField(3);
   @$pb.TagNumber(3)
-  $0.Date ensureStartDate() => $_ensure(2);
+  $1.Date ensureStartDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $0.Date get endDate => $_getN(3);
+  $1.Date get endDate => $_getN(3);
   @$pb.TagNumber(4)
-  set endDate($0.Date v) { setField(4, v); }
+  set endDate($1.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasEndDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
-  $0.Date ensureEndDate() => $_ensure(3);
+  $1.Date ensureEndDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
   User get responsible => $_getN(4);
@@ -520,6 +557,28 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   $core.bool hasCanDelete() => $_has(11);
   @$pb.TagNumber(12)
   void clearCanDelete() => clearField(12);
+
+  @$pb.TagNumber(13)
+  Category get category => $_getN(12);
+  @$pb.TagNumber(13)
+  set category(Category v) { setField(13, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasCategory() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearCategory() => clearField(13);
+  @$pb.TagNumber(13)
+  Category ensureCategory() => $_ensure(12);
+
+  @$pb.TagNumber(14)
+  Subcategory get subcategory => $_getN(13);
+  @$pb.TagNumber(14)
+  set subcategory(Subcategory v) { setField(14, v); }
+  @$pb.TagNumber(14)
+  $core.bool hasSubcategory() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearSubcategory() => clearField(14);
+  @$pb.TagNumber(14)
+  Subcategory ensureSubcategory() => $_ensure(13);
 }
 
 enum UpdateTaskRequest_Recurring {
@@ -538,13 +597,15 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     ..oo(0, [8, 9])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
-    ..aOM<$0.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
-    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
+    ..aOM<$1.Date>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsibleId', $pb.PbFieldType.O3)
     ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.O3)
     ..aOM<Duration>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
     ..aOM<RecurringChecked>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checked', subBuilder: RecurringChecked.create)
     ..aOM<RecurringEveryRequest>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'every', subBuilder: RecurringEveryRequest.create)
+    ..a<$core.int>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
+    ..a<$core.int>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategoryId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -552,13 +613,15 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   factory UpdateTaskRequest({
     $core.int? id,
     $core.String? title,
-    $0.Date? startDate,
-    $0.Date? endDate,
+    $1.Date? startDate,
+    $1.Date? endDate,
     $core.int? responsibleId,
     $core.int? groupId,
     Duration? estimate,
     RecurringChecked? checked,
     RecurringEveryRequest? every,
+    $core.int? categoryId,
+    $core.int? subcategoryId,
   }) {
     final _result = create();
     if (id != null) {
@@ -587,6 +650,12 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
     }
     if (every != null) {
       _result.every = every;
+    }
+    if (categoryId != null) {
+      _result.categoryId = categoryId;
+    }
+    if (subcategoryId != null) {
+      _result.subcategoryId = subcategoryId;
     }
     return _result;
   }
@@ -633,26 +702,26 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $0.Date get startDate => $_getN(2);
+  $1.Date get startDate => $_getN(2);
   @$pb.TagNumber(3)
-  set startDate($0.Date v) { setField(3, v); }
+  set startDate($1.Date v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasStartDate() => $_has(2);
   @$pb.TagNumber(3)
   void clearStartDate() => clearField(3);
   @$pb.TagNumber(3)
-  $0.Date ensureStartDate() => $_ensure(2);
+  $1.Date ensureStartDate() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $0.Date get endDate => $_getN(3);
+  $1.Date get endDate => $_getN(3);
   @$pb.TagNumber(4)
-  set endDate($0.Date v) { setField(4, v); }
+  set endDate($1.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasEndDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearEndDate() => clearField(4);
   @$pb.TagNumber(4)
-  $0.Date ensureEndDate() => $_ensure(3);
+  $1.Date ensureEndDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
   $core.int get responsibleId => $_getIZ(4);
@@ -704,6 +773,24 @@ class UpdateTaskRequest extends $pb.GeneratedMessage {
   void clearEvery() => clearField(9);
   @$pb.TagNumber(9)
   RecurringEveryRequest ensureEvery() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $core.int get categoryId => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set categoryId($core.int v) { $_setSignedInt32(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasCategoryId() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearCategoryId() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.int get subcategoryId => $_getIZ(10);
+  @$pb.TagNumber(11)
+  set subcategoryId($core.int v) { $_setSignedInt32(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasSubcategoryId() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearSubcategoryId() => clearField(11);
 }
 
 enum UpdateTaskResponse_Recurring {
@@ -723,8 +810,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
-    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
-    ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
@@ -733,6 +820,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
+    ..aOM<Category>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -741,8 +830,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
-    $0.Date? startDate,
-    $0.Date? endDate,
+    $1.Date? startDate,
+    $1.Date? endDate,
     User? responsible,
     Group? group,
     Duration? estimate,
@@ -751,6 +840,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.bool? canUpdate,
     $core.bool? canToggle,
     $core.bool? canDelete,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -791,6 +882,12 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     }
     if (canDelete != null) {
       _result.canDelete = canDelete;
+    }
+    if (category != null) {
+      _result.category = category;
+    }
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -846,26 +943,26 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearIsCompleted() => clearField(3);
 
   @$pb.TagNumber(4)
-  $0.Date get startDate => $_getN(3);
+  $1.Date get startDate => $_getN(3);
   @$pb.TagNumber(4)
-  set startDate($0.Date v) { setField(4, v); }
+  set startDate($1.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasStartDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearStartDate() => clearField(4);
   @$pb.TagNumber(4)
-  $0.Date ensureStartDate() => $_ensure(3);
+  $1.Date ensureStartDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $0.Date get endDate => $_getN(4);
+  $1.Date get endDate => $_getN(4);
   @$pb.TagNumber(5)
-  set endDate($0.Date v) { setField(5, v); }
+  set endDate($1.Date v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasEndDate() => $_has(4);
   @$pb.TagNumber(5)
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
-  $0.Date ensureEndDate() => $_ensure(4);
+  $1.Date ensureEndDate() => $_ensure(4);
 
   @$pb.TagNumber(6)
   User get responsible => $_getN(5);
@@ -948,6 +1045,28 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   $core.bool hasCanDelete() => $_has(12);
   @$pb.TagNumber(13)
   void clearCanDelete() => clearField(13);
+
+  @$pb.TagNumber(14)
+  Category get category => $_getN(13);
+  @$pb.TagNumber(14)
+  set category(Category v) { setField(14, v); }
+  @$pb.TagNumber(14)
+  $core.bool hasCategory() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearCategory() => clearField(14);
+  @$pb.TagNumber(14)
+  Category ensureCategory() => $_ensure(13);
+
+  @$pb.TagNumber(15)
+  Subcategory get subcategory => $_getN(14);
+  @$pb.TagNumber(15)
+  set subcategory(Subcategory v) { setField(15, v); }
+  @$pb.TagNumber(15)
+  $core.bool hasSubcategory() => $_has(14);
+  @$pb.TagNumber(15)
+  void clearSubcategory() => clearField(15);
+  @$pb.TagNumber(15)
+  Subcategory ensureSubcategory() => $_ensure(14);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -1302,8 +1421,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isCompleted')
-    ..aOM<$0.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $0.Date.create)
-    ..aOM<$0.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $0.Date.create)
+    ..aOM<$1.Date>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startDate', subBuilder: $1.Date.create)
+    ..aOM<$1.Date>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endDate', subBuilder: $1.Date.create)
     ..aOM<User>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responsible', subBuilder: User.create)
     ..aOM<Group>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: Group.create)
     ..aOM<Duration>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'estimate', subBuilder: Duration.create)
@@ -1313,6 +1432,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..aOB(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isFriendTask')
+    ..aOM<Category>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -1321,8 +1442,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.int? id,
     $core.String? title,
     $core.bool? isCompleted,
-    $0.Date? startDate,
-    $0.Date? endDate,
+    $1.Date? startDate,
+    $1.Date? endDate,
     User? responsible,
     Group? group,
     Duration? estimate,
@@ -1332,6 +1453,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.bool? canToggle,
     $core.bool? canDelete,
     $core.bool? isFriendTask,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -1375,6 +1498,12 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     }
     if (isFriendTask != null) {
       _result.isFriendTask = isFriendTask;
+    }
+    if (category != null) {
+      _result.category = category;
+    }
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -1430,26 +1559,26 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearIsCompleted() => clearField(3);
 
   @$pb.TagNumber(4)
-  $0.Date get startDate => $_getN(3);
+  $1.Date get startDate => $_getN(3);
   @$pb.TagNumber(4)
-  set startDate($0.Date v) { setField(4, v); }
+  set startDate($1.Date v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasStartDate() => $_has(3);
   @$pb.TagNumber(4)
   void clearStartDate() => clearField(4);
   @$pb.TagNumber(4)
-  $0.Date ensureStartDate() => $_ensure(3);
+  $1.Date ensureStartDate() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $0.Date get endDate => $_getN(4);
+  $1.Date get endDate => $_getN(4);
   @$pb.TagNumber(5)
-  set endDate($0.Date v) { setField(5, v); }
+  set endDate($1.Date v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasEndDate() => $_has(4);
   @$pb.TagNumber(5)
   void clearEndDate() => clearField(5);
   @$pb.TagNumber(5)
-  $0.Date ensureEndDate() => $_ensure(4);
+  $1.Date ensureEndDate() => $_ensure(4);
 
   @$pb.TagNumber(6)
   User get responsible => $_getN(5);
@@ -1541,6 +1670,28 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   $core.bool hasIsFriendTask() => $_has(13);
   @$pb.TagNumber(14)
   void clearIsFriendTask() => clearField(14);
+
+  @$pb.TagNumber(15)
+  Category get category => $_getN(14);
+  @$pb.TagNumber(15)
+  set category(Category v) { setField(15, v); }
+  @$pb.TagNumber(15)
+  $core.bool hasCategory() => $_has(14);
+  @$pb.TagNumber(15)
+  void clearCategory() => clearField(15);
+  @$pb.TagNumber(15)
+  Category ensureCategory() => $_ensure(14);
+
+  @$pb.TagNumber(16)
+  Subcategory get subcategory => $_getN(15);
+  @$pb.TagNumber(16)
+  set subcategory(Subcategory v) { setField(16, v); }
+  @$pb.TagNumber(16)
+  $core.bool hasSubcategory() => $_has(15);
+  @$pb.TagNumber(16)
+  void clearSubcategory() => clearField(16);
+  @$pb.TagNumber(16)
+  Subcategory ensureSubcategory() => $_ensure(15);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
@@ -2681,57 +2832,859 @@ class RecurringEveryResponse extends $pb.GeneratedMessage {
   void clearNumReachedDeadlineIsLowerBound() => clearField(6);
 }
 
-class APIApi {
-  $pb.RpcClient _client;
-  APIApi(this._client);
+class GetCategoriesRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetCategoriesRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  $async.Future<LoginResponse> login($pb.ClientContext? ctx, LoginRequest request) {
-    var emptyResponse = LoginResponse();
-    return _client.invoke<LoginResponse>(ctx, 'API', 'Login', request, emptyResponse);
+  GetCategoriesRequest._() : super();
+  factory GetCategoriesRequest() => create();
+  factory GetCategoriesRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetCategoriesRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetCategoriesRequest clone() => GetCategoriesRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetCategoriesRequest copyWith(void Function(GetCategoriesRequest) updates) => super.copyWith((message) => updates(message as GetCategoriesRequest)) as GetCategoriesRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetCategoriesRequest create() => GetCategoriesRequest._();
+  GetCategoriesRequest createEmptyInstance() => create();
+  static $pb.PbList<GetCategoriesRequest> createRepeated() => $pb.PbList<GetCategoriesRequest>();
+  @$core.pragma('dart2js:noInline')
+  static GetCategoriesRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCategoriesRequest>(create);
+  static GetCategoriesRequest? _defaultInstance;
+}
+
+class GetCategoriesResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetCategoriesResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rawTitle')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..pc<Subcategory>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategories', $pb.PbFieldType.PM, subBuilder: Subcategory.create)
+    ..hasRequiredFields = false
+  ;
+
+  GetCategoriesResponse._() : super();
+  factory GetCategoriesResponse({
+    $core.int? id,
+    $core.String? rawTitle,
+    $core.String? color,
+    $core.bool? isEnabled,
+    $core.Iterable<Subcategory>? subcategories,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (rawTitle != null) {
+      _result.rawTitle = rawTitle;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    if (subcategories != null) {
+      _result.subcategories.addAll(subcategories);
+    }
+    return _result;
   }
-  $async.Future<CreateTaskResponse> createTask($pb.ClientContext? ctx, CreateTaskRequest request) {
-    var emptyResponse = CreateTaskResponse();
-    return _client.invoke<CreateTaskResponse>(ctx, 'API', 'CreateTask', request, emptyResponse);
+  factory GetCategoriesResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetCategoriesResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetCategoriesResponse clone() => GetCategoriesResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetCategoriesResponse copyWith(void Function(GetCategoriesResponse) updates) => super.copyWith((message) => updates(message as GetCategoriesResponse)) as GetCategoriesResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetCategoriesResponse create() => GetCategoriesResponse._();
+  GetCategoriesResponse createEmptyInstance() => create();
+  static $pb.PbList<GetCategoriesResponse> createRepeated() => $pb.PbList<GetCategoriesResponse>();
+  @$core.pragma('dart2js:noInline')
+  static GetCategoriesResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCategoriesResponse>(create);
+  static GetCategoriesResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rawTitle => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rawTitle($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRawTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRawTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isEnabled => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isEnabled($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIsEnabled() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsEnabled() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.List<Subcategory> get subcategories => $_getList(4);
+}
+
+class Category extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Category', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rawTitle')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..hasRequiredFields = false
+  ;
+
+  Category._() : super();
+  factory Category({
+    $core.int? id,
+    $core.String? rawTitle,
+    $core.String? color,
+    $core.bool? isEnabled,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (rawTitle != null) {
+      _result.rawTitle = rawTitle;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    return _result;
   }
-  $async.Future<UpdateTaskResponse> updateTask($pb.ClientContext? ctx, UpdateTaskRequest request) {
-    var emptyResponse = UpdateTaskResponse();
-    return _client.invoke<UpdateTaskResponse>(ctx, 'API', 'UpdateTask', request, emptyResponse);
+  factory Category.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Category.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Category clone() => Category()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Category copyWith(void Function(Category) updates) => super.copyWith((message) => updates(message as Category)) as Category; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Category create() => Category._();
+  Category createEmptyInstance() => create();
+  static $pb.PbList<Category> createRepeated() => $pb.PbList<Category>();
+  @$core.pragma('dart2js:noInline')
+  static Category getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Category>(create);
+  static Category? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rawTitle => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rawTitle($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRawTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRawTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isEnabled => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isEnabled($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIsEnabled() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsEnabled() => clearField(4);
+}
+
+class Subcategory extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Subcategory', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..hasRequiredFields = false
+  ;
+
+  Subcategory._() : super();
+  factory Subcategory({
+    $core.int? id,
+    $core.String? title,
+    $core.String? color,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    return _result;
   }
-  $async.Future<ToggleTaskCompletedResponse> toggleTaskCompleted($pb.ClientContext? ctx, ToggleTaskCompletedRequest request) {
-    var emptyResponse = ToggleTaskCompletedResponse();
-    return _client.invoke<ToggleTaskCompletedResponse>(ctx, 'API', 'ToggleTaskCompleted', request, emptyResponse);
+  factory Subcategory.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Subcategory.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Subcategory clone() => Subcategory()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Subcategory copyWith(void Function(Subcategory) updates) => super.copyWith((message) => updates(message as Subcategory)) as Subcategory; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Subcategory create() => Subcategory._();
+  Subcategory createEmptyInstance() => create();
+  static $pb.PbList<Subcategory> createRepeated() => $pb.PbList<Subcategory>();
+  @$core.pragma('dart2js:noInline')
+  static Subcategory getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Subcategory>(create);
+  static Subcategory? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+}
+
+class UpdateCategoryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateCategoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateCategoryRequest._() : super();
+  factory UpdateCategoryRequest({
+    $core.int? id,
+    $core.String? color,
+    $core.bool? isEnabled,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    return _result;
   }
-  $async.Future<DeleteTaskResponse> deleteTask($pb.ClientContext? ctx, DeleteTaskRequest request) {
-    var emptyResponse = DeleteTaskResponse();
-    return _client.invoke<DeleteTaskResponse>(ctx, 'API', 'DeleteTask', request, emptyResponse);
+  factory UpdateCategoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateCategoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateCategoryRequest clone() => UpdateCategoryRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateCategoryRequest copyWith(void Function(UpdateCategoryRequest) updates) => super.copyWith((message) => updates(message as UpdateCategoryRequest)) as UpdateCategoryRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateCategoryRequest create() => UpdateCategoryRequest._();
+  UpdateCategoryRequest createEmptyInstance() => create();
+  static $pb.PbList<UpdateCategoryRequest> createRepeated() => $pb.PbList<UpdateCategoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateCategoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateCategoryRequest>(create);
+  static UpdateCategoryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get color => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set color($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasColor() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearColor() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get isEnabled => $_getBF(2);
+  @$pb.TagNumber(3)
+  set isEnabled($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasIsEnabled() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearIsEnabled() => clearField(3);
+}
+
+class UpdateCategoryResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateCategoryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rawTitle')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..pc<Subcategory>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategories', $pb.PbFieldType.PM, subBuilder: Subcategory.create)
+    ..hasRequiredFields = false
+  ;
+
+  UpdateCategoryResponse._() : super();
+  factory UpdateCategoryResponse({
+    $core.int? id,
+    $core.String? rawTitle,
+    $core.String? color,
+    $core.bool? isEnabled,
+    $core.Iterable<Subcategory>? subcategories,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (rawTitle != null) {
+      _result.rawTitle = rawTitle;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    if (subcategories != null) {
+      _result.subcategories.addAll(subcategories);
+    }
+    return _result;
   }
-  $async.Future<GetTasksResponse> getTasks($pb.ClientContext? ctx, GetTasksRequest request) {
-    var emptyResponse = GetTasksResponse();
-    return _client.invoke<GetTasksResponse>(ctx, 'API', 'GetTasks', request, emptyResponse);
+  factory UpdateCategoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateCategoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateCategoryResponse clone() => UpdateCategoryResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateCategoryResponse copyWith(void Function(UpdateCategoryResponse) updates) => super.copyWith((message) => updates(message as UpdateCategoryResponse)) as UpdateCategoryResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateCategoryResponse create() => UpdateCategoryResponse._();
+  UpdateCategoryResponse createEmptyInstance() => create();
+  static $pb.PbList<UpdateCategoryResponse> createRepeated() => $pb.PbList<UpdateCategoryResponse>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateCategoryResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateCategoryResponse>(create);
+  static UpdateCategoryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rawTitle => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rawTitle($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRawTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRawTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isEnabled => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isEnabled($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIsEnabled() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsEnabled() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.List<Subcategory> get subcategories => $_getList(4);
+}
+
+class CreateSubcategoryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateSubcategoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..hasRequiredFields = false
+  ;
+
+  CreateSubcategoryRequest._() : super();
+  factory CreateSubcategoryRequest({
+    $core.int? categoryId,
+    $core.String? title,
+    $core.String? color,
+  }) {
+    final _result = create();
+    if (categoryId != null) {
+      _result.categoryId = categoryId;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    return _result;
   }
-  $async.Future<CreateGroupResponse> createGroup($pb.ClientContext? ctx, CreateGroupRequest request) {
-    var emptyResponse = CreateGroupResponse();
-    return _client.invoke<CreateGroupResponse>(ctx, 'API', 'CreateGroup', request, emptyResponse);
+  factory CreateSubcategoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CreateSubcategoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CreateSubcategoryRequest clone() => CreateSubcategoryRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CreateSubcategoryRequest copyWith(void Function(CreateSubcategoryRequest) updates) => super.copyWith((message) => updates(message as CreateSubcategoryRequest)) as CreateSubcategoryRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CreateSubcategoryRequest create() => CreateSubcategoryRequest._();
+  CreateSubcategoryRequest createEmptyInstance() => create();
+  static $pb.PbList<CreateSubcategoryRequest> createRepeated() => $pb.PbList<CreateSubcategoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static CreateSubcategoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateSubcategoryRequest>(create);
+  static CreateSubcategoryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get categoryId => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set categoryId($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCategoryId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCategoryId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+}
+
+class CreateSubcategoryResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateSubcategoryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..hasRequiredFields = false
+  ;
+
+  CreateSubcategoryResponse._() : super();
+  factory CreateSubcategoryResponse({
+    $core.int? id,
+    $core.String? title,
+    $core.String? color,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    return _result;
   }
-  $async.Future<JoinGroupResponse> joinGroup($pb.ClientContext? ctx, JoinGroupRequest request) {
-    var emptyResponse = JoinGroupResponse();
-    return _client.invoke<JoinGroupResponse>(ctx, 'API', 'JoinGroup', request, emptyResponse);
+  factory CreateSubcategoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CreateSubcategoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CreateSubcategoryResponse clone() => CreateSubcategoryResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CreateSubcategoryResponse copyWith(void Function(CreateSubcategoryResponse) updates) => super.copyWith((message) => updates(message as CreateSubcategoryResponse)) as CreateSubcategoryResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CreateSubcategoryResponse create() => CreateSubcategoryResponse._();
+  CreateSubcategoryResponse createEmptyInstance() => create();
+  static $pb.PbList<CreateSubcategoryResponse> createRepeated() => $pb.PbList<CreateSubcategoryResponse>();
+  @$core.pragma('dart2js:noInline')
+  static CreateSubcategoryResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateSubcategoryResponse>(create);
+  static CreateSubcategoryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+}
+
+class UpdateSubcategoryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateSubcategoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateSubcategoryRequest._() : super();
+  factory UpdateSubcategoryRequest({
+    $core.int? id,
+    $core.String? title,
+    $core.String? color,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    return _result;
   }
-  $async.Future<UpdateGroupResponse> updateGroup($pb.ClientContext? ctx, UpdateGroupRequest request) {
-    var emptyResponse = UpdateGroupResponse();
-    return _client.invoke<UpdateGroupResponse>(ctx, 'API', 'UpdateGroup', request, emptyResponse);
+  factory UpdateSubcategoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateSubcategoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateSubcategoryRequest clone() => UpdateSubcategoryRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateSubcategoryRequest copyWith(void Function(UpdateSubcategoryRequest) updates) => super.copyWith((message) => updates(message as UpdateSubcategoryRequest)) as UpdateSubcategoryRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateSubcategoryRequest create() => UpdateSubcategoryRequest._();
+  UpdateSubcategoryRequest createEmptyInstance() => create();
+  static $pb.PbList<UpdateSubcategoryRequest> createRepeated() => $pb.PbList<UpdateSubcategoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateSubcategoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateSubcategoryRequest>(create);
+  static UpdateSubcategoryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(4)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(4)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearColor() => clearField(4);
+}
+
+class UpdateSubcategoryResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateSubcategoryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'title')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateSubcategoryResponse._() : super();
+  factory UpdateSubcategoryResponse({
+    $core.int? id,
+    $core.String? title,
+    $core.String? color,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (title != null) {
+      _result.title = title;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    return _result;
   }
-  $async.Future<LeaveGroupResponse> leaveGroup($pb.ClientContext? ctx, LeaveGroupRequest request) {
-    var emptyResponse = LeaveGroupResponse();
-    return _client.invoke<LeaveGroupResponse>(ctx, 'API', 'LeaveGroup', request, emptyResponse);
+  factory UpdateSubcategoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateSubcategoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateSubcategoryResponse clone() => UpdateSubcategoryResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateSubcategoryResponse copyWith(void Function(UpdateSubcategoryResponse) updates) => super.copyWith((message) => updates(message as UpdateSubcategoryResponse)) as UpdateSubcategoryResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateSubcategoryResponse create() => UpdateSubcategoryResponse._();
+  UpdateSubcategoryResponse createEmptyInstance() => create();
+  static $pb.PbList<UpdateSubcategoryResponse> createRepeated() => $pb.PbList<UpdateSubcategoryResponse>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateSubcategoryResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateSubcategoryResponse>(create);
+  static UpdateSubcategoryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+}
+
+class DeleteSubcategoryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteSubcategoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  DeleteSubcategoryRequest._() : super();
+  factory DeleteSubcategoryRequest({
+    $core.int? id,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    return _result;
   }
-  $async.Future<GetGroupsResponse> getGroups($pb.ClientContext? ctx, GetGroupsRequest request) {
-    var emptyResponse = GetGroupsResponse();
-    return _client.invoke<GetGroupsResponse>(ctx, 'API', 'GetGroups', request, emptyResponse);
+  factory DeleteSubcategoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteSubcategoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteSubcategoryRequest clone() => DeleteSubcategoryRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteSubcategoryRequest copyWith(void Function(DeleteSubcategoryRequest) updates) => super.copyWith((message) => updates(message as DeleteSubcategoryRequest)) as DeleteSubcategoryRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteSubcategoryRequest create() => DeleteSubcategoryRequest._();
+  DeleteSubcategoryRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteSubcategoryRequest> createRepeated() => $pb.PbList<DeleteSubcategoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteSubcategoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteSubcategoryRequest>(create);
+  static DeleteSubcategoryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+}
+
+class DeleteSubcategoryResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteSubcategoryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  DeleteSubcategoryResponse._() : super();
+  factory DeleteSubcategoryResponse({
+    $core.int? id,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    return _result;
   }
-  $async.Future<GetGroupParticipantsResponse> getGroupParticipants($pb.ClientContext? ctx, GetGroupParticipantsRequest request) {
-    var emptyResponse = GetGroupParticipantsResponse();
-    return _client.invoke<GetGroupParticipantsResponse>(ctx, 'API', 'GetGroupParticipants', request, emptyResponse);
-  }
+  factory DeleteSubcategoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteSubcategoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteSubcategoryResponse clone() => DeleteSubcategoryResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteSubcategoryResponse copyWith(void Function(DeleteSubcategoryResponse) updates) => super.copyWith((message) => updates(message as DeleteSubcategoryResponse)) as DeleteSubcategoryResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteSubcategoryResponse create() => DeleteSubcategoryResponse._();
+  DeleteSubcategoryResponse createEmptyInstance() => create();
+  static $pb.PbList<DeleteSubcategoryResponse> createRepeated() => $pb.PbList<DeleteSubcategoryResponse>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteSubcategoryResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteSubcategoryResponse>(create);
+  static DeleteSubcategoryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
 }
 

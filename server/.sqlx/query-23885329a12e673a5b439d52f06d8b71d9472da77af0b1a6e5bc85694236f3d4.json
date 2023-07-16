@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO tasks (\n                    responsible_user_id,\n                    title,\n                    start_date,\n                    end_date,\n                    group_id,\n                    estimate,\n                    category_id\n                )\n                VALUES (\n                    $1,\n                    $2,\n                    $3,\n                    $4,\n                    $5,\n                    $6,\n                    $7\n                )\n                RETURNING\n                    id as \"id: TaskId\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: TaskId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Date",
+        "Date",
+        "Int4",
+        "Interval",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "23885329a12e673a5b439d52f06d8b71d9472da77af0b1a6e5bc85694236f3d4"
+}

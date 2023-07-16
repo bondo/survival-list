@@ -84,6 +84,36 @@ class APIClient extends $grpc.Client {
       ($0.GetGroupParticipantsRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $0.GetGroupParticipantsResponse.fromBuffer(value));
+  static final _$getCategories =
+      $grpc.ClientMethod<$0.GetCategoriesRequest, $0.GetCategoriesResponse>(
+          '/api.v1.API/GetCategories',
+          ($0.GetCategoriesRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.GetCategoriesResponse.fromBuffer(value));
+  static final _$updateCategory =
+      $grpc.ClientMethod<$0.UpdateCategoryRequest, $0.UpdateCategoryResponse>(
+          '/api.v1.API/UpdateCategory',
+          ($0.UpdateCategoryRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.UpdateCategoryResponse.fromBuffer(value));
+  static final _$createSubcategory = $grpc.ClientMethod<
+          $0.CreateSubcategoryRequest, $0.CreateSubcategoryResponse>(
+      '/api.v1.API/CreateSubcategory',
+      ($0.CreateSubcategoryRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.CreateSubcategoryResponse.fromBuffer(value));
+  static final _$updateSubcategory = $grpc.ClientMethod<
+          $0.UpdateSubcategoryRequest, $0.UpdateSubcategoryResponse>(
+      '/api.v1.API/UpdateSubcategory',
+      ($0.UpdateSubcategoryRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.UpdateSubcategoryResponse.fromBuffer(value));
+  static final _$deleteSubcategory = $grpc.ClientMethod<
+          $0.DeleteSubcategoryRequest, $0.DeleteSubcategoryResponse>(
+      '/api.v1.API/DeleteSubcategory',
+      ($0.DeleteSubcategoryRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.DeleteSubcategoryResponse.fromBuffer(value));
 
   APIClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -164,6 +194,38 @@ class APIClient extends $grpc.Client {
     return $createStreamingCall(
         _$getGroupParticipants, $async.Stream.fromIterable([request]),
         options: options);
+  }
+
+  $grpc.ResponseStream<$0.GetCategoriesResponse> getCategories(
+      $0.GetCategoriesRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$getCategories, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$0.UpdateCategoryResponse> updateCategory(
+      $0.UpdateCategoryRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$updateCategory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.CreateSubcategoryResponse> createSubcategory(
+      $0.CreateSubcategoryRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$createSubcategory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.UpdateSubcategoryResponse> updateSubcategory(
+      $0.UpdateSubcategoryRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$updateSubcategory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.DeleteSubcategoryResponse> deleteSubcategory(
+      $0.DeleteSubcategoryRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$deleteSubcategory, request, options: options);
   }
 }
 
@@ -263,6 +325,51 @@ abstract class APIServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.GetGroupParticipantsRequest.fromBuffer(value),
         ($0.GetGroupParticipantsResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.GetCategoriesRequest, $0.GetCategoriesResponse>(
+            'GetCategories',
+            getCategories_Pre,
+            false,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.GetCategoriesRequest.fromBuffer(value),
+            ($0.GetCategoriesResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UpdateCategoryRequest,
+            $0.UpdateCategoryResponse>(
+        'UpdateCategory',
+        updateCategory_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.UpdateCategoryRequest.fromBuffer(value),
+        ($0.UpdateCategoryResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.CreateSubcategoryRequest,
+            $0.CreateSubcategoryResponse>(
+        'CreateSubcategory',
+        createSubcategory_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.CreateSubcategoryRequest.fromBuffer(value),
+        ($0.CreateSubcategoryResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UpdateSubcategoryRequest,
+            $0.UpdateSubcategoryResponse>(
+        'UpdateSubcategory',
+        updateSubcategory_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.UpdateSubcategoryRequest.fromBuffer(value),
+        ($0.UpdateSubcategoryResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DeleteSubcategoryRequest,
+            $0.DeleteSubcategoryResponse>(
+        'DeleteSubcategory',
+        deleteSubcategory_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.DeleteSubcategoryRequest.fromBuffer(value),
+        ($0.DeleteSubcategoryResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.LoginResponse> login_Pre(
@@ -327,6 +434,36 @@ abstract class APIServiceBase extends $grpc.Service {
     yield* getGroupParticipants(call, await request);
   }
 
+  $async.Stream<$0.GetCategoriesResponse> getCategories_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.GetCategoriesRequest> request) async* {
+    yield* getCategories(call, await request);
+  }
+
+  $async.Future<$0.UpdateCategoryResponse> updateCategory_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.UpdateCategoryRequest> request) async {
+    return updateCategory(call, await request);
+  }
+
+  $async.Future<$0.CreateSubcategoryResponse> createSubcategory_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.CreateSubcategoryRequest> request) async {
+    return createSubcategory(call, await request);
+  }
+
+  $async.Future<$0.UpdateSubcategoryResponse> updateSubcategory_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.UpdateSubcategoryRequest> request) async {
+    return updateSubcategory(call, await request);
+  }
+
+  $async.Future<$0.DeleteSubcategoryResponse> deleteSubcategory_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.DeleteSubcategoryRequest> request) async {
+    return deleteSubcategory(call, await request);
+  }
+
   $async.Future<$0.LoginResponse> login(
       $grpc.ServiceCall call, $0.LoginRequest request);
   $async.Future<$0.CreateTaskResponse> createTask(
@@ -351,4 +488,14 @@ abstract class APIServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.GetGroupsRequest request);
   $async.Stream<$0.GetGroupParticipantsResponse> getGroupParticipants(
       $grpc.ServiceCall call, $0.GetGroupParticipantsRequest request);
+  $async.Stream<$0.GetCategoriesResponse> getCategories(
+      $grpc.ServiceCall call, $0.GetCategoriesRequest request);
+  $async.Future<$0.UpdateCategoryResponse> updateCategory(
+      $grpc.ServiceCall call, $0.UpdateCategoryRequest request);
+  $async.Future<$0.CreateSubcategoryResponse> createSubcategory(
+      $grpc.ServiceCall call, $0.CreateSubcategoryRequest request);
+  $async.Future<$0.UpdateSubcategoryResponse> updateSubcategory(
+      $grpc.ServiceCall call, $0.UpdateSubcategoryRequest request);
+  $async.Future<$0.DeleteSubcategoryResponse> deleteSubcategory(
+      $grpc.ServiceCall call, $0.DeleteSubcategoryRequest request);
 }
