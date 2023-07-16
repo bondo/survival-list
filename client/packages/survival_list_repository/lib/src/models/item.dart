@@ -14,6 +14,8 @@ class Item extends Equatable {
     required this.recurrence,
     required this.responsible,
     required this.group,
+    required this.category,
+    required this.subcategory,
     required this.canUpdate,
     required this.canToggle,
     required this.canDelete,
@@ -30,6 +32,8 @@ class Item extends Equatable {
   final Recurrence recurrence;
   final Person? responsible;
   final Group? group;
+  final Category? category;
+  final Subcategory? subcategory;
   final bool canUpdate;
   final bool canToggle;
   final bool canDelete;
@@ -46,6 +50,8 @@ class Item extends Equatable {
     Recurrence Function()? recurrence,
     Person? Function()? responsible,
     Group? Function()? group,
+    Category? Function()? category,
+    Subcategory? Function()? subcategory,
     bool Function()? canUpdate,
     bool Function()? canToggle,
     bool Function()? canDelete,
@@ -62,6 +68,8 @@ class Item extends Equatable {
       recurrence: recurrence != null ? recurrence() : this.recurrence,
       responsible: responsible != null ? responsible() : this.responsible,
       group: group != null ? group() : this.group,
+      category: category != null ? category() : this.category,
+      subcategory: subcategory != null ? subcategory() : this.subcategory,
       canUpdate: canUpdate != null ? canUpdate() : this.canUpdate,
       canToggle: canToggle != null ? canToggle() : this.canToggle,
       canDelete: canDelete != null ? canDelete() : this.canDelete,
@@ -82,6 +90,8 @@ class Item extends Equatable {
         recurrence,
         responsible,
         group,
+        category,
+        subcategory,
         canUpdate,
         canToggle,
         canDelete,

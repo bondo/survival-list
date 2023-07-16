@@ -83,6 +83,24 @@ class EditItemResponsibleChanged extends EditItemEvent {
   List<Object> get props => [responsible ?? 'null'];
 }
 
+class EditItemCategoryChanged extends EditItemEvent {
+  const EditItemCategoryChanged(this.category);
+
+  final Category? category;
+
+  @override
+  List<Object> get props => [category ?? 'null'];
+}
+
+class EditItemSubcategoryChanged extends EditItemEvent {
+  const EditItemSubcategoryChanged(this.subcategory);
+
+  final Subcategory? subcategory;
+
+  @override
+  List<Object> get props => [subcategory ?? 'null'];
+}
+
 class EditItemSubmitted extends EditItemEvent {
   const EditItemSubmitted();
 }

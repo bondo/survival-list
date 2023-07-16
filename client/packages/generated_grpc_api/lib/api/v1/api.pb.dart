@@ -345,8 +345,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
     ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
-    ..a<$core.int>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
-    ..a<$core.int>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategoryId', $pb.PbFieldType.O3)
+    ..aOM<Category>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -364,8 +364,8 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     $core.bool? canUpdate,
     $core.bool? canToggle,
     $core.bool? canDelete,
-    $core.int? categoryId,
-    $core.int? subcategoryId,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -404,11 +404,11 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
     if (canDelete != null) {
       _result.canDelete = canDelete;
     }
-    if (categoryId != null) {
-      _result.categoryId = categoryId;
+    if (category != null) {
+      _result.category = category;
     }
-    if (subcategoryId != null) {
-      _result.subcategoryId = subcategoryId;
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -559,22 +559,26 @@ class CreateTaskResponse extends $pb.GeneratedMessage {
   void clearCanDelete() => clearField(12);
 
   @$pb.TagNumber(13)
-  $core.int get categoryId => $_getIZ(12);
+  Category get category => $_getN(12);
   @$pb.TagNumber(13)
-  set categoryId($core.int v) { $_setSignedInt32(12, v); }
+  set category(Category v) { setField(13, v); }
   @$pb.TagNumber(13)
-  $core.bool hasCategoryId() => $_has(12);
+  $core.bool hasCategory() => $_has(12);
   @$pb.TagNumber(13)
-  void clearCategoryId() => clearField(13);
+  void clearCategory() => clearField(13);
+  @$pb.TagNumber(13)
+  Category ensureCategory() => $_ensure(12);
 
   @$pb.TagNumber(14)
-  $core.int get subcategoryId => $_getIZ(13);
+  Subcategory get subcategory => $_getN(13);
   @$pb.TagNumber(14)
-  set subcategoryId($core.int v) { $_setSignedInt32(13, v); }
+  set subcategory(Subcategory v) { setField(14, v); }
   @$pb.TagNumber(14)
-  $core.bool hasSubcategoryId() => $_has(13);
+  $core.bool hasSubcategory() => $_has(13);
   @$pb.TagNumber(14)
-  void clearSubcategoryId() => clearField(14);
+  void clearSubcategory() => clearField(14);
+  @$pb.TagNumber(14)
+  Subcategory ensureSubcategory() => $_ensure(13);
 }
 
 enum UpdateTaskRequest_Recurring {
@@ -816,8 +820,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canUpdate')
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
-    ..a<$core.int>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
-    ..a<$core.int>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategoryId', $pb.PbFieldType.O3)
+    ..aOM<Category>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -836,8 +840,8 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     $core.bool? canUpdate,
     $core.bool? canToggle,
     $core.bool? canDelete,
-    $core.int? categoryId,
-    $core.int? subcategoryId,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -879,11 +883,11 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
     if (canDelete != null) {
       _result.canDelete = canDelete;
     }
-    if (categoryId != null) {
-      _result.categoryId = categoryId;
+    if (category != null) {
+      _result.category = category;
     }
-    if (subcategoryId != null) {
-      _result.subcategoryId = subcategoryId;
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -1043,22 +1047,26 @@ class UpdateTaskResponse extends $pb.GeneratedMessage {
   void clearCanDelete() => clearField(13);
 
   @$pb.TagNumber(14)
-  $core.int get categoryId => $_getIZ(13);
+  Category get category => $_getN(13);
   @$pb.TagNumber(14)
-  set categoryId($core.int v) { $_setSignedInt32(13, v); }
+  set category(Category v) { setField(14, v); }
   @$pb.TagNumber(14)
-  $core.bool hasCategoryId() => $_has(13);
+  $core.bool hasCategory() => $_has(13);
   @$pb.TagNumber(14)
-  void clearCategoryId() => clearField(14);
+  void clearCategory() => clearField(14);
+  @$pb.TagNumber(14)
+  Category ensureCategory() => $_ensure(13);
 
   @$pb.TagNumber(15)
-  $core.int get subcategoryId => $_getIZ(14);
+  Subcategory get subcategory => $_getN(14);
   @$pb.TagNumber(15)
-  set subcategoryId($core.int v) { $_setSignedInt32(14, v); }
+  set subcategory(Subcategory v) { setField(15, v); }
   @$pb.TagNumber(15)
-  $core.bool hasSubcategoryId() => $_has(14);
+  $core.bool hasSubcategory() => $_has(14);
   @$pb.TagNumber(15)
-  void clearSubcategoryId() => clearField(15);
+  void clearSubcategory() => clearField(15);
+  @$pb.TagNumber(15)
+  Subcategory ensureSubcategory() => $_ensure(14);
 }
 
 class ToggleTaskCompletedRequest extends $pb.GeneratedMessage {
@@ -1424,8 +1432,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canToggle')
     ..aOB(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canDelete')
     ..aOB(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isFriendTask')
-    ..a<$core.int>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'categoryId', $pb.PbFieldType.O3)
-    ..a<$core.int>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategoryId', $pb.PbFieldType.O3)
+    ..aOM<Category>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'category', subBuilder: Category.create)
+    ..aOM<Subcategory>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcategory', subBuilder: Subcategory.create)
     ..hasRequiredFields = false
   ;
 
@@ -1445,8 +1453,8 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     $core.bool? canToggle,
     $core.bool? canDelete,
     $core.bool? isFriendTask,
-    $core.int? categoryId,
-    $core.int? subcategoryId,
+    Category? category,
+    Subcategory? subcategory,
   }) {
     final _result = create();
     if (id != null) {
@@ -1491,11 +1499,11 @@ class GetTasksResponse extends $pb.GeneratedMessage {
     if (isFriendTask != null) {
       _result.isFriendTask = isFriendTask;
     }
-    if (categoryId != null) {
-      _result.categoryId = categoryId;
+    if (category != null) {
+      _result.category = category;
     }
-    if (subcategoryId != null) {
-      _result.subcategoryId = subcategoryId;
+    if (subcategory != null) {
+      _result.subcategory = subcategory;
     }
     return _result;
   }
@@ -1664,22 +1672,26 @@ class GetTasksResponse extends $pb.GeneratedMessage {
   void clearIsFriendTask() => clearField(14);
 
   @$pb.TagNumber(15)
-  $core.int get categoryId => $_getIZ(14);
+  Category get category => $_getN(14);
   @$pb.TagNumber(15)
-  set categoryId($core.int v) { $_setSignedInt32(14, v); }
+  set category(Category v) { setField(15, v); }
   @$pb.TagNumber(15)
-  $core.bool hasCategoryId() => $_has(14);
+  $core.bool hasCategory() => $_has(14);
   @$pb.TagNumber(15)
-  void clearCategoryId() => clearField(15);
+  void clearCategory() => clearField(15);
+  @$pb.TagNumber(15)
+  Category ensureCategory() => $_ensure(14);
 
   @$pb.TagNumber(16)
-  $core.int get subcategoryId => $_getIZ(15);
+  Subcategory get subcategory => $_getN(15);
   @$pb.TagNumber(16)
-  set subcategoryId($core.int v) { $_setSignedInt32(15, v); }
+  set subcategory(Subcategory v) { setField(16, v); }
   @$pb.TagNumber(16)
-  $core.bool hasSubcategoryId() => $_has(15);
+  $core.bool hasSubcategory() => $_has(15);
   @$pb.TagNumber(16)
-  void clearSubcategoryId() => clearField(16);
+  void clearSubcategory() => clearField(16);
+  @$pb.TagNumber(16)
+  Subcategory ensureSubcategory() => $_ensure(15);
 }
 
 class CreateGroupRequest extends $pb.GeneratedMessage {
@@ -2944,6 +2956,95 @@ class GetCategoriesResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(5)
   $core.List<Subcategory> get subcategories => $_getList(4);
+}
+
+class Category extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Category', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'api.v1'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rawTitle')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'color')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..hasRequiredFields = false
+  ;
+
+  Category._() : super();
+  factory Category({
+    $core.int? id,
+    $core.String? rawTitle,
+    $core.String? color,
+    $core.bool? isEnabled,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (rawTitle != null) {
+      _result.rawTitle = rawTitle;
+    }
+    if (color != null) {
+      _result.color = color;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    return _result;
+  }
+  factory Category.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Category.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Category clone() => Category()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Category copyWith(void Function(Category) updates) => super.copyWith((message) => updates(message as Category)) as Category; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Category create() => Category._();
+  Category createEmptyInstance() => create();
+  static $pb.PbList<Category> createRepeated() => $pb.PbList<Category>();
+  @$core.pragma('dart2js:noInline')
+  static Category getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Category>(create);
+  static Category? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rawTitle => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rawTitle($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRawTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRawTitle() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get color => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set color($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasColor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearColor() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isEnabled => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isEnabled($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIsEnabled() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsEnabled() => clearField(4);
 }
 
 class Subcategory extends $pb.GeneratedMessage {

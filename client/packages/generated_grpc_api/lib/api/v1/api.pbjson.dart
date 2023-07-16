@@ -67,8 +67,8 @@ const CreateTaskResponse$json = const {
     const {'1': 'can_update', '3': 10, '4': 1, '5': 8, '10': 'canUpdate'},
     const {'1': 'can_toggle', '3': 11, '4': 1, '5': 8, '10': 'canToggle'},
     const {'1': 'can_delete', '3': 12, '4': 1, '5': 8, '10': 'canDelete'},
-    const {'1': 'category_id', '3': 13, '4': 1, '5': 5, '10': 'categoryId'},
-    const {'1': 'subcategory_id', '3': 14, '4': 1, '5': 5, '10': 'subcategoryId'},
+    const {'1': 'category', '3': 13, '4': 1, '5': 11, '6': '.api.v1.Category', '10': 'category'},
+    const {'1': 'subcategory', '3': 14, '4': 1, '5': 11, '6': '.api.v1.Subcategory', '10': 'subcategory'},
   ],
   '8': const [
     const {'1': 'recurring'},
@@ -76,7 +76,7 @@ const CreateTaskResponse$json = const {
 };
 
 /// Descriptor for `CreateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIwCgpzdGFydF9kYXRlGAMgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgFIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgGIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYByABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCCABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAkgASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgKIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYCyABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGAwgASgIUgljYW5EZWxldGUSHwoLY2F0ZWdvcnlfaWQYDSABKAVSCmNhdGVnb3J5SWQSJQoOc3ViY2F0ZWdvcnlfaWQYDiABKAVSDXN1YmNhdGVnb3J5SWRCCwoJcmVjdXJyaW5n');
+final $typed_data.Uint8List createTaskResponseDescriptor = $convert.base64Decode('ChJDcmVhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIwCgpzdGFydF9kYXRlGAMgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgFIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgGIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYByABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCCABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAkgASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgKIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYCyABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGAwgASgIUgljYW5EZWxldGUSLAoIY2F0ZWdvcnkYDSABKAsyEC5hcGkudjEuQ2F0ZWdvcnlSCGNhdGVnb3J5EjUKC3N1YmNhdGVnb3J5GA4gASgLMhMuYXBpLnYxLlN1YmNhdGVnb3J5UgtzdWJjYXRlZ29yeUILCglyZWN1cnJpbmc=');
 @$core.Deprecated('Use updateTaskRequestDescriptor instead')
 const UpdateTaskRequest$json = const {
   '1': 'UpdateTaskRequest',
@@ -117,8 +117,8 @@ const UpdateTaskResponse$json = const {
     const {'1': 'can_update', '3': 11, '4': 1, '5': 8, '10': 'canUpdate'},
     const {'1': 'can_toggle', '3': 12, '4': 1, '5': 8, '10': 'canToggle'},
     const {'1': 'can_delete', '3': 13, '4': 1, '5': 8, '10': 'canDelete'},
-    const {'1': 'category_id', '3': 14, '4': 1, '5': 5, '10': 'categoryId'},
-    const {'1': 'subcategory_id', '3': 15, '4': 1, '5': 5, '10': 'subcategoryId'},
+    const {'1': 'category', '3': 14, '4': 1, '5': 11, '6': '.api.v1.Category', '10': 'category'},
+    const {'1': 'subcategory', '3': 15, '4': 1, '5': 11, '6': '.api.v1.Subcategory', '10': 'subcategory'},
   ],
   '8': const [
     const {'1': 'recurring'},
@@ -126,7 +126,7 @@ const UpdateTaskResponse$json = const {
 };
 
 /// Descriptor for `UpdateTaskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVkEjAKCnN0YXJ0X2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBSABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEi4KC3Jlc3BvbnNpYmxlGAYgASgLMgwuYXBpLnYxLlVzZXJSC3Jlc3BvbnNpYmxlEiMKBWdyb3VwGAcgASgLMg0uYXBpLnYxLkdyb3VwUgVncm91cBIsCghlc3RpbWF0ZRgIIAEoCzIQLmFwaS52MS5EdXJhdGlvblIIZXN0aW1hdGUSNAoHY2hlY2tlZBgJIAEoCzIYLmFwaS52MS5SZWN1cnJpbmdDaGVja2VkSABSB2NoZWNrZWQSNgoFZXZlcnkYCiABKAsyHi5hcGkudjEuUmVjdXJyaW5nRXZlcnlSZXNwb25zZUgAUgVldmVyeRIdCgpjYW5fdXBkYXRlGAsgASgIUgljYW5VcGRhdGUSHQoKY2FuX3RvZ2dsZRgMIAEoCFIJY2FuVG9nZ2xlEh0KCmNhbl9kZWxldGUYDSABKAhSCWNhbkRlbGV0ZRIfCgtjYXRlZ29yeV9pZBgOIAEoBVIKY2F0ZWdvcnlJZBIlCg5zdWJjYXRlZ29yeV9pZBgPIAEoBVINc3ViY2F0ZWdvcnlJZEILCglyZWN1cnJpbmc=');
+final $typed_data.Uint8List updateTaskResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVUYXNrUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIhCgxpc19jb21wbGV0ZWQYAyABKAhSC2lzQ29tcGxldGVkEjAKCnN0YXJ0X2RhdGUYBCABKAsyES5nb29nbGUudHlwZS5EYXRlUglzdGFydERhdGUSLAoIZW5kX2RhdGUYBSABKAsyES5nb29nbGUudHlwZS5EYXRlUgdlbmREYXRlEi4KC3Jlc3BvbnNpYmxlGAYgASgLMgwuYXBpLnYxLlVzZXJSC3Jlc3BvbnNpYmxlEiMKBWdyb3VwGAcgASgLMg0uYXBpLnYxLkdyb3VwUgVncm91cBIsCghlc3RpbWF0ZRgIIAEoCzIQLmFwaS52MS5EdXJhdGlvblIIZXN0aW1hdGUSNAoHY2hlY2tlZBgJIAEoCzIYLmFwaS52MS5SZWN1cnJpbmdDaGVja2VkSABSB2NoZWNrZWQSNgoFZXZlcnkYCiABKAsyHi5hcGkudjEuUmVjdXJyaW5nRXZlcnlSZXNwb25zZUgAUgVldmVyeRIdCgpjYW5fdXBkYXRlGAsgASgIUgljYW5VcGRhdGUSHQoKY2FuX3RvZ2dsZRgMIAEoCFIJY2FuVG9nZ2xlEh0KCmNhbl9kZWxldGUYDSABKAhSCWNhbkRlbGV0ZRIsCghjYXRlZ29yeRgOIAEoCzIQLmFwaS52MS5DYXRlZ29yeVIIY2F0ZWdvcnkSNQoLc3ViY2F0ZWdvcnkYDyABKAsyEy5hcGkudjEuU3ViY2F0ZWdvcnlSC3N1YmNhdGVnb3J5QgsKCXJlY3VycmluZw==');
 @$core.Deprecated('Use toggleTaskCompletedRequestDescriptor instead')
 const ToggleTaskCompletedRequest$json = const {
   '1': 'ToggleTaskCompletedRequest',
@@ -200,8 +200,8 @@ const GetTasksResponse$json = const {
     const {'1': 'can_toggle', '3': 12, '4': 1, '5': 8, '10': 'canToggle'},
     const {'1': 'can_delete', '3': 13, '4': 1, '5': 8, '10': 'canDelete'},
     const {'1': 'is_friend_task', '3': 14, '4': 1, '5': 8, '10': 'isFriendTask'},
-    const {'1': 'category_id', '3': 15, '4': 1, '5': 5, '10': 'categoryId'},
-    const {'1': 'subcategory_id', '3': 16, '4': 1, '5': 5, '10': 'subcategoryId'},
+    const {'1': 'category', '3': 15, '4': 1, '5': 11, '6': '.api.v1.Category', '10': 'category'},
+    const {'1': 'subcategory', '3': 16, '4': 1, '5': 11, '6': '.api.v1.Subcategory', '10': 'subcategory'},
   ],
   '8': const [
     const {'1': 'recurring'},
@@ -209,7 +209,7 @@ const GetTasksResponse$json = const {
 };
 
 /// Descriptor for `GetTasksResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgHIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYCCABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCSABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAogASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgLIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYDCABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGA0gASgIUgljYW5EZWxldGUSJAoOaXNfZnJpZW5kX3Rhc2sYDiABKAhSDGlzRnJpZW5kVGFzaxIfCgtjYXRlZ29yeV9pZBgPIAEoBVIKY2F0ZWdvcnlJZBIlCg5zdWJjYXRlZ29yeV9pZBgQIAEoBVINc3ViY2F0ZWdvcnlJZEILCglyZWN1cnJpbmc=');
+final $typed_data.Uint8List getTasksResponseDescriptor = $convert.base64Decode('ChBHZXRUYXNrc1Jlc3BvbnNlEg4KAmlkGAEgASgFUgJpZBIUCgV0aXRsZRgCIAEoCVIFdGl0bGUSIQoMaXNfY29tcGxldGVkGAMgASgIUgtpc0NvbXBsZXRlZBIwCgpzdGFydF9kYXRlGAQgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIJc3RhcnREYXRlEiwKCGVuZF9kYXRlGAUgASgLMhEuZ29vZ2xlLnR5cGUuRGF0ZVIHZW5kRGF0ZRIuCgtyZXNwb25zaWJsZRgGIAEoCzIMLmFwaS52MS5Vc2VyUgtyZXNwb25zaWJsZRIjCgVncm91cBgHIAEoCzINLmFwaS52MS5Hcm91cFIFZ3JvdXASLAoIZXN0aW1hdGUYCCABKAsyEC5hcGkudjEuRHVyYXRpb25SCGVzdGltYXRlEjQKB2NoZWNrZWQYCSABKAsyGC5hcGkudjEuUmVjdXJyaW5nQ2hlY2tlZEgAUgdjaGVja2VkEjYKBWV2ZXJ5GAogASgLMh4uYXBpLnYxLlJlY3VycmluZ0V2ZXJ5UmVzcG9uc2VIAFIFZXZlcnkSHQoKY2FuX3VwZGF0ZRgLIAEoCFIJY2FuVXBkYXRlEh0KCmNhbl90b2dnbGUYDCABKAhSCWNhblRvZ2dsZRIdCgpjYW5fZGVsZXRlGA0gASgIUgljYW5EZWxldGUSJAoOaXNfZnJpZW5kX3Rhc2sYDiABKAhSDGlzRnJpZW5kVGFzaxIsCghjYXRlZ29yeRgPIAEoCzIQLmFwaS52MS5DYXRlZ29yeVIIY2F0ZWdvcnkSNQoLc3ViY2F0ZWdvcnkYECABKAsyEy5hcGkudjEuU3ViY2F0ZWdvcnlSC3N1YmNhdGVnb3J5QgsKCXJlY3VycmluZw==');
 @$core.Deprecated('Use createGroupRequestDescriptor instead')
 const CreateGroupRequest$json = const {
   '1': 'CreateGroupRequest',
@@ -430,6 +430,19 @@ const GetCategoriesResponse$json = const {
 
 /// Descriptor for `GetCategoriesResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getCategoriesResponseDescriptor = $convert.base64Decode('ChVHZXRDYXRlZ29yaWVzUmVzcG9uc2USDgoCaWQYASABKAVSAmlkEhsKCXJhd190aXRsZRgCIAEoCVIIcmF3VGl0bGUSFAoFY29sb3IYAyABKAlSBWNvbG9yEh0KCmlzX2VuYWJsZWQYBCABKAhSCWlzRW5hYmxlZBI5Cg1zdWJjYXRlZ29yaWVzGAUgAygLMhMuYXBpLnYxLlN1YmNhdGVnb3J5Ug1zdWJjYXRlZ29yaWVz');
+@$core.Deprecated('Use categoryDescriptor instead')
+const Category$json = const {
+  '1': 'Category',
+  '2': const [
+    const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
+    const {'1': 'raw_title', '3': 2, '4': 1, '5': 9, '10': 'rawTitle'},
+    const {'1': 'color', '3': 3, '4': 1, '5': 9, '10': 'color'},
+    const {'1': 'is_enabled', '3': 4, '4': 1, '5': 8, '10': 'isEnabled'},
+  ],
+};
+
+/// Descriptor for `Category`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List categoryDescriptor = $convert.base64Decode('CghDYXRlZ29yeRIOCgJpZBgBIAEoBVICaWQSGwoJcmF3X3RpdGxlGAIgASgJUghyYXdUaXRsZRIUCgVjb2xvchgDIAEoCVIFY29sb3ISHQoKaXNfZW5hYmxlZBgEIAEoCFIJaXNFbmFibGVk');
 @$core.Deprecated('Use subcategoryDescriptor instead')
 const Subcategory$json = const {
   '1': 'Subcategory',

@@ -149,6 +149,8 @@ class SurvivalListRepository {
         },
         responsible: _parseUser(response.responsible),
         group: _parseGroup(response.group),
+        category: _parseCategory(response.category),
+        subcategory: _parseSubcategory(response.subcategory),
         canUpdate: response.canUpdate,
         canToggle: response.canToggle,
         canDelete: response.canDelete,
@@ -526,7 +528,8 @@ class SurvivalListRepository {
       BehaviorSubject<bool>.seeded(false);
   final _categoriesStreamController =
       BehaviorSubject<Map<int, (Category, List<Subcategory>)>>.seeded(
-          HashMap());
+    HashMap(),
+  );
   StreamSubscription<bool>? _categoriesUserSubscription;
 
   Stream<List<(Category, List<Subcategory>)>> get categories {
@@ -668,6 +671,31 @@ class SurvivalListRepository {
     }
   }
 
+  Category? _parseCategory(api.Category category) {
+    if (category.hasId()) {
+      return Category(
+        id: category.id,
+        rawTitle: category.rawTitle,
+        color: category.color,
+        isEnabled: category.isEnabled,
+      );
+    } else {
+      return null;
+    }
+  }
+
+  Subcategory? _parseSubcategory(api.Subcategory subcategory) {
+    if (subcategory.hasId()) {
+      return Subcategory(
+        id: subcategory.id,
+        title: subcategory.title,
+        color: subcategory.color,
+      );
+    } else {
+      return null;
+    }
+  }
+
   LongDuration _parseRecurrenceChecked(api.RecurringChecked checked) {
     return LongDuration(months: checked.months, days: checked.days);
   }
@@ -700,6 +728,8 @@ class SurvivalListRepository {
           )
       },
       group: _parseGroup(task.group),
+      category: _parseCategory(task.category),
+      subcategory: _parseSubcategory(task.subcategory),
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,
@@ -735,6 +765,8 @@ class SurvivalListRepository {
           )
       },
       group: _parseGroup(task.group),
+      category: _parseCategory(task.category),
+      subcategory: _parseSubcategory(task.subcategory),
       canUpdate: task.canUpdate,
       canToggle: task.canToggle,
       canDelete: task.canDelete,

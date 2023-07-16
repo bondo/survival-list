@@ -19,6 +19,8 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     on<CreateItemRecurrenceFrequencyChanged>(_onRecurrenceFrequencyChanged);
     on<CreateItemRecurrenceKindChanged>(_onRecurrenceKindChanged);
     on<CreateItemResponsibleChanged>(_onResponsibleChanged);
+    on<CreateItemCategoryChanged>(_onCategoryChanged);
+    on<CreateItemSubcategoryChanged>(_onSubcategoryChanged);
     on<CreateItemSubmitted>(_onSubmitted);
     on<CreateItemSubscriptionRequested>(_onSubscriptionRequested);
     on<CreateItemGroupParticipantsSubscriptionRequested>(
@@ -97,6 +99,21 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     emit(state.copyWith(responsible: () => event.responsible));
   }
 
+  void _onCategoryChanged(
+    CreateItemCategoryChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(category: () => event.category));
+    add(const CreateItemSubcategoryChanged(null));
+  }
+
+  void _onSubcategoryChanged(
+    CreateItemSubcategoryChanged event,
+    Emitter<CreateItemState> emit,
+  ) {
+    emit(state.copyWith(subcategory: () => event.subcategory));
+  }
+
   Future<void> _onSubmitted(
     CreateItemSubmitted event,
     Emitter<CreateItemState> emit,
@@ -129,18 +146,33 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     emit(state.copyWith(groupsStatus: () => CreateItemStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine3(
+      CombineLatestStream.combine5(
+        _survivalListRepository.categories,
+        _survivalListRepository.isFetchingCategories,
         _survivalListRepository.groups,
         _survivalListRepository.isFetchingGroups,
         _survivalListRepository.viewerPerson,
-        (List<Group> groups, bool isFetching, Person? viewerPerson) => (
+        (
+          List<(Category, List<Subcategory>)> categories,
+          bool isFetchingCategories,
+          List<Group> groups,
+          bool isFetchingGroups,
+          Person? viewerPerson,
+        ) =>
+            (
+          categories: categories,
+          isFetchingCategories: isFetchingCategories,
           groups: groups,
-          isFetching: isFetching,
+          isFetchingGroups: isFetchingGroups,
           viewerPerson: viewerPerson
         ),
       ),
       onData: (data) => state.copyWith(
-        groupsStatus: () => data.isFetching
+        categoriesStatus: () => data.isFetchingCategories
+            ? CreateItemStatus.loading
+            : CreateItemStatus.success,
+        categories: () => data.categories,
+        groupsStatus: () => data.isFetchingGroups
             ? CreateItemStatus.loading
             : CreateItemStatus.success,
         groups: () => data.groups,

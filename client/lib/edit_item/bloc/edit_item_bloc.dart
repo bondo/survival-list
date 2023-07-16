@@ -14,6 +14,8 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
         super(
           EditItemState(
             item: item,
+            category: item.category,
+            subcategory: item.subcategory,
             title: item.title,
             startDate: item.startDate,
             endDate: item.endDate,
@@ -33,6 +35,8 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     on<EditItemRecurrenceFrequencyChanged>(_onRecurrenceFrequencyChanged);
     on<EditItemRecurrenceKindChanged>(_onRecurrenceKindChanged);
     on<EditItemResponsibleChanged>(_onResponsibleChanged);
+    on<EditItemCategoryChanged>(_onCategoryChanged);
+    on<EditItemSubcategoryChanged>(_onSubcategoryChanged);
     on<EditItemSubmitted>(_onSubmitted);
     on<EditItemSubscriptionRequested>(_onSubscriptionRequested);
     on<EditItemGroupParticipantsSubscriptionRequested>(
@@ -118,6 +122,21 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     emit(state.copyWith(responsible: () => event.responsible));
   }
 
+  void _onCategoryChanged(
+    EditItemCategoryChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(category: () => event.category));
+    add(const EditItemSubcategoryChanged(null));
+  }
+
+  void _onSubcategoryChanged(
+    EditItemSubcategoryChanged event,
+    Emitter<EditItemState> emit,
+  ) {
+    emit(state.copyWith(subcategory: () => event.subcategory));
+  }
+
   Future<void> _onSubmitted(
     EditItemSubmitted event,
     Emitter<EditItemState> emit,
@@ -151,19 +170,35 @@ class EditItemBloc extends Bloc<EditItemEvent, EditItemState> {
     emit(state.copyWith(groupsStatus: () => EditItemStatus.loading));
 
     await emit.forEach(
-      CombineLatestStream.combine3(
+      CombineLatestStream.combine5(
+        _survivalListRepository.categories,
+        _survivalListRepository.isFetchingCategories,
         _survivalListRepository.groups,
         _survivalListRepository.isFetchingGroups,
         _survivalListRepository.viewerPerson,
-        (List<Group> groups, bool isFetching, Person? viewerPerson) => (
+        (
+          List<(Category, List<Subcategory>)> categories,
+          bool isFetchingCategories,
+          List<Group> groups,
+          bool isFetchingGroups,
+          Person? viewerPerson,
+        ) =>
+            (
+          categories: categories,
+          isFetchingCategories: isFetchingCategories,
           groups: groups,
-          isFetching: isFetching,
+          isFetchingGroups: isFetchingGroups,
           viewerPerson: viewerPerson
         ),
       ),
       onData: (data) => state.copyWith(
-        groupsStatus: () =>
-            data.isFetching ? EditItemStatus.loading : EditItemStatus.success,
+        categoriesStatus: () => data.isFetchingCategories
+            ? EditItemStatus.loading
+            : EditItemStatus.success,
+        categories: () => data.categories,
+        groupsStatus: () => data.isFetchingGroups
+            ? EditItemStatus.loading
+            : EditItemStatus.success,
         groups: () => data.groups,
         viewerPerson: () => data.viewerPerson,
       ),
