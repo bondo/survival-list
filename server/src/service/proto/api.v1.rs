@@ -68,10 +68,10 @@ pub struct CreateTaskResponse {
     pub can_toggle: bool,
     #[prost(bool, tag = "12")]
     pub can_delete: bool,
-    #[prost(int32, tag = "13")]
-    pub category_id: i32,
-    #[prost(int32, tag = "14")]
-    pub subcategory_id: i32,
+    #[prost(message, optional, tag = "13")]
+    pub category: ::core::option::Option<Category>,
+    #[prost(message, optional, tag = "14")]
+    pub subcategory: ::core::option::Option<Subcategory>,
     #[prost(oneof = "create_task_response::Recurring", tags = "8, 9")]
     pub recurring: ::core::option::Option<create_task_response::Recurring>,
 }
@@ -146,10 +146,10 @@ pub struct UpdateTaskResponse {
     pub can_toggle: bool,
     #[prost(bool, tag = "13")]
     pub can_delete: bool,
-    #[prost(int32, tag = "14")]
-    pub category_id: i32,
-    #[prost(int32, tag = "15")]
-    pub subcategory_id: i32,
+    #[prost(message, optional, tag = "14")]
+    pub category: ::core::option::Option<Category>,
+    #[prost(message, optional, tag = "15")]
+    pub subcategory: ::core::option::Option<Subcategory>,
     #[prost(oneof = "update_task_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<update_task_response::Recurring>,
 }
@@ -234,10 +234,10 @@ pub struct GetTasksResponse {
     pub can_delete: bool,
     #[prost(bool, tag = "14")]
     pub is_friend_task: bool,
-    #[prost(int32, tag = "15")]
-    pub category_id: i32,
-    #[prost(int32, tag = "16")]
-    pub subcategory_id: i32,
+    #[prost(message, optional, tag = "15")]
+    pub category: ::core::option::Option<Category>,
+    #[prost(message, optional, tag = "16")]
+    pub subcategory: ::core::option::Option<Subcategory>,
     #[prost(oneof = "get_tasks_response::Recurring", tags = "9, 10")]
     pub recurring: ::core::option::Option<get_tasks_response::Recurring>,
 }
@@ -417,6 +417,18 @@ pub struct GetCategoriesResponse {
     pub is_enabled: bool,
     #[prost(message, repeated, tag = "5")]
     pub subcategories: ::prost::alloc::vec::Vec<Subcategory>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Category {
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(string, tag = "2")]
+    pub raw_title: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub color: ::prost::alloc::string::String,
+    #[prost(bool, tag = "4")]
+    pub is_enabled: bool,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -701,24 +701,34 @@ fn it_can_have_tasks_with_subcategories() {
 
         let categories = client.get_categories().await.unwrap();
 
-        let get_category_id = |raw_title: &str| {
+        let get_category = |raw_title: &str| {
             categories
                 .iter()
                 .find(|c| c.raw_title == raw_title)
-                .map(|c| c.id)
-                .unwrap_or_default()
+                .map(|c| Category {
+                    id: c.id,
+                    raw_title: c.raw_title.clone(),
+                    color: c.color.clone(),
+                    is_enabled: c.is_enabled,
+                })
+                .expect("category not found")
         };
 
-        let finance_id = get_category_id("finance");
-        let home_id = get_category_id("home");
+        let finance = get_category("finance");
+        let home = get_category("home");
 
         let cleaning = client
             .create_subcategory(CreateSubcategoryRequest {
-                category_id: home_id,
+                category_id: home.id,
                 title: "Cleaning!".to_string(),
                 color: "".to_string(),
             })
             .await
+            .map(|c| Subcategory {
+                id: c.id,
+                title: c.title,
+                color: c.color,
+            })
             .unwrap();
 
         let simple_task = client
@@ -742,7 +752,7 @@ fn it_can_have_tasks_with_subcategories() {
                     month: 1,
                     day: 1,
                 }),
-                category_id: finance_id,
+                category_id: finance.id,
                 ..Default::default()
             })
             .await
@@ -756,7 +766,7 @@ fn it_can_have_tasks_with_subcategories() {
                     month: 1,
                     day: 1,
                 }),
-                category_id: home_id,
+                category_id: home.id,
                 subcategory_id: cleaning.id,
                 ..Default::default()
             })
@@ -794,7 +804,7 @@ fn it_can_have_tasks_with_subcategories() {
                     can_update: true,
                     can_toggle: true,
                     can_delete: true,
-                    category_id: finance_id,
+                    category: Some(finance.clone()),
                     ..Default::default()
                 },
                 GetTasksResponse {
@@ -810,8 +820,8 @@ fn it_can_have_tasks_with_subcategories() {
                     can_update: true,
                     can_toggle: true,
                     can_delete: true,
-                    category_id: home_id,
-                    subcategory_id: cleaning.id,
+                    category: Some(home.clone()),
+                    subcategory: Some(cleaning.clone()),
                     ..Default::default()
                 },
             ]

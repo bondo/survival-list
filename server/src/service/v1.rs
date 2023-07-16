@@ -8,9 +8,9 @@ use tonic::{Request, Response, Status};
 use crate::{
     db::{
         CategoryId, CreateTaskParams, Database, GroupId, SubcategoryId, SubcategoryResult,
-        TaskEstimate, TaskGroup, TaskId, TaskPeriod, TaskRecurrenceEvery, TaskRecurrenceFrequency,
-        TaskRecurrenceInput, TaskRecurrenceOutput, TaskResponsible, TaskResult, UpdateTaskParams,
-        UserId,
+        TaskCategory, TaskEstimate, TaskGroup, TaskId, TaskPeriod, TaskRecurrenceEvery,
+        TaskRecurrenceFrequency, TaskRecurrenceInput, TaskRecurrenceOutput, TaskResponsible,
+        TaskResult, TaskSubcategory, UpdateTaskParams, UserId,
     },
     AuthExtension, Error, Result,
 };
@@ -249,8 +249,8 @@ impl api_server::Api for Service {
                         can_toggle: task.can_toggle,
                         can_delete: task.can_delete,
                         is_friend_task: task.is_friend_task,
-                        category_id: task.category_id.map(Into::into).unwrap_or_default(),
-                        subcategory_id: task.subcategory_id.map(Into::into).unwrap_or_default(),
+                        category: task.category.map(Into::into),
+                        subcategory: task.subcategory.map(Into::into),
                     })
                     .map_err(Into::into),
                 )
@@ -585,6 +585,27 @@ impl From<TaskGroup> for Group {
     }
 }
 
+impl From<TaskCategory> for Category {
+    fn from(value: TaskCategory) -> Self {
+        Self {
+            id: value.id.into(),
+            raw_title: value.raw_title,
+            color: value.color.unwrap_or_default(),
+            is_enabled: value.is_enabled,
+        }
+    }
+}
+
+impl From<TaskSubcategory> for Subcategory {
+    fn from(value: TaskSubcategory) -> Self {
+        Self {
+            id: value.id.into(),
+            title: value.title,
+            color: value.color.unwrap_or_default(),
+        }
+    }
+}
+
 impl From<TaskRecurrenceEvery> for RecurringEveryResponse {
     fn from(value: TaskRecurrenceEvery) -> Self {
         Self {
@@ -670,8 +691,8 @@ impl From<TaskResult> for CreateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
-            category_id: value.category_id.map(Into::into).unwrap_or_default(),
-            subcategory_id: value.subcategory_id.map(Into::into).unwrap_or_default(),
+            category: value.category.map(Into::into),
+            subcategory: value.subcategory.map(Into::into),
         }
     }
 }
@@ -698,8 +719,8 @@ impl From<TaskResult> for UpdateTaskResponse {
             can_update: value.can_update,
             can_toggle: value.can_toggle,
             can_delete: value.can_delete,
-            category_id: value.category_id.map(Into::into).unwrap_or_default(),
-            subcategory_id: value.subcategory_id.map(Into::into).unwrap_or_default(),
+            category: value.category.map(Into::into),
+            subcategory: value.subcategory.map(Into::into),
         }
     }
 }

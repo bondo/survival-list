@@ -63,7 +63,12 @@ struct TaskRawResult {
     pub recurrence_num_ready_to_start: Option<i32>,
     pub recurrence_num_reached_deadline: Option<i32>,
     pub category_id: Option<i32>,
+    pub category_raw_title: Option<String>,
+    pub category_color: Option<String>,
+    pub category_is_enabled: Option<bool>,
     pub subcategory_id: Option<i32>,
+    pub subcategory_title: Option<String>,
+    pub subcategory_color: Option<String>,
 }
 
 impl TaskRawResult {
@@ -134,8 +139,8 @@ pub struct TaskResult {
     pub can_toggle: bool,
     pub can_delete: bool,
     pub is_friend_task: bool,
-    pub category_id: Option<CategoryId>,
-    pub subcategory_id: Option<SubcategoryId>,
+    pub category: Option<TaskCategory>,
+    pub subcategory: Option<TaskSubcategory>,
 }
 
 static RECURRENCE_MAX: i32 = 5;
@@ -198,8 +203,25 @@ impl TryFrom<TaskRawResult> for TaskResult {
             can_toggle,
             can_delete,
             is_friend_task,
-            category_id: value.category_id.map(CategoryId),
-            subcategory_id: value.subcategory_id.map(SubcategoryId),
+            category: match (value.category_id, value.category_raw_title) {
+                (None, None) => Ok(None),
+                (Some(id), Some(raw_title)) => Ok(Some(TaskCategory {
+                    id: CategoryId(id),
+                    raw_title,
+                    color: value.category_color,
+                    is_enabled: value.category_is_enabled.unwrap_or(true),
+                })),
+                _ => Err(Error::InternalState("Unexpected category result")),
+            }?,
+            subcategory: match (value.subcategory_id, value.subcategory_title) {
+                (None, None) => Ok(None),
+                (Some(id), Some(title)) => Ok(Some(TaskSubcategory {
+                    id: SubcategoryId(id),
+                    title,
+                    color: value.subcategory_color,
+                })),
+                _ => Err(Error::InternalState("Unexpected subcategory result")),
+            }?,
         })
     }
 }
@@ -284,6 +306,21 @@ pub struct TaskEstimate {
     pub days: i32,
     pub hours: i32,
     pub minutes: i32,
+}
+
+#[derive(Debug)]
+pub struct TaskCategory {
+    pub id: CategoryId,
+    pub raw_title: String,
+    pub color: Option<String>,
+    pub is_enabled: bool,
+}
+
+#[derive(Debug)]
+pub struct TaskSubcategory {
+    pub id: SubcategoryId,
+    pub title: String,
+    pub color: Option<String>,
 }
 
 impl TryFrom<PgInterval> for TaskEstimate {
@@ -405,29 +442,14 @@ impl Database {
                             t.id,
                             t.created_at,
                             t.title,
-                            (
-                                t.responsible_user_id = $1
-                            ) is_responsible,
-                            EXISTS (
-                                SELECT
-                                FROM
-                                    users_groups ug
-                                WHERE
-                                    ug.group_id = t.group_id AND
-                                    ug.user_id = $1
-                            ) is_in_group,
                             t.completed_at,
                             t.start_date,
                             t.end_date,
                             t.estimate,
                             t.category_id,
                             ts.subcategory_id,
-                            u.id as responsible_id,
-                            u.name as responsible_name,
-                            u.picture_url as responsible_picture_url,
-                            g.id as group_id,
-                            g.title as group_title,
-                            g.uid as group_uid,
+                            t.responsible_user_id,
+                            t.group_id,
                             r.id as recurrence_id,
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
@@ -435,12 +457,6 @@ impl Database {
                             c.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
-                        INNER JOIN
-                            users u ON
-                                u.id = t.responsible_user_id
-                        LEFT JOIN
-                            groups g ON
-                                g.id = t.group_id
                         LEFT JOIN
                             recurrences r ON
                                 r.id = t.recurrence_id
@@ -497,20 +513,14 @@ impl Database {
                             et.id,
                             et.created_at,
                             et.title,
-                            et.is_responsible,
-                            et.is_in_group,
                             et.completed_at,
                             (et.start_date + et.recurrence_frequency)::date,
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
                             et.category_id,
                             et.subcategory_id,
-                            et.responsible_id,
-                            et.responsible_name,
-                            et.responsible_picture_url,
+                            et.responsible_user_id,
                             et.group_id,
-                            et.group_title,
-                            et.group_uid,
                             et.recurrence_id,
                             et.recurrence_frequency,
                             et.recurrence_is_every,
@@ -526,21 +536,35 @@ impl Database {
                 SELECT
                     bt.id,
                     bt.title,
-                    bt.is_responsible,
-                    bt.is_in_group,
+                    (
+                        bt.responsible_user_id = $1
+                    ) is_responsible,
+                    EXISTS (
+                        SELECT
+                        FROM
+                            users_groups ug
+                        WHERE
+                            ug.group_id = bt.group_id AND
+                            ug.user_id = $1
+                    ) is_in_group,
                     bt.completed_at,
                     false is_old,
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
-                    bt.category_id,
-                    bt.subcategory_id as "subcategory_id: Option<i32>",
-                    bt.responsible_id,
-                    bt.responsible_name,
-                    bt.responsible_picture_url,
-                    bt.group_id as "group_id: Option<i32>",
-                    bt.group_title as "group_title: Option<String>",
-                    bt.group_uid as "group_uid: Option<Uuid>",
+                    c.id as "category_id: Option<i32>",
+                    c.raw_title as "category_raw_title: Option<String>",
+                    co.color category_color,
+                    co.is_enabled as "category_is_enabled: Option<bool>",
+                    sc.id as "subcategory_id: Option<i32>",
+                    sc.title as "subcategory_title: Option<String>",
+                    sc.color subcategory_color,
+                    u.id responsible_id,
+                    u.name responsible_name,
+                    u.picture_url responsible_picture_url,
+                    g.id as "group_id: Option<i32>",
+                    g.title as "group_title: Option<String>",
+                    g.uid as "group_uid: Option<Uuid>",
                     bt.recurrence_id as "recurrence_id: Option<i32>",
                     bt.recurrence_frequency as "recurrence_frequency: Option<PgInterval>",
                     bt.recurrence_is_every as "recurrence_is_every: Option<bool>",
@@ -550,6 +574,22 @@ impl Database {
                     (SELECT COUNT(*) FROM every_tasks et WHERE et.id = bt.id AND et.end_date < CURRENT_TIMESTAMP)::int as recurrence_num_reached_deadline
                 FROM
                     base_tasks bt
+                INNER JOIN
+                    users u ON
+                        u.id = bt.responsible_user_id
+                LEFT JOIN
+                    groups g ON
+                        g.id = bt.group_id
+                LEFT JOIN
+                    categories c ON
+                        c.id = bt.category_id
+                LEFT JOIN
+                    categories_override co ON
+                        co.category_id = c.id AND
+                        co.user_id = $1
+                LEFT JOIN
+                    subcategories sc ON
+                        sc.id = bt.subcategory_id
                 ORDER BY
                     bt.created_at
             "#,
@@ -900,8 +940,13 @@ impl<'c> Transaction<'c> {
                             t.start_date,
                             t.end_date,
                             t.estimate,
-                            t.category_id,
-                            ts.subcategory_id,
+                            c.id category_id,
+                            c.raw_title category_raw_title,
+                            co.color category_color,
+                            co.is_enabled category_is_enabled,
+                            sc.id subcategory_id,
+                            sc.title subcategory_title,
+                            sc.color subcategory_color,
                             u.id as responsible_id,
                             u.name as responsible_name,
                             u.picture_url as responsible_picture_url,
@@ -912,7 +957,7 @@ impl<'c> Transaction<'c> {
                             r.frequency as recurrence_frequency,
                             r.is_every as recurrence_is_every,
                             r.current_task_id as recurrence_current_task_id,
-                            c.previous_task_id as recurrence_previous_task_id
+                            cur.previous_task_id as recurrence_previous_task_id
                         FROM
                             tasks t
                         INNER JOIN
@@ -925,12 +970,22 @@ impl<'c> Transaction<'c> {
                             recurrences r ON
                                 r.id = t.recurrence_id
                         LEFT JOIN
-                            tasks c ON
-                                c.id = r.current_task_id
+                            tasks cur ON
+                                cur.id = r.current_task_id
+                        LEFT JOIN
+                            categories c ON
+                                c.id = t.category_id
+                        LEFT JOIN
+                            categories_override co ON
+                                co.category_id = c.id AND
+                                co.user_id = $1
                         LEFT JOIN
                             tasks_subcategories ts ON
                                 ts.task_id = t.id AND
                                 ts.user_id = $1
+                        LEFT JOIN
+                            subcategories sc ON
+                                sc.id = ts.subcategory_id
                         WHERE
                             t.id = $2
                     ),
@@ -953,7 +1008,12 @@ impl<'c> Transaction<'c> {
                             (et.end_date + et.recurrence_frequency)::date,
                             et.estimate,
                             et.category_id,
+                            et.category_raw_title,
+                            et.category_color,
+                            et.category_is_enabled,
                             et.subcategory_id,
+                            et.subcategory_title,
+                            et.subcategory_color,
                             et.responsible_id,
                             et.responsible_name,
                             et.responsible_picture_url,
@@ -982,8 +1042,13 @@ impl<'c> Transaction<'c> {
                     bt.start_date,
                     bt.end_date,
                     bt.estimate,
-                    bt.category_id,
+                    bt.category_id as "category_id: Option<i32>",
+                    bt.category_raw_title as "category_raw_title: Option<String>",
+                    bt.category_color,
+                    bt.category_is_enabled as "category_is_enabled: Option<bool>",
                     bt.subcategory_id as "subcategory_id: Option<i32>",
+                    bt.subcategory_title as "subcategory_title: Option<String>",
+                    bt.subcategory_color,
                     bt.responsible_id,
                     bt.responsible_name,
                     bt.responsible_picture_url,

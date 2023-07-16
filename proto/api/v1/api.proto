@@ -63,8 +63,8 @@ message CreateTaskResponse {
     bool can_update = 10;
     bool can_toggle = 11;
     bool can_delete = 12;
-    int32 category_id = 13;
-    int32 subcategory_id = 14;
+    Category category = 13;
+    Subcategory subcategory = 14;
 }
 
 message UpdateTaskRequest {
@@ -99,8 +99,8 @@ message UpdateTaskResponse {
     bool can_update = 11;
     bool can_toggle = 12;
     bool can_delete = 13;
-    int32 category_id = 14;
-    int32 subcategory_id = 15;
+    Category category = 14;
+    Subcategory subcategory = 15;
 }
 
 message ToggleTaskCompletedRequest {
@@ -147,8 +147,8 @@ message GetTasksResponse {
     bool can_toggle = 12;
     bool can_delete = 13;
     bool is_friend_task = 14;
-    int32 category_id = 15;
-    int32 subcategory_id = 16;
+    Category category = 15;
+    Subcategory subcategory = 16;
 }
 
 message CreateGroupRequest {
@@ -255,6 +255,13 @@ message GetCategoriesResponse {
     string color = 3;
     bool is_enabled = 4;
     repeated Subcategory subcategories = 5;
+}
+
+message Category {
+    int32 id = 1;
+    string raw_title = 2;
+    string color = 3;
+    bool is_enabled = 4;
 }
 
 message Subcategory {
