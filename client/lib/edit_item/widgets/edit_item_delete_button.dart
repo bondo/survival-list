@@ -24,7 +24,7 @@ class EditItemDeleteButton extends StatelessWidget {
           context: context,
           // Back button handling doesn't work properly when using root navigator
           useRootNavigator: false,
-          builder: (_) => WillPopScope(
+          builder: (_) => PopScope(
             child: AlertDialog(
               title: Text(l10n.editItemOptionsDeleteDialogTitle),
               content: Text(
@@ -43,9 +43,11 @@ class EditItemDeleteButton extends StatelessWidget {
                 ),
               ],
             ),
-            onWillPop: () async {
+            onPopInvoked: (bool didPop) async {
+              if (didPop) {
+                return;
+              }
               navigator.pop(false);
-              return true;
             },
           ),
         );

@@ -87,7 +87,7 @@ class EditItemView extends StatelessWidget {
                 _RecurrenceKindField(),
                 _RecurrenceFrequencyField(),
                 _GroupField(),
-                _ResponsibleField()
+                _ResponsibleField(),
               ],
             ),
           ),

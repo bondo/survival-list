@@ -43,7 +43,7 @@ class SettingsView extends StatelessWidget {
                 DropdownMenuItem(
                   value: ThemeMode.dark,
                   child: Text(l10n.pageSettingsThemeDark),
-                )
+                ),
               ],
             ),
             DropdownButton<Locale?>(
@@ -53,7 +53,7 @@ class SettingsView extends StatelessWidget {
                 DropdownMenuItem<Locale?>(
                   child: Text(l10n.pageSettingsLanguageDefault),
                 ),
-                for (Locale locale in AppLocalizations.supportedLocales)
+                for (final Locale locale in AppLocalizations.supportedLocales)
                   DropdownMenuItem(
                     value: locale,
                     child: Text(
@@ -63,7 +63,7 @@ class SettingsView extends StatelessWidget {
                               ? l10n.pageSettingsLanguageEnglish
                               : locale.toLanguageTag()),
                     ),
-                  )
+                  ),
               ],
             ),
           ],

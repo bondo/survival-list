@@ -84,7 +84,7 @@ class CreateItemView extends StatelessWidget {
                 _RecurrenceKindField(),
                 _RecurrenceFrequencyField(),
                 _GroupField(),
-                _ResponsibleField()
+                _ResponsibleField(),
               ],
             ),
           ),

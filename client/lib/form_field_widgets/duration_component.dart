@@ -28,7 +28,7 @@ class DurationComponent extends StatelessWidget {
           labelText: label,
         ),
         inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly
+          FilteringTextInputFormatter.digitsOnly,
         ],
         keyboardType: TextInputType.number,
         onChanged: (text) => onChanged(int.tryParse(text, radix: 10) ?? 0),

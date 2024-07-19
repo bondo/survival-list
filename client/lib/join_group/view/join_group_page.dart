@@ -90,7 +90,7 @@ class JoinGroupView extends StatelessWidget {
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
     );
